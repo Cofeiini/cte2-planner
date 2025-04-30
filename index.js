@@ -1012,38 +1012,29 @@ const handleLoadingAssets = async () => {
     const progress = document.querySelector("#progress");
 
     if (!Asset.iconAssets.has("default")) {
-        console.time("asset_get_default");
         progress.innerText = "Processing fallback assets...";
         await fetch(`assets/textures/gui/stat_icons/default.png`).then(response => response.blob()).then(bitmap => {
             Asset.iconAssets.set("default", URL.createObjectURL(bitmap));
         });
-        console.timeEnd("asset_get_default");
     }
 
     if (!Asset.iconAssets.has("missing")) {
-        console.time("asset_get_missing");
         await fetch(`assets/textures/gui/stat_icons/missing.png`).then(response => response.blob()).then(bitmap => {
             Asset.iconAssets.set("missing", URL.createObjectURL(bitmap));
         });
-        console.timeEnd("asset_get_missing");
     }
 
-    console.time("asset_generate_tree");
     progress.innerText = "Processing the talent tree...";
     await fetch(`data/${releaseInfo.version}/talents_new.csv`).then(response => response.text()).then(data => {
         generateTalentGrid(data);
     });
-    console.timeEnd("asset_generate_tree");
 
-    console.time("asset_get_images");
     await handleLoadingImageAssets();
-    console.timeEnd("asset_get_images");
 
     for (const [key, values] of exclusiveNodeValues) {
         talentExclusions.set(key, talentNodes.filter(item => values.includes(item.identifier.talent)));
     }
 
-    console.time("asset_get_names");
     progress.innerText = "Processing talent descriptions...";
     const descriptionData = {};
     await fetch(`data/${releaseInfo.version}/lang/en_us.json`).then(response => response.json()).then(data => {
@@ -1054,14 +1045,12 @@ const handleLoadingAssets = async () => {
         Object.assign(descriptionData, data);
         progress.innerText = `Processing talent descriptions...\n${2} of ${2} done.`;
     });
-    console.timeEnd("asset_get_names");
 
     let overrideData = {};
     await fetch(`data/${releaseInfo.version}/overrides.json`).then(response => response.json()).then(data => {
         overrideData = data;
     });
 
-    console.time("asset_get_description");
     const tasks = {
         started: 0,
         completed: 0,
@@ -1098,7 +1087,6 @@ const handleLoadingAssets = async () => {
             }
         }
     }));
-    console.timeEnd("asset_get_description");
 
     const statNodeList = talentNodes.filter(item => item.type === "stat" || item.type === "special");
     for (const node of statNodeList) {
@@ -1531,9 +1519,7 @@ const handleLoading = async () => {
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
 
     if (shouldLoadAssets) {
-        console.time("asset_loading_total");
         await handleLoadingAssets();
-        console.timeEnd("asset_loading_total");
 
         handleEvents();
         generateTree();
