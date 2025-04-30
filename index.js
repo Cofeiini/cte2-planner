@@ -1895,7 +1895,7 @@ window.onload = async () => {
             }
         }
         const tooltip = [
-            `<p style="margin: 0;">You can search talents or stats by name or description.</p>`,
+            `<p style="margin: 0 0 0.5em 0;">You can search talents or stats by name or description.</p>`,
             `<p style="margin: 0">The following keywords are recognized:</p>`,
             `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li>${item}</li>`).join("")}</ul>`,
         ];
