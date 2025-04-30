@@ -235,10 +235,7 @@ html, body {
     gap: 0.25em;
     height: 100%;
     min-width: 25em;
-    overflow-x: hidden;
-    overflow-y: scroll;
     padding: 0.25em;
-    scrollbar-width: none;
     user-select: none;
     width: 20vw;
     z-index: 1;
