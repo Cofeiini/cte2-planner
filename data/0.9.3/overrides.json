@@ -1,0 +1,27 @@
+{
+  "bleed_receive_chance": {
+    "minus_is_good": true
+  },
+  "burn_receive_chance": {
+    "minus_is_good": true
+  },
+  "electrify_receive_chance": {
+    "minus_is_good": true
+  },
+  "freeze_receive_chance": {
+    "minus_is_good": true
+  },
+  "ghost_shroud_on_dodge": {
+    "format": false
+  },
+  "jewel_socket": {
+    "is_perc": false
+  },
+  "poison_receive_chance": {
+    "minus_is_good": true
+  },
+  "projectile_count": {
+    "format": true,
+    "is_perc": false
+  }
+}
