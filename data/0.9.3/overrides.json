@@ -1,12 +1,63 @@
 {
+  "ailment_damage": {
+    "is_perc": true
+  },
+  "aura_effect": {
+    "is_perc": true
+  },
+  "bleed_chance": {
+    "is_perc": true
+  },
+  "bleed_damage": {
+    "is_perc": true
+  },
+  "bleed_duration": {
+    "is_perc": true
+  },
   "bleed_receive_chance": {
     "minus_is_good": true
+  },
+  "block_chance": {
+    "is_perc": true
+  },
+  "brutality_on_basic_hit": {
+    "format": false
+  },
+  "burn_chance": {
+    "is_perc": true
+  },
+  "burn_damage": {
+    "is_perc": true
   },
   "burn_receive_chance": {
     "minus_is_good": true
   },
+  "chaos_penetration": {
+    "is_perc": true
+  },
+  "combat_talent_melee_hit": {
+    "format": false
+  },
+  "combat_talent_ranged_hit": {
+    "format": false
+  },
+  "electrify_chance": {
+    "is_perc": true
+  },
+  "electrify_proc_chance": {
+    "is_perc": true
+  },
   "electrify_receive_chance": {
     "minus_is_good": true
+  },
+  "elemental_resist": {
+    "is_perc": true
+  },
+  "freeze_damage": {
+    "is_perc": true
+  },
+  "freeze_proc_chance": {
+    "is_perc": true
   },
   "freeze_receive_chance": {
     "minus_is_good": true
@@ -17,11 +68,35 @@
   "jewel_socket": {
     "is_perc": false
   },
+  "max_fire_resist": {
+    "is_perc": true
+  },
+  "phys_to_fire": {
+    "is_perc": true
+  },
+  "phys_to_water": {
+    "is_perc": true
+  },
+  "poison_chance": {
+    "is_perc": true
+  },
+  "poison_damage": {
+    "is_perc": true
+  },
+  "poison_duration": {
+    "is_perc": true
+  },
   "poison_receive_chance": {
     "minus_is_good": true
   },
   "projectile_count": {
     "format": true,
     "is_perc": false
+  },
+  "spirit_cost": {
+    "is_perc": false
+  },
+  "summon_health": {
+    "is_perc": true
   }
 }
