@@ -1869,10 +1869,6 @@ window.onload = async () => {
     sidePanel.allocated.stat = document.querySelector("#allocated-stat");
     sidePanel.allocated.statList = document.querySelector("#allocated-stat-list");
 
-    const search = document.querySelector("#talent-search");
-    search.value = "";
-    search.oninput = handleSearch;
-
     const latest = RELEASES.at(0).version;
     const versionSelect = document.querySelector("#version-select");
     for (const release of RELEASES) {
@@ -1887,6 +1883,44 @@ window.onload = async () => {
 
     document.querySelector("#import-button").onclick = handleDataImport;
     document.querySelector("#export-button").onclick = handleDataExport;
+
+    const search = document.querySelector("#talent-search");
+    search.value = "";
+    search.oninput = handleSearch;
+
+    const searchInfo = document.querySelector("#talent-search-info");
+    searchInfo.onmouseenter = () => {
+        infoTooltip.name.innerText = "Search options";
+        infoTooltip.name.style.color = "white";
+        infoTooltip.node.count.classList.add("hidden");
+        infoTooltip.node.text.classList.add("hidden");
+
+        const keywords = new Set();
+        for (const talent of talentNodes) {
+            for (const key of talent.keywords) {
+                keywords.add(key);
+            }
+        }
+        const tooltip = [
+            `<p style="margin: 0;">You can search talents or stats by name or description.</p>`,
+            `<p style="margin: 0">The following keywords are recognized:</p>`,
+            `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li>${item}</li>`).join("")}</ul>`,
+        ];
+        infoTooltip.stats.innerHTML = tooltip.join("");
+
+        infoTooltip.main.classList.remove("invisible");
+        infoTooltip.main.classList.add("visible");
+    };
+    searchInfo.onmouseleave = () => {
+        infoTooltip.node.count.classList.remove("hidden");
+        infoTooltip.node.text.classList.remove("hidden");
+        infoTooltip.main.classList.remove("visible");
+        infoTooltip.main.classList.add("invisible");
+    };
+    searchInfo.onmousemove = (event) => {
+        infoTooltip.main.style.left = `${event.clientX + 20}px`;
+        infoTooltip.main.style.top = `${event.clientY + 20}px`;
+    };
 
     await handleLoading();
 };

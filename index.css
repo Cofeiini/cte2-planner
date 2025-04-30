@@ -181,8 +181,8 @@ html, body {
 
 #info-name {
     display: flex;
-    width: 100%;
     white-space: nowrap;
+    width: 100%;
 }
 
 #info-node-container {
@@ -207,6 +207,7 @@ html, body {
 #info-stats {
     display: flex;
     flex-direction: column;
+    gap: 0.5em;
     padding: 0.5em;
 }
 
@@ -256,16 +257,41 @@ html, body {
     transform: translateY(-50%);
 }
 
+#talent-search-container {
+    align-items: center;
+    background-color: black;
+    border: 1px solid white;
+    display: flex;
+    height: 2em;
+    left: calc(50% + 1.0em);
+    position: relative;
+    top: 2px;
+    transform: translateX(-50%);
+    width: 13em;
+}
+
 #talent-search {
     background-color: black;
+    border: none;
     color: white;
     font-size: 1.25em;
-    left: 50%;
+    height: 100%;
     outline: white solid 1px;
-    position: absolute;
+    position: relative;
     text-align: center;
     top: 0;
-    transform: translateX(-50%);
+    width: 100%;
+}
+
+#talent-search-info {
+    align-items: center;
+    aspect-ratio: 1;
+    color: white;
+    display: flex;
+    height: 1.5em;
+    justify-content: center;
+    padding: 0.25em;
+    position: relative;
 }
 
 #version-select {
