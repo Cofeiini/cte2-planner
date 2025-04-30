@@ -1144,15 +1144,10 @@ const handleLoadingAssets = async () => {
             const value = parseFloat(item["v1"]);
 
             const info = nodeData.get(item["stat"]);
-            const isPercent = (info["is_perc"] ?? info["data"]?.["perc"]) ?? true;
+            const isPercent = (info["data"]?.["perc"] ?? info["is_perc"]) ?? true;
             const isMinusGood = info["minus_is_good"] ?? false;
             const isScaled = item["scale_to_lvl"] ?? false;
-            const isFormat = (info["format"] ?? false) || isStat || (isPerk && (Math.abs(value) > 1));
-
-            // const trueValue = value * (isScaled ? 100.0 : 1.0);
-            if (isScaled) {
-                console.log("Scaled value", info, node);
-            }
+            const isFormat = info["format"] ?? (isStat || (isPerk && (Math.abs(value) > 1)));
 
             let description = descriptionData[`mmorpg.stat.${item["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16))).replaceAll(/(§\w)\1+/g, "$1");
             if (!description.includes("[VAL1]") && isFormat) {
@@ -1160,9 +1155,9 @@ const handleLoadingAssets = async () => {
                 description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
             }
 
+            item["scale_to_lvl"] = isScaled;
             item["is_percent"] = isPercent;
             item["description"] = description;
-
             item["description_html"] = generateDescriptionHTML(description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("");
         }
 
