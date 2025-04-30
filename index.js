@@ -437,15 +437,39 @@ const findRoutes = (targetNode) => {
 
 /**
  * @param {string} description
+ * @returns {string[]}
+ */
+const generateDescriptionHTML = (description) => {
+    const results = [];
+    const parts = description.split(/(§\w)/).filter(element => element);
+    let color = Constant.colorMap.get("7");
+    for (const part of parts) {
+        if (part.startsWith("§")) {
+            color = Constant.colorMap.get(part.at(1));
+            continue;
+        }
+
+        const elements = [];
+        const words = part.split(/\s/);
+        for (const word of words) {
+            elements.push(`<span class="word" style="color: ${color};">${word}</span>`);
+        }
+        results.push(elements.join("\u00A0"));
+    }
+
+    return results;
+};
+
+/**
+ * @param {string} description
  * @param {number} value
- * @param {boolean} isPercent
  * @returns {HTMLDivElement}
  */
-const setUpStatContainer = (description, value, isPercent) => {
+const setUpStatContainer = (description, value) => {
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
     container.style.color = "white";
-    container.innerHTML = `<p style="margin: 0;">${description.replaceAll(/§(\w)[+-]\d+?%?§\w(%?)/g, (match, p1, p2) => `<span style='color: ${Constant.colorMap.get(p1)};'>${value.toLocaleString("en", { signDisplay: "exceptZero" })}${isPercent ? "%" : p2}</span>`)}</p>`;
+    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("")}</p>`;
 
     return container;
 };
@@ -499,7 +523,7 @@ const setUpStatIcon = (nodeId) => {
     return container;
 };
 
-const setUpSeprator = () => {
+const setUpSeparator = () => {
     const separator = document.createElement("div");
     separator.classList.add("horizontal-line");
     separator.style.backgroundColor = "#384848";
@@ -536,8 +560,8 @@ const handleSidePanel = () => {
 
         const attributeItems = [];
         for (const value of totalStatAttributes) {
-            attributeItems.push(setUpStatContainer(value.description, value.value, value.is_percent));
-            attributeItems.push(setUpSeprator());
+            attributeItems.push(setUpStatContainer(value.description, value.value));
+            attributeItems.push(setUpSeparator());
         }
         attributeItems.splice(-1);
         attributeContainer.replaceChildren(attributesTitle, ...attributeItems);
@@ -556,8 +580,8 @@ const handleSidePanel = () => {
 
         const statItems = [];
         for (const value of totalStatValues) {
-            statItems.push(setUpStatContainer(value.description, value.value, value.is_percent));
-            statItems.push(setUpSeprator());
+            statItems.push(setUpStatContainer(value.description, value.value));
+            statItems.push(setUpSeparator());
         }
         statItems.splice(-1);
         statContainer.replaceChildren(statsTitle, ...statItems);
@@ -597,11 +621,11 @@ const handleSidePanel = () => {
             statsContainer.appendChild(title);
 
             for (const stat of value.value.values()) {
-                statsContainer.appendChild(setUpStatContainer(stat.description, stat.value, stat.is_percent));
+                statsContainer.appendChild(setUpStatContainer(stat.description, stat.value));
             }
             itemContainer.appendChild(statsContainer);
             gameChangerItems.push(itemContainer);
-            gameChangerItems.push(setUpSeprator());
+            gameChangerItems.push(setUpSeparator());
         }
         gameChangerItems.splice(-1);
         gameChangerContainer.replaceChildren(mainTitle, ...gameChangerItems);
@@ -1129,34 +1153,17 @@ const handleLoadingAssets = async () => {
             if (isScaled) {
                 console.log("Scaled value", info, node);
             }
+
             let description = descriptionData[`mmorpg.stat.${item["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16))).replaceAll(/(§\w)\1+/g, "$1");
             if (!description.includes("[VAL1]") && isFormat) {
-                description = `${(((value > 0) && !isMinusGood) || ((value < 0) && isMinusGood)) ? "§a" : "§c"}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
+                const valueColor = (((value > 0) && !isMinusGood) || ((value < 0) && isMinusGood)) ? "§a" : "§c";
+                description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
             }
+
             item["is_percent"] = isPercent;
-            item["description"] = description.replaceAll(/§\w/g, "")
-                .replace("[VAL1]", `${(((value > 0) && !isMinusGood) || ((value < 0) && isMinusGood)) ? "§a" : "§c"}${value.toLocaleString("en", { signDisplay: "exceptZero" })}§7`);
+            item["description"] = description;
 
-            description = description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }));
-
-            const results = [];
-            const parts = description.split(/(§\w)/).filter(element => element);
-            let color = Constant.colorMap.get("7");
-            for (const part of parts) {
-                if (part.startsWith("§")) {
-                    color = Constant.colorMap.get(part.at(1));
-                    continue;
-                }
-
-                const elements = [];
-                const words = part.split(/\s/);
-                for (const word of words) {
-                    elements.push(`<span class="word" style="color: ${color};">${word}</span>`);
-                }
-                results.push(elements.join("\u00A0"));
-            }
-
-            item["description_html"] = results.flat().join("");
+            item["description_html"] = generateDescriptionHTML(description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("");
         }
 
         switch (node.type) {
