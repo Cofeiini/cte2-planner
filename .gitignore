@@ -1,0 +1,18 @@
+# Dependency directories
+node_modules/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# WebStorm config files
+.idea
+
+# Bun files
+*.lockb
+
+# Node files
+package.json
+package-lock.json
