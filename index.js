@@ -1050,6 +1050,9 @@ const handleLoading = async () => {
     updatePoints(points.starting + points.leveling + points.questing);
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
 
+    sidePanel.character.level.value = presetInfo.level;
+    sidePanel.character.levelLabel.innerText = presetInfo.level;
+
     if (shouldLoadAssets) {
         await handleLoadingAssets();
 
@@ -1067,9 +1070,6 @@ const handleLoading = async () => {
             toggleNode(talentNodes.find(item => item.identifier.number === id), true);
         }
     }
-
-    sidePanel.character.level.value = presetInfo.level;
-    sidePanel.character.levelLabel.innerText = presetInfo.level;
 
     drawLinesRegular();
     handleViewport();
