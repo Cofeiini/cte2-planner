@@ -20,3 +20,19 @@ export const colorMap = new Map([
     ["e", "#FFFF55"],
     ["f", "#FFFFFF"],
 ]);
+
+export const controls = {
+    x: 0.0,
+    y: 0.0,
+    zoom: 1.0,
+    panning: false,
+    hovering: false,
+    shouldRedraw: false,
+    clickTarget: undefined,
+};
+
+export const viewport = {
+    width: 0,
+    height: 0,
+    max: 0,
+};

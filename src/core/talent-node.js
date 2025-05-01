@@ -1,4 +1,41 @@
-import { CELL_SIZE, CELL_HALF } from "./constants.js";
+import { CELL_SIZE, CELL_HALF } from "../data/constants.js";
+
+/** @type {TalentNode[][]} */
+export const talentGrid = [];
+
+/** @type {TalentNode[]} */
+export const talentNodes = [];
+
+/** @type {TalentNode[]} */
+export const talentSelections = [];
+
+/** @type {TalentNode[]} */
+export const talentAddPreview = [];
+
+/** @type {TalentNode[]} */
+export const talentAddLeftovers = [];
+
+/** @type {TalentNode[]} */
+export const talentRemovePreview = [];
+
+/** @type {Map<string, TalentNode[]>} */
+export const talentExclusions = new Map();
+
+/** @type {Map<string, string[]>} */
+export const exclusiveNodeValues = new Map();
+
+/** @type {TalentNode|undefined} */
+export let startingNode = undefined;
+
+export const updateStartingNode = (node) => {
+    startingNode = node;
+};
+
+export let TOTAL_POINTS = 0;
+
+export const updatePoints = (value) => {
+    TOTAL_POINTS = value;
+};
 
 export class TalentNode {
     x = 0;

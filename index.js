@@ -1,24 +1,21 @@
+import { findDeadBranch, findRoutes, findShortestRoute, generateTalentGrid } from "./src/core/algorithms.js";
+import { borderAssets, iconAssets, indicatorAssets } from "./src/data/assets.js";
+import { colorMap, controls } from "./src/data/constants.js";
+import { drawLinesRegular } from "./src/core/drawing.js";
 import { RELEASES } from "./src/releases.js";
-import { TalentNode } from "./src/talent-node.js";
-import { BinaryHeap } from "./src/binary-heap.js";
-import * as Constant from "./src/constants.js";
-import * as Asset from "./src/assets.js";
-
-const controls = {
-    x: 0.0,
-    y: 0.0,
-    zoom: 1.0,
-    panning: false,
-    hovering: false,
-    shouldRedraw: false,
-    clickTarget: undefined,
-};
-
-const viewport = {
-    width: 0,
-    height: 0,
-    max: 0,
-};
+import {
+    exclusiveNodeValues,
+    startingNode,
+    talentAddLeftovers,
+    talentAddPreview,
+    talentExclusions,
+    talentNodes,
+    talentRemovePreview,
+    talentSelections,
+    TOTAL_POINTS,
+    updatePoints,
+    updateStartingNode,
+} from "./src/core/talent-node.js";
 
 const infoTooltip = {
     main: undefined,
@@ -49,128 +46,12 @@ let releaseInfo = undefined;
 let presetInfo = undefined;
 
 let drawingTimer = undefined;
-let startingNode = undefined;
-
-/** @type {TalentNode[][]} */
-let talentGrid = [];
-
-/** @type {TalentNode[]} */
-let talentNodes = [];
-
-/** @type {TalentNode[]} */
-let talentSelections = [];
-
-/** @type {TalentNode[]} */
-let talentAddPreview = [];
-
-/** @type {TalentNode[]} */
-let talentAddLeftovers = [];
-
-/** @type {TalentNode[]} */
-let talentRemovePreview = [];
-
-/** @type {Map<string, TalentNode[]>} */
-const talentExclusions = new Map();
-
-/** @type {Map<string, string[]>} */
-const exclusiveNodeValues = new Map();
-
-let TOTAL_POINTS = 0;
 
 /** @type {Map<string, Object>} */
 const totalStats = new Map();
 
 /** @type {Map<string, Object>} */
 const totalGameChangers = new Map();
-
-/**
- * @param {CanvasRenderingContext2D} context
- * @param {TalentNode[]} collection
- * @param {TalentNode[]} excluded
- */
-const drawLinesSimple = (context, collection, excluded = []) => {
-    context.beginPath();
-    for (const leaf of collection) {
-        for (const neighbor of leaf.neighbors) {
-            if (excluded.some(item => item.identifier.number === neighbor.identifier.number)) {
-                continue;
-            }
-
-            context.moveTo(leaf.center.x, leaf.center.y);
-            context.lineTo(neighbor.center.x, neighbor.center.y);
-        }
-    }
-    context.closePath();
-    context.stroke();
-};
-
-/**
- * @param {CanvasRenderingContext2D} context
- * @param {TalentNode[]} collection
- * @param {TalentNode[] | undefined} optional
- */
-const drawLinesComplex = (context, collection, optional = undefined) => {
-    context.beginPath();
-    for (const leaf of collection) {
-        for (const neighbor of leaf.neighbors) {
-            if (optional) {
-                if (optional.some(item => item.identifier.number === neighbor.identifier.number)) {
-                    continue;
-                }
-                optional.push(neighbor);
-            }
-
-            if (collection.some(item => item.identifier.number === neighbor.identifier.number)) {
-                context.moveTo(leaf.center.x, leaf.center.y);
-                context.lineTo(neighbor.center.x, neighbor.center.y);
-            }
-        }
-    }
-    context.closePath();
-    context.stroke();
-};
-
-const drawLinesInitial = () => {
-    const canvas = document.querySelector("#line-canvas").offscreenCanvas;
-    const context = canvas.getContext("2d", { alpha: false });
-    context.imageSmoothingEnabled = false;
-
-    context.fillStyle = "#191821";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    context.strokeStyle = "#222222";
-    context.lineWidth = 10;
-    drawLinesSimple(context, talentNodes);
-    context.stroke();
-};
-
-const drawLinesRegular = () => {
-    const canvas = document.querySelector("#line-canvas");
-    const context = canvas.getContext("2d", { alpha: false });
-    context.imageSmoothingEnabled = false;
-
-    context.drawImage(canvas.offscreenCanvas, 0, 0);
-
-    context.lineWidth = 10;
-
-    context.strokeStyle = "#3E3E3E";
-    const excluded = [];
-    for (const values of talentExclusions.values()) {
-        if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
-            excluded.push(...values);
-        }
-    }
-    drawLinesSimple(context, talentSelections, excluded);
-
-    context.strokeStyle = "#1A5A1A";
-    drawLinesComplex(context, talentSelections);
-
-    context.strokeStyle = "#9F1F1F";
-    drawLinesComplex(context, talentRemovePreview, []);
-
-    context.strokeStyle = "#1F1F9F";
-    drawLinesComplex(context, talentAddPreview, []);
-};
 
 const handleViewport = () => {
     const lineCanvas = document.querySelector("#line-canvas");
@@ -185,271 +66,16 @@ const handleViewport = () => {
 };
 
 /**
- * @param {TalentNode} node
- * @param {TalentNode[][]} paths
- * @param {Set<TalentNode>} collected
- */
-const searchNodes = (node, paths, collected) => {
-    const visited = new Set();
-
-    const search = (current) => {
-        visited.add(current.identifier.number);
-        collected.add(current);
-
-        for (const neighbor of current.neighbors) {
-            if (visited.has(neighbor.identifier.number)) {
-                continue;
-            }
-
-            if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
-                continue;
-            }
-
-            if (paths.some(item => item.some(element => element.identifier.number === neighbor.identifier.number))) {
-                continue;
-            }
-
-            search(neighbor);
-        }
-    };
-
-    search(node);
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @param {TalentNode[]} currentPath
- * @param {TalentNode[][]} allPaths
- */
-const findPaths = (start, end, currentPath, allPaths) => {
-    const node = currentPath.at(-1);
-    if (node.identifier.number === end.identifier.number) {
-        allPaths.push(currentPath);
-        return;
-    }
-
-    for (const neighbor of node.neighbors) {
-        if (currentPath.some(item => item.identifier.number === neighbor.identifier.number)) {
-            continue;
-        }
-
-        if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
-            continue;
-        }
-
-        findPaths(start, end, [...currentPath, neighbor], allPaths);
-    }
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} target
- * @returns {TalentNode[]}
- */
-const findDeadBranch = (start, target) => {
-    if (!start) {
-        return [];
-    }
-
-    const paths = [];
-    findPaths(start, target, [start], paths);
-
-    if (!paths.some(item => item.some(element => element.identifier.number === target.identifier.number))) {
-        return [];
-    }
-
-    const nodesToRemove = new Set();
-    searchNodes(target, paths, nodesToRemove);
-
-    return Array.from(nodesToRemove);
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @returns {number}
- */
-const findDistance = (start, end) => {
-    const queue = [[start, 0]];
-    const visited = new Set([start.identifier.number]);
-
-    while (queue.length > 0) {
-        const [node, distance] = queue.shift();
-        if (node.identifier.number === end.identifier.number) {
-            return distance;
-        }
-
-        for (const neighbor of node.neighbors) {
-            if (visited.has(neighbor.identifier.number)) {
-                continue;
-            }
-            visited.add(neighbor.identifier.number);
-            queue.push([neighbor, distance + 1]);
-        }
-    }
-
-    return 0;
-};
-
-const resetNodeHeuristics = () => {
-    for (const talent of talentNodes) {
-        talent.travel.source = undefined;
-        talent.travel.closed = false;
-        talent.travel.cost.total = Number.MAX_VALUE;
-        talent.travel.cost.accumulated = 0;
-        talent.travel.cost.heuristic = 0;
-    }
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @returns {TalentNode[]}
- */
-const algorithm = (start, end) => {
-    resetNodeHeuristics();
-
-    for (const node of talentExclusions.get("start")) {
-        node.travel.closed = true;
-    }
-
-    const openHeap = new BinaryHeap();
-    openHeap.push(start);
-    start.travel.cost.heuristic = findDistance(start, end);
-
-    while (openHeap.size() > 0) {
-        const currentNode = openHeap.pop();
-
-        if (currentNode.identifier.number === end.identifier.number) {
-            const path = [currentNode];
-
-            let temp = currentNode;
-            while (temp.travel.source) {
-                path.push(temp.travel.source);
-                temp = temp.travel.source;
-            }
-
-            return path;
-        }
-
-        currentNode.travel.closed = true;
-        for (const neighbor of currentNode.neighbors) {
-            if (neighbor.travel.closed) {
-                continue;
-            }
-
-            const accumulated = currentNode.travel.cost.accumulated + 1;
-            const visited = neighbor.travel.closed;
-            if (!visited || (accumulated < neighbor.travel.cost.accumulated)) {
-                neighbor.travel.closed = true;
-                neighbor.travel.source = currentNode;
-                neighbor.travel.cost.heuristic = neighbor.travel.cost.heuristic || findDistance(neighbor, end);
-                neighbor.travel.cost.accumulated = accumulated;
-                neighbor.travel.cost.total = neighbor.travel.cost.accumulated + neighbor.travel.cost.heuristic;
-
-                if (visited) {
-                    openHeap.rescore(neighbor);
-                } else {
-                    openHeap.push(neighbor);
-                }
-            }
-        }
-    }
-
-    return [];
-};
-
-/**
- * @param {TalentNode} target
- * @returns {TalentNode[]}
- */
-const findShortestRoute = (target) => {
-    /** @type {string[]} */
-    const excluded = [];
-    for (const values of exclusiveNodeValues.values()) {
-        if (talentSelections.some(item => values.some(element => item.identifier.talent === element))) {
-            excluded.push(...values);
-        }
-    }
-
-    if (!startingNode) {
-        excluded.push(...exclusiveNodeValues.get("start"));
-    }
-
-    if (excluded.some(item => item === target.identifier.talent)) {
-        if (startingNode) {
-            return [];
-        }
-
-        return [target];
-    }
-
-    const routeList = [];
-    for (const start of talentSelections) {
-        if (start.identifier.number === target.identifier.number) {
-            continue;
-        }
-
-        routeList.push(algorithm(start, target));
-    }
-
-    let shortest = [];
-    let min = viewport.max;
-    for (const route of routeList) {
-        if (route.length < min) {
-            min = route.length;
-            shortest = route;
-        }
-    }
-
-    return shortest;
-};
-
-/**
- * @param {TalentNode} targetNode
- */
-const findRoutes = (targetNode) => {
-    /** @type {TalentNode[]} */
-    let shortest = findShortestRoute(targetNode);
-
-    resetNodeHeuristics();
-
-    const allNodes = new Set();
-    for (const node of talentSelections) {
-        allNodes.add(node);
-    }
-
-    const possiblePoints = talentSelections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
-    if (possiblePoints > TOTAL_POINTS) {
-        if ((possiblePoints - TOTAL_POINTS) > shortest.length) {
-            console.error("Actually too many points!");
-            return;
-        }
-
-        const realPath = shortest.reverse().slice(0, TOTAL_POINTS - possiblePoints);
-        talentAddLeftovers = shortest.slice(TOTAL_POINTS - possiblePoints - 1); // Offset by 1 to include the last selected node for forming a proper line segment
-        shortest = realPath;
-    }
-
-    for (const node of shortest) {
-        allNodes.add(node);
-    }
-
-    talentSelections = Array.from(allNodes);
-};
-
-/**
  * @param {string} description
  * @returns {string[]}
  */
 const generateDescriptionHTML = (description) => {
     const results = [];
     const parts = description.split(/(§\w)/).filter(element => element);
-    let color = Constant.colorMap.get("7");
+    let color = colorMap.get("7");
     for (const part of parts) {
         if (part.startsWith("§")) {
-            color = Constant.colorMap.get(part.at(1));
+            color = colorMap.get(part.at(1));
             continue;
         }
 
@@ -531,21 +157,21 @@ const setUpStatIcon = (nodeId) => {
     container.style.height = "78px";
 
     const border = document.createElement("img");
-    border.src = Asset.borderAssets.get("major_on");
+    border.src = borderAssets.get("major_on");
     border.width = 78;
     border.height = 78;
     setUpIcon(border);
     container.appendChild(border);
 
     const indicator = document.createElement("img");
-    indicator.src = Asset.indicatorAssets.get("yes");
+    indicator.src = indicatorAssets.get("yes");
     indicator.width = 40;
     indicator.height = 40;
     setUpIcon(indicator);
     container.appendChild(indicator);
 
     const icon = document.createElement("img");
-    icon.src = Asset.iconAssets.get(nodeId);
+    icon.src = iconAssets.get(nodeId);
     icon.width = 32;
     icon.height = 32;
     setUpIcon(icon);
@@ -765,7 +391,7 @@ const toggleNode = (node, isPreset = false) => {
             }
 
             if (!startingNode && isClassNode) {
-                startingNode = node;
+                updateStartingNode(node);
             }
         }
     } else {
@@ -775,7 +401,8 @@ const toggleNode = (node, isPreset = false) => {
             talent.selected = false;
         }
 
-        talentSelections = talentSelections.filter(item => item.selected);
+        talentSelections.length = 0;
+        talentSelections.push(...talentSelections.filter(item => item.selected));
 
         for (const talent of deadBranch) {
             talent.update();
@@ -786,7 +413,7 @@ const toggleNode = (node, isPreset = false) => {
         }
 
         if (startingNode?.identifier.number === node.identifier.number) {
-            startingNode = undefined;
+            updateStartingNode(undefined);
         }
     }
 
@@ -810,49 +437,10 @@ const toggleNode = (node, isPreset = false) => {
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS - talentSelections.length}`;
 };
 
-const handleCanvas = () => {
-    viewport.width = talentGrid.at(0).length * Constant.CELL_SIZE;
-    viewport.height = talentGrid.length * Constant.CELL_SIZE;
-    viewport.max = Math.max(talentGrid.length, talentGrid.at(0).length);
-
-    const tree = document.querySelector("#talent-tree");
-    tree.style.width = `${viewport.width}px`;
-    tree.style.height = `${viewport.height}px`;
-
-    let centerNode = {
-        center: {
-            x: (viewport.width * -0.5),
-            y: (viewport.height * -0.5),
-        },
-    };
-    for (const branch of talentGrid) {
-        for (const leaf of branch) {
-            if (leaf.identifier.talent.includes("[CENTER]")) {
-                centerNode = leaf;
-                break;
-            }
-        }
-    }
-
-    const container = document.querySelector("#talent-container").getBoundingClientRect();
-    controls.x = (centerNode.center.x * -controls.zoom) + (container.width * 0.5);
-    controls.y = (centerNode.center.y * -controls.zoom) + (container.height * 0.5);
-
-    const canvas = document.querySelector("#line-canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    canvas.offscreenCanvas = document.createElement("canvas");
-    canvas.offscreenCanvas.width = viewport.width;
-    canvas.offscreenCanvas.height = viewport.height;
-
-    drawLinesInitial();
-};
-
 /**
  * @param {MouseEvent} event
  */
-const mouseDrag = (event) => {
+const handleMouseDrag = (event) => {
     event.preventDefault();
 
     if (!controls.panning) {
@@ -869,115 +457,6 @@ const mouseDrag = (event) => {
     handleViewport();
 };
 
-/**
- * @param {TalentNode} current
- * @param {TalentNode[]} route
- * @returns {talentNodes[]}
- */
-const generatePath = (current, route) => {
-    const path = [];
-    for (let y = -1; y <= 1; ++y) {
-        for (let x = -1; x <= 1; ++x) {
-            if (x === 0 && y === 0) {
-                continue;
-            }
-
-            const node = talentGrid.at(current.y + y)?.at(current.x + x);
-            if (!node) {
-                continue;
-            }
-
-            if (route.some(item => item.identifier.number === node.identifier.number)) {
-                continue;
-            }
-
-            if (node.selectable) {
-                path.push({
-                    node: node,
-                    steps: route.length,
-                });
-                continue;
-            }
-
-            if (node.identifier.talent === current.identifier.talent) {
-                generatePath(node, [...route, node]).forEach(item => path.push({
-                    node: item,
-                    steps: route.length + 1,
-                }));
-            }
-        }
-    }
-
-    if (path.length === 0) {
-        return [];
-    }
-
-    let steps = Number.MAX_VALUE;
-    for (const item of path) {
-        if (item.steps < steps) {
-            steps = item.steps;
-        }
-    }
-
-    return path.filter(item => item.steps <= steps).map(item => item.node);
-};
-
-/**
- * @param {string} data
- */
-const generateTalentGrid = (data) => {
-    talentGrid = [];
-    const rows = data.trim().split(/\r?\n/);
-    for (let y = 0; y < rows.length; ++y) {
-        /** @type {TalentNode[]} */
-        const branch = [];
-        const columns = rows.at(y).split(",");
-        for (let x = 0; x < columns.length; ++x) {
-            const value = columns.at(x).trim();
-            branch.push(new TalentNode({
-                x: x,
-                y: y,
-                length: columns.length,
-                value: value,
-            }));
-        }
-
-        talentGrid.push(branch);
-    }
-
-    talentNodes = [];
-    for (const branch of talentGrid) {
-        for (const leaf of branch) {
-            if (!leaf.selectable) {
-                continue;
-            }
-
-            talentNodes.push(leaf);
-
-            for (let y = -1; y <= 1; ++y) {
-                for (let x = -1; x <= 1; ++x) {
-                    if (x === 0 && y === 0) {
-                        continue;
-                    }
-
-                    const node = talentGrid.at(leaf.y + y)?.at(leaf.x + x);
-                    if (!node) {
-                        continue;
-                    }
-
-                    if (node.identifier.talent.length !== 1) {
-                        continue;
-                    }
-
-                    generatePath(node, [leaf, node]).forEach(item => leaf.neighbors.push(item));
-                }
-            }
-        }
-    }
-
-    handleCanvas();
-};
-
 const handleLoadingImageAssets = async () => {
     const progress = document.querySelector("#progress");
 
@@ -988,24 +467,24 @@ const handleLoadingImageAssets = async () => {
         completed: 0,
     };
 
-    for (const key of Asset.borderAssets.keys()) {
-        if (Asset.borderAssets.get(key)) {
+    for (const key of borderAssets.keys()) {
+        if (borderAssets.get(key)) {
             continue;
         }
 
         promises.push(fetch(`assets/textures/gui/skill_tree/borders/${key}.png`).then(response => response.blob()).then(bitmap => {
-            Asset.borderAssets.set(key, URL.createObjectURL(bitmap));
+            borderAssets.set(key, URL.createObjectURL(bitmap));
             progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
         }));
     }
 
-    for (const key of Asset.indicatorAssets.keys()) {
-        if (Asset.indicatorAssets.get(key)) {
+    for (const key of indicatorAssets.keys()) {
+        if (indicatorAssets.get(key)) {
             continue;
         }
 
         promises.push(fetch(`assets/textures/gui/skill_tree/indic/${key}.png`).then(response => response.blob()).then(bitmap => {
-            Asset.indicatorAssets.set(key, URL.createObjectURL(bitmap));
+            indicatorAssets.set(key, URL.createObjectURL(bitmap));
             progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
         }));
     }
@@ -1043,7 +522,7 @@ const handleLoadingImageAssets = async () => {
             }
             requested.add(node.identifier.talent);
 
-            if (Asset.iconAssets.has(node.identifier.talent)) {
+            if (iconAssets.has(node.identifier.talent)) {
                 continue;
             }
 
@@ -1057,10 +536,10 @@ const handleLoadingImageAssets = async () => {
             }
 
             promises.push(fetch(`assets/${path}/${key}.png`).then(response => response.blob()).then(bitmap => {
-                Asset.iconAssets.set(node.identifier.talent, URL.createObjectURL(bitmap));
+                iconAssets.set(node.identifier.talent, URL.createObjectURL(bitmap));
                 progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
             }).catch(error => {
-                Asset.iconAssets.set(node.identifier.talent, Asset.iconAssets.get("missing"));
+                iconAssets.set(node.identifier.talent, iconAssets.get("missing"));
                 console.error(node.identifier.talent, error);
             }));
         }
@@ -1073,16 +552,16 @@ const handleLoadingImageAssets = async () => {
 const handleLoadingAssets = async () => {
     const progress = document.querySelector("#progress");
 
-    if (!Asset.iconAssets.has("default")) {
+    if (!iconAssets.has("default")) {
         progress.innerText = "Processing fallback assets...";
         await fetch(`assets/textures/gui/stat_icons/default.png`).then(response => response.blob()).then(bitmap => {
-            Asset.iconAssets.set("default", URL.createObjectURL(bitmap));
+            iconAssets.set("default", URL.createObjectURL(bitmap));
         });
     }
 
-    if (!Asset.iconAssets.has("missing")) {
+    if (!iconAssets.has("missing")) {
         await fetch(`assets/textures/gui/stat_icons/missing.png`).then(response => response.blob()).then(bitmap => {
-            Asset.iconAssets.set("missing", URL.createObjectURL(bitmap));
+            iconAssets.set("missing", URL.createObjectURL(bitmap));
         });
     }
 
@@ -1282,7 +761,7 @@ const handleEvents = () => {
         }
 
         document.querySelector("#talent-container").style.cursor = "grabbing";
-        container.addEventListener("mousemove", mouseDrag);
+        container.addEventListener("mousemove", handleMouseDrag);
     };
 
     container.onmouseup = (event) => {
@@ -1298,7 +777,7 @@ const handleEvents = () => {
             infoTooltip.main.classList.remove("invisible");
         }
 
-        container.removeEventListener("mousemove", mouseDrag);
+        container.removeEventListener("mousemove", handleMouseDrag);
     };
 };
 
@@ -1309,10 +788,12 @@ const handleTooltip = (talent) => {
     let nodeTotal = 0;
     if (talent.selected) {
         const previewNeighbors = talentSelections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
-        talentRemovePreview = [...findDeadBranch(startingNode, talent), ...previewNeighbors];
+        talentRemovePreview.length = 0;
+        talentRemovePreview.push(...findDeadBranch(startingNode, talent), ...previewNeighbors);
         nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
     } else {
-        talentAddPreview = findShortestRoute(talent);
+        talentAddPreview.length = 0;
+        talentAddPreview.push(...findShortestRoute(talent));
         nodeTotal = talentAddPreview.length;
         if (talentAddPreview.length > 1) {
             nodeTotal = talentAddPreview.length - 1;
@@ -1320,7 +801,7 @@ const handleTooltip = (talent) => {
     }
 
     infoTooltip.name.innerText = talent.name;
-    infoTooltip.name.style.color = (talent.type === "major") ? Constant.colorMap.get("5") : Constant.colorMap.get("f");
+    infoTooltip.name.style.color = (talent.type === "major") ? colorMap.get("5") : colorMap.get("f");
     infoTooltip.node.count.innerText = nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" });
     infoTooltip.node.text.innerText = `Node${(Math.abs(nodeTotal) === 1) ? "" : "s"}`;
 
@@ -1375,8 +856,8 @@ const handleTalentEvents = (talent, container) => {
         infoTooltip.main.classList.remove("visible");
         infoTooltip.main.classList.add("invisible");
 
-        talentRemovePreview = [];
-        talentAddPreview = [];
+        talentAddPreview.length = 0;
+        talentRemovePreview.length = 0;
 
         clearTimeout(drawingTimer);
         if (controls.shouldRedraw) {
@@ -1422,9 +903,10 @@ const handleTalentEvents = (talent, container) => {
             toggleNode(talent);
             handleTooltip(talent);
             if (talent.selected) {
-                talentAddPreview = talentAddLeftovers;
+                talentAddPreview.length = 0;
+                talentAddPreview.push(...talentAddLeftovers);
             } else {
-                talentRemovePreview = [];
+                talentRemovePreview.length = 0;
             }
             drawLinesRegular();
         }
@@ -1443,7 +925,7 @@ const generateTree = () => {
 
         const border = document.createElement("img");
         border.classList.add("talent-node-border");
-        border.src = Asset.borderAssets.get(`${talent.type}_off`);
+        border.src = borderAssets.get(`${talent.type}_off`);
         switch (talent.type) {
             case "stat": {
                 border.width = 52;
@@ -1471,7 +953,7 @@ const generateTree = () => {
 
         const indicator = document.createElement("img");
         indicator.classList.add("talent-node-indicator");
-        indicator.src = Asset.indicatorAssets.get("no");
+        indicator.src = indicatorAssets.get("no");
         indicator.width = 40;
         indicator.height = 40;
         setUpIcon(indicator);
@@ -1479,7 +961,7 @@ const generateTree = () => {
 
         const icon = document.createElement("img");
         icon.classList.add("talent-node-icon");
-        icon.src = Asset.iconAssets.get(talent.identifier.talent);
+        icon.src = iconAssets.get(talent.identifier.talent);
         icon.width = 32;
         icon.height = 32;
         setUpIcon(icon);
@@ -1509,8 +991,8 @@ const generateTree = () => {
                 assetId = "can";
             }
 
-            border.src = Asset.borderAssets.get(`${talent.type}_${talent.selected ? "on" : "off"}`);
-            indicator.src = Asset.indicatorAssets.get(assetId);
+            border.src = borderAssets.get(`${talent.type}_${talent.selected ? "on" : "off"}`);
+            indicator.src = indicatorAssets.get(assetId);
         };
 
         talent.visual = container;
@@ -1565,7 +1047,7 @@ const handleLoading = async () => {
     }
 
     const points = releaseInfo.points;
-    TOTAL_POINTS = points.starting + points.leveling + points.questing;
+    updatePoints(points.starting + points.leveling + points.questing);
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
 
     if (shouldLoadAssets) {

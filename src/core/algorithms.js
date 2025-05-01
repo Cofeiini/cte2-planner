@@ -1,0 +1,419 @@
+import { BinaryHeap } from "./binary-heap.js";
+import { CELL_SIZE, controls, viewport } from "../data/constants.js";
+import { drawLinesInitial } from "./drawing.js";
+import {
+    exclusiveNodeValues,
+    startingNode,
+    talentAddLeftovers,
+    talentExclusions,
+    talentGrid,
+    TalentNode,
+    talentNodes,
+    talentSelections,
+    TOTAL_POINTS,
+} from "./talent-node.js";
+
+/**
+ * @param {TalentNode} node
+ * @param {TalentNode[][]} paths
+ * @param {Set<TalentNode>} collected
+ */
+export const searchNodes = (node, paths, collected) => {
+    const visited = new Set();
+
+    const search = (current) => {
+        visited.add(current.identifier.number);
+        collected.add(current);
+
+        for (const neighbor of current.neighbors) {
+            if (visited.has(neighbor.identifier.number)) {
+                continue;
+            }
+
+            if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
+                continue;
+            }
+
+            if (paths.some(item => item.some(element => element.identifier.number === neighbor.identifier.number))) {
+                continue;
+            }
+
+            search(neighbor);
+        }
+    };
+
+    search(node);
+};
+
+/**
+ * @param {TalentNode} start
+ * @param {TalentNode} end
+ * @param {TalentNode[]} currentPath
+ * @param {TalentNode[][]} allPaths
+ */
+export const findPaths = (start, end, currentPath, allPaths) => {
+    const node = currentPath.at(-1);
+    if (node.identifier.number === end.identifier.number) {
+        allPaths.push(currentPath);
+        return;
+    }
+
+    for (const neighbor of node.neighbors) {
+        if (currentPath.some(item => item.identifier.number === neighbor.identifier.number)) {
+            continue;
+        }
+
+        if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
+            continue;
+        }
+
+        findPaths(start, end, [...currentPath, neighbor], allPaths);
+    }
+};
+
+/**
+ * @param {TalentNode} start
+ * @param {TalentNode} target
+ * @returns {TalentNode[]}
+ */
+export const findDeadBranch = (start, target) => {
+    if (!start) {
+        return [];
+    }
+
+    const paths = [];
+    findPaths(start, target, [start], paths);
+
+    if (!paths.some(item => item.some(element => element.identifier.number === target.identifier.number))) {
+        return [];
+    }
+
+    const nodesToRemove = new Set();
+    searchNodes(target, paths, nodesToRemove);
+
+    return Array.from(nodesToRemove);
+};
+
+/**
+ * @param {TalentNode} start
+ * @param {TalentNode} end
+ * @returns {number}
+ */
+export const findDistance = (start, end) => {
+    const queue = [[start, 0]];
+    const visited = new Set([start.identifier.number]);
+
+    while (queue.length > 0) {
+        const [node, distance] = queue.shift();
+        if (node.identifier.number === end.identifier.number) {
+            return distance;
+        }
+
+        for (const neighbor of node.neighbors) {
+            if (visited.has(neighbor.identifier.number)) {
+                continue;
+            }
+            visited.add(neighbor.identifier.number);
+            queue.push([neighbor, distance + 1]);
+        }
+    }
+
+    return 0;
+};
+
+export const resetNodeHeuristics = () => {
+    for (const talent of talentNodes) {
+        talent.travel.source = undefined;
+        talent.travel.closed = false;
+        talent.travel.cost.total = Number.MAX_VALUE;
+        talent.travel.cost.accumulated = 0;
+        talent.travel.cost.heuristic = 0;
+    }
+};
+
+/**
+ * @param {TalentNode} start
+ * @param {TalentNode} end
+ * @returns {TalentNode[]}
+ */
+export const algorithm = (start, end) => {
+    resetNodeHeuristics();
+
+    for (const node of talentExclusions.get("start")) {
+        node.travel.closed = true;
+    }
+
+    const openHeap = new BinaryHeap();
+    openHeap.push(start);
+    start.travel.cost.heuristic = findDistance(start, end);
+
+    while (openHeap.size() > 0) {
+        const currentNode = openHeap.pop();
+
+        if (currentNode.identifier.number === end.identifier.number) {
+            const path = [currentNode];
+
+            let temp = currentNode;
+            while (temp.travel.source) {
+                path.push(temp.travel.source);
+                temp = temp.travel.source;
+            }
+
+            return path;
+        }
+
+        currentNode.travel.closed = true;
+        for (const neighbor of currentNode.neighbors) {
+            if (neighbor.travel.closed) {
+                continue;
+            }
+
+            const accumulated = currentNode.travel.cost.accumulated + 1;
+            const visited = neighbor.travel.closed;
+            if (!visited || (accumulated < neighbor.travel.cost.accumulated)) {
+                neighbor.travel.closed = true;
+                neighbor.travel.source = currentNode;
+                neighbor.travel.cost.heuristic = neighbor.travel.cost.heuristic || findDistance(neighbor, end);
+                neighbor.travel.cost.accumulated = accumulated;
+                neighbor.travel.cost.total = neighbor.travel.cost.accumulated + neighbor.travel.cost.heuristic;
+
+                if (visited) {
+                    openHeap.rescore(neighbor);
+                } else {
+                    openHeap.push(neighbor);
+                }
+            }
+        }
+    }
+
+    return [];
+};
+
+/**
+ * @param {TalentNode} target
+ * @returns {TalentNode[]}
+ */
+export const findShortestRoute = (target) => {
+    /** @type {string[]} */
+    const excluded = [];
+    for (const values of exclusiveNodeValues.values()) {
+        if (talentSelections.some(item => values.some(element => item.identifier.talent === element))) {
+            excluded.push(...values);
+        }
+    }
+
+    if (!startingNode) {
+        excluded.push(...exclusiveNodeValues.get("start"));
+    }
+
+    if (excluded.some(item => item === target.identifier.talent)) {
+        if (startingNode) {
+            return [];
+        }
+
+        return [target];
+    }
+
+    const routeList = [];
+    for (const start of talentSelections) {
+        if (start.identifier.number === target.identifier.number) {
+            continue;
+        }
+
+        routeList.push(algorithm(start, target));
+    }
+
+    let shortest = [];
+    let min = viewport.max;
+    for (const route of routeList) {
+        if (route.length < min) {
+            min = route.length;
+            shortest = route;
+        }
+    }
+
+    return shortest;
+};
+
+/**
+ * @param {TalentNode} targetNode
+ */
+export const findRoutes = (targetNode) => {
+    /** @type {TalentNode[]} */
+    let shortest = findShortestRoute(targetNode);
+
+    resetNodeHeuristics();
+
+    const allNodes = new Set();
+    for (const node of talentSelections) {
+        allNodes.add(node);
+    }
+
+    const possiblePoints = talentSelections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
+    if (possiblePoints > TOTAL_POINTS) {
+        if ((possiblePoints - TOTAL_POINTS) > shortest.length) {
+            console.error("Actually too many points!");
+            return;
+        }
+
+        const realPath = shortest.reverse().slice(0, TOTAL_POINTS - possiblePoints);
+        talentAddLeftovers.length = 0;
+        talentAddLeftovers.push(...shortest.slice(TOTAL_POINTS - possiblePoints - 1)); // Offset by 1 to include the last selected node for forming a proper line segment
+        shortest = realPath;
+    }
+
+    for (const node of shortest) {
+        allNodes.add(node);
+    }
+
+    talentSelections.length = 0;
+    talentSelections.push(...Array.from(allNodes));
+};
+
+const handleCanvas = () => {
+    viewport.width = talentGrid.at(0).length * CELL_SIZE;
+    viewport.height = talentGrid.length * CELL_SIZE;
+    viewport.max = Math.max(talentGrid.length, talentGrid.at(0).length);
+
+    const tree = document.querySelector("#talent-tree");
+    tree.style.width = `${viewport.width}px`;
+    tree.style.height = `${viewport.height}px`;
+
+    let centerNode = {
+        center: {
+            x: (viewport.width * -0.5),
+            y: (viewport.height * -0.5),
+        },
+    };
+    for (const branch of talentGrid) {
+        for (const leaf of branch) {
+            if (leaf.identifier.talent.includes("[CENTER]")) {
+                centerNode = leaf;
+                break;
+            }
+        }
+    }
+
+    const container = document.querySelector("#talent-container").getBoundingClientRect();
+    controls.x = (centerNode.center.x * -controls.zoom) + (container.width * 0.5);
+    controls.y = (centerNode.center.y * -controls.zoom) + (container.height * 0.5);
+
+    const canvas = document.querySelector("#line-canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    canvas.offscreenCanvas = document.createElement("canvas");
+    canvas.offscreenCanvas.width = viewport.width;
+    canvas.offscreenCanvas.height = viewport.height;
+
+    drawLinesInitial();
+};
+
+/**
+ * @param {TalentNode} current
+ * @param {TalentNode[]} route
+ * @returns {talentNodes[]}
+ */
+export const generatePath = (current, route) => {
+    const path = [];
+    for (let y = -1; y <= 1; ++y) {
+        for (let x = -1; x <= 1; ++x) {
+            if (x === 0 && y === 0) {
+                continue;
+            }
+
+            const node = talentGrid.at(current.y + y)?.at(current.x + x);
+            if (!node) {
+                continue;
+            }
+
+            if (route.some(item => item.identifier.number === node.identifier.number)) {
+                continue;
+            }
+
+            if (node.selectable) {
+                path.push({
+                    node: node,
+                    steps: route.length,
+                });
+                continue;
+            }
+
+            if (node.identifier.talent === current.identifier.talent) {
+                generatePath(node, [...route, node]).forEach(item => path.push({
+                    node: item,
+                    steps: route.length + 1,
+                }));
+            }
+        }
+    }
+
+    if (path.length === 0) {
+        return [];
+    }
+
+    let steps = Number.MAX_VALUE;
+    for (const item of path) {
+        if (item.steps < steps) {
+            steps = item.steps;
+        }
+    }
+
+    return path.filter(item => item.steps <= steps).map(item => item.node);
+};
+
+/**
+ * @param {string} data
+ */
+export const generateTalentGrid = (data) => {
+    talentGrid.length = 0;
+    const rows = data.trim().split(/\r?\n/);
+    for (let y = 0; y < rows.length; ++y) {
+        /** @type {TalentNode[]} */
+        const branch = [];
+        const columns = rows.at(y).split(",");
+        for (let x = 0; x < columns.length; ++x) {
+            const value = columns.at(x).trim();
+            branch.push(new TalentNode({
+                x: x,
+                y: y,
+                length: columns.length,
+                value: value,
+            }));
+        }
+
+        talentGrid.push(branch);
+    }
+
+    talentNodes.length = 0;
+    for (const branch of talentGrid) {
+        for (const leaf of branch) {
+            if (!leaf.selectable) {
+                continue;
+            }
+
+            talentNodes.push(leaf);
+
+            for (let y = -1; y <= 1; ++y) {
+                for (let x = -1; x <= 1; ++x) {
+                    if (x === 0 && y === 0) {
+                        continue;
+                    }
+
+                    const node = talentGrid.at(leaf.y + y)?.at(leaf.x + x);
+                    if (!node) {
+                        continue;
+                    }
+
+                    if (node.identifier.talent.length !== 1) {
+                        continue;
+                    }
+
+                    generatePath(node, [leaf, node]).forEach(item => leaf.neighbors.push(item));
+                }
+            }
+        }
+    }
+
+    handleCanvas();
+};
