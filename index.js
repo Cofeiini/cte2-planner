@@ -67,7 +67,7 @@ const handleViewport = () => {
 
 /**
  * @param {string} description
- * @returns {string[]}
+ * @returns {string}
  */
 const generateDescriptionHTML = (description) => {
     const results = [];
@@ -87,7 +87,7 @@ const generateDescriptionHTML = (description) => {
         results.push(elements.join("\u00A0"));
     }
 
-    return results;
+    return results.flat().join("");
 };
 
 /**
@@ -126,7 +126,7 @@ const setUpStatContainer = (stat) => {
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
     container.style.color = "white";
-    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("")}</p>`;
+    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" })))}</p>`;
 
     return container;
 };
@@ -580,11 +580,9 @@ const handleLoadingAssets = async () => {
     const descriptionData = {};
     await fetch(`data/${releaseInfo.version}/lang/en_us.json`).then(response => response.json()).then(data => {
         Object.assign(descriptionData, data);
-        progress.innerText = `Processing talent descriptions...\n${1} of ${2} done.`;
     });
     await fetch(`data/${releaseInfo.version}/lang/override/en_us.json`).then(response => response.json()).then(data => {
         Object.assign(descriptionData, data);
-        progress.innerText = `Processing talent descriptions...\n${2} of ${2} done.`;
     });
 
     let overrideData = {};
@@ -603,17 +601,15 @@ const handleLoadingAssets = async () => {
         progress.innerText = `Processing talent details...\n${tasks.completed} of ${tasks.started} done.`;
         for (const node of talentNodes) {
             for (const stat of node.stats) {
-                progress.innerText = `Processing talent details...\n${++tasks.completed} of ${tasks.started} done.`;
-
                 const identifier = stat["stat"];
                 let json = data.find(item => (item.id === identifier) || (item.data?.id === identifier));
-                const type = stat["type"].toLowerCase();
                 if (!json) {
                     json = {
                         is_perc: node.type !== "special",
                     };
                 }
-                json["is_perc"] = json["is_perc"] || ((type === "percent") || (type === "more"));
+                const type = stat["type"].toLowerCase();
+                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || ((type === "percent") || (type === "more"));
                 json["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/§\w/g, "");
 
                 if (overrideData[identifier]) {
@@ -625,6 +621,8 @@ const handleLoadingAssets = async () => {
                     newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
                 }
                 statData.set(node.identifier.talent, newData);
+
+                progress.innerText = `Processing talent details...\n${++tasks.completed} of ${tasks.started} done.`;
             }
         }
     }));
@@ -666,7 +664,7 @@ const handleLoadingAssets = async () => {
             const isScaled = item["scale_to_lvl"] ?? false;
             const isFormat = info["format"] ?? (isStat || (isPerk && (Math.abs(value) > 1)));
 
-            let description = descriptionData[`mmorpg.stat.${item["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16))).replaceAll(/(§\w)\1+/g, "$1");
+            let description = descriptionData[`mmorpg.stat.${item["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
             if (!description.includes("[VAL1]") && isFormat) {
                 const valueColor = (((value > 0) && !isMinusGood) || ((value < 0) && isMinusGood)) ? "§a" : "§c";
                 description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
@@ -675,7 +673,7 @@ const handleLoadingAssets = async () => {
             item["scale_to_lvl"] = isScaled;
             item["is_percent"] = isPercent;
             item["description"] = description;
-            item["description_html"] = generateDescriptionHTML(description).flat().join("");
+            item["description_html"] = generateDescriptionHTML(description);
         }
 
         switch (node.type) {
@@ -833,7 +831,9 @@ const handleTooltip = (talent) => {
  * @param {HTMLDivElement} container
  */
 const handleTalentEvents = (talent, container) => {
-    container.onmouseenter = () => {
+    const bounds = document.querySelector("#talent-container").getBoundingClientRect();
+
+    container.onmouseenter = (event) => {
         controls.hovering = true;
 
         if (controls.panning) {
@@ -841,6 +841,10 @@ const handleTalentEvents = (talent, container) => {
         }
 
         handleTooltip(talent);
+
+        const tooltipBounds = infoTooltip.main.getBoundingClientRect();
+        infoTooltip.main.style.left = `${event.clientX + 20}px`;
+        infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
 
         clearTimeout(drawingTimer);
         drawingTimer = setTimeout(() => {
@@ -868,10 +872,8 @@ const handleTalentEvents = (talent, container) => {
         }
     };
 
-    const bounds = document.querySelector("#talent-container").getBoundingClientRect();
     container.onmousemove = (event) => {
         const tooltipBounds = infoTooltip.main.getBoundingClientRect();
-
         infoTooltip.main.style.left = `${event.clientX + 20}px`;
         infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
     };
@@ -1001,8 +1003,11 @@ const generateTree = () => {
 };
 
 const handleLoading = async () => {
+    const progress = document.querySelector("#progress");
+    progress.innerText = "Processing...";
+
     const loading = document.querySelector("#loading");
-    loading.classList.remove("invisible");
+    loading.classList.remove("invisible", "hidden");
 
     let shouldLoadAssets = true;
     try {
@@ -1074,7 +1079,7 @@ const handleLoading = async () => {
     drawLinesRegular();
     handleViewport();
 
-    document.querySelector("#progress").innerText = "Done.";
+    progress.innerText = "Done.";
     loading.classList.add("invisible");
 };
 
@@ -1449,6 +1454,11 @@ window.onload = async () => {
     searchInfo.onmousemove = (event) => {
         infoTooltip.main.style.left = `${event.clientX + 20}px`;
         infoTooltip.main.style.top = `${event.clientY + 20}px`;
+    };
+
+    const loading = document.querySelector("#loading");
+    loading.ontransitionend = () => {
+        loading.classList.add("hidden");
     };
 
     await handleLoading();
