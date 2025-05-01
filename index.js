@@ -39,6 +39,10 @@ const sidePanel = {
         stat: undefined,
         statList: undefined,
     },
+    character: {
+        level: undefined,
+        levelLabel: undefined,
+    },
 };
 
 let releaseInfo = undefined;
@@ -461,15 +465,42 @@ const generateDescriptionHTML = (description) => {
 };
 
 /**
- * @param {string} description
+ * @param {number} level
  * @param {number} value
+ * @returns {number}
+ */
+const scaleValueToLevel = (level, value) => {
+    if (value > 1.0) {
+        value = 4;
+        if (level > 1) {
+            value = 4 + level;
+        }
+    } else {
+        value = 1 + (0.2 * (level - 1)) + Math.min(Math.max(0, level - 71), 5);
+        if (level > 71) {
+            value = 15.0 + Math.floor((level - 71) / 5.0);
+        }
+    }
+
+    return value;
+};
+
+/**
+ * @param {Object} stat
+ * @param {string} stat.description
+ * @param {number[]} stat.values
  * @returns {HTMLDivElement}
  */
-const setUpStatContainer = (description, value) => {
+const setUpStatContainer = (stat) => {
+    let total = stat.values.reduce((accumulated, item) => accumulated + item, 0);
+    if (stat["scale_to_lvl"]) {
+        total = stat.values.reduce((accumulated, item) => accumulated + scaleValueToLevel(parseInt(sidePanel.character.level.value), item), 0);
+    }
+
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
     container.style.color = "white";
-    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("")}</p>`;
+    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("")}</p>`;
 
     return container;
 };
@@ -545,7 +576,7 @@ const handleSidePanel = () => {
         return;
     }
 
-    const totalStatList = Array.from(totalStats.values()).sort((a, b) => a.value - b.value);
+    const totalStatList = Array.from(totalStats.values());
 
     const attributeContainer = document.createElement("div");
     attributeContainer.classList.add("panel-group-item-container");
@@ -559,11 +590,11 @@ const handleSidePanel = () => {
         attributesTitle.innerText = "Attributes";
 
         const attributeItems = [];
-        for (const value of totalStatAttributes) {
-            attributeItems.push(setUpStatContainer(value.description, value.value));
-            attributeItems.push(setUpSeparator());
+        for (const stat of totalStatAttributes) {
+            attributeItems.push(setUpStatContainer(stat));
         }
-        attributeItems.splice(-1);
+        attributeItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+
         attributeContainer.replaceChildren(attributesTitle, ...attributeItems);
     }
 
@@ -579,11 +610,11 @@ const handleSidePanel = () => {
         statsTitle.innerText = "Stats";
 
         const statItems = [];
-        for (const value of totalStatValues) {
-            statItems.push(setUpStatContainer(value.description, value.value));
-            statItems.push(setUpSeparator());
+        for (const stat of totalStatValues) {
+            statItems.push(setUpStatContainer(stat));
         }
-        statItems.splice(-1);
+        statItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+
         statContainer.replaceChildren(statsTitle, ...statItems);
     }
 
@@ -599,13 +630,13 @@ const handleSidePanel = () => {
 
         const gameChangerItems = [];
         const gameChangerList = [...totalGameChangers.values()].sort((a, b) => a.name.localeCompare(b.name));
-        for (const value of gameChangerList) {
+        for (const gameChanger of gameChangerList) {
             const itemContainer = document.createElement("div");
             itemContainer.style.display = "flex";
             itemContainer.style.padding = "0.5em";
             itemContainer.style.gap = "1.0em";
 
-            itemContainer.appendChild(setUpStatIcon(value.id));
+            itemContainer.appendChild(setUpStatIcon(gameChanger.id));
 
             const statsContainer = document.createElement("div");
             statsContainer.style.display = "flex";
@@ -615,13 +646,13 @@ const handleSidePanel = () => {
             statsContainer.style.fontSize = "small";
 
             const title = document.createElement("div");
-            title.innerText = value.name;
+            title.innerText = gameChanger.name;
             title.style.color = "white";
             title.style.fontWeight = "bold";
             statsContainer.appendChild(title);
 
-            for (const stat of value.value.values()) {
-                statsContainer.appendChild(setUpStatContainer(stat.description, stat.value));
+            for (const stat of gameChanger.value.values()) {
+                statsContainer.appendChild(setUpStatContainer(stat));
             }
             itemContainer.appendChild(statsContainer);
             gameChangerItems.push(itemContainer);
@@ -640,13 +671,64 @@ const handleSidePanel = () => {
 const setUpURL = (json = undefined) => {
     presetInfo = json || {
         version: releaseInfo.version,
-        talents: talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort(),
+        level: sidePanel.character.level.value,
         start: startingNode?.identifier.number,
+        talents: talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort(),
     };
 
     const url = new URL(location.href);
     url.searchParams.set("preset", btoa(JSON.stringify(presetInfo)));
     history.replaceState(null, "", url);
+};
+
+const collectStatInformation = () => {
+    totalGameChangers.clear();
+    const majorSelections = talentSelections.filter(item => item.type === "major");
+    for (const talent of majorSelections) {
+        const gameChangerStats = new Map();
+        for (const stat of talent.stats) {
+            const key = stat["stat"];
+            const type = stat["type"].toLowerCase();
+
+            const valueList = [parseFloat(stat["v1"])];
+            if (gameChangerStats.has(key)) {
+                valueList.push(...totalStats.get(key).values);
+            }
+            gameChangerStats.set(key, {
+                type: type,
+                values: valueList,
+                description: stat["description"],
+                is_percent: stat["is_percent"],
+                scale_to_lvl: stat["scale_to_lvl"],
+            });
+        }
+        totalGameChangers.set(talent.identifier.talent, {
+            id: talent.identifier.talent,
+            name: talent.name,
+            value: gameChangerStats,
+        });
+    }
+
+    totalStats.clear();
+    const regularSelections = talentSelections.filter(item => item.type !== "major");
+    for (const talent of regularSelections) {
+        for (const stat of talent.stats) {
+            const key = stat["stat"];
+            const type = stat["type"].toLowerCase();
+
+            const valueList = [parseFloat(stat["v1"])];
+            if (totalStats.has(key)) {
+                valueList.push(...totalStats.get(key).values);
+            }
+            totalStats.set(key, {
+                type: type,
+                values: valueList,
+                description: stat["description"],
+                is_percent: stat["is_percent"],
+                scale_to_lvl: stat["scale_to_lvl"],
+            });
+        }
+    }
 };
 
 /**
@@ -717,51 +799,7 @@ const toggleNode = (node, isPreset = false) => {
         }
     }
 
-    totalGameChangers.clear();
-    const majorSelections = talentSelections.filter(item => item.type === "major");
-    for (const talent of majorSelections) {
-        const gameChangerStats = new Map();
-        for (const stat of talent.stats) {
-            const key = stat["stat"];
-            const type = stat["type"].toLowerCase();
-
-            let value = parseFloat(stat["v1"]);
-            if (gameChangerStats.has(key)) {
-                value += totalStats.get(key).value;
-            }
-            gameChangerStats.set(key, {
-                type: type,
-                value: value,
-                description: stat["description"],
-                is_percent: stat["is_percent"],
-            });
-        }
-        totalGameChangers.set(talent.identifier.talent, {
-            id: talent.identifier.talent,
-            name: talent.name,
-            value: gameChangerStats,
-        });
-    }
-
-    totalStats.clear();
-    const regularSelections = talentSelections.filter(item => item.type !== "major");
-    for (const talent of regularSelections) {
-        for (const stat of talent.stats) {
-            const key = stat["stat"];
-            const type = stat["type"].toLowerCase();
-
-            let value = parseFloat(stat["v1"]);
-            if (totalStats.has(key)) {
-                value += totalStats.get(key).value;
-            }
-            totalStats.set(key, {
-                type: type,
-                value: value,
-                description: stat["description"],
-                is_percent: stat["is_percent"],
-            });
-        }
-    }
+    collectStatInformation();
 
     handleSidePanel();
 
@@ -1158,7 +1196,7 @@ const handleLoadingAssets = async () => {
             item["scale_to_lvl"] = isScaled;
             item["is_percent"] = isPercent;
             item["description"] = description;
-            item["description_html"] = generateDescriptionHTML(description.replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))).flat().join("");
+            item["description_html"] = generateDescriptionHTML(description).flat().join("");
         }
 
         switch (node.type) {
@@ -1286,16 +1324,22 @@ const handleTooltip = (talent) => {
     infoTooltip.node.count.innerText = nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" });
     infoTooltip.node.text.innerText = `Node${(Math.abs(nodeTotal) === 1) ? "" : "s"}`;
 
+    const level = parseInt(sidePanel.character.level.value);
     const formatted = [];
     for (const stat of talent.stats) {
         let bullet = "";
         if (stat.type.toLowerCase() !== "more") {
             bullet = `<span style="color: purple;">&#9670;</span>`;
         }
-        formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${stat["description_html"]}</p></div>`);
+
+        let value = parseFloat(stat["v1"]);
+        if (stat["scale_to_lvl"]) {
+            value = scaleValueToLevel(level, value);
+        }
+        formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${stat["description_html"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))}</p></div>`);
     }
     if (talent.type === "major") {
-        formatted.push(`<p style="margin: 0;"><span style="color: red;">Game Changer Talent</span></p>`);
+        formatted.push(`<span style="color: red;">Game Changer Talent</span>`);
     }
     infoTooltip.stats.innerHTML = formatted.join("");
 
@@ -1497,6 +1541,7 @@ const handleLoading = async () => {
         releaseInfo = RELEASES.at(0);
         presetInfo = {
             version: releaseInfo.version,
+            level: 100,
             start: undefined,
             talents: [],
         };
@@ -1508,6 +1553,9 @@ const handleLoading = async () => {
     }
     if (!presetInfo.version) {
         presetInfo["version"] = releaseInfo.version;
+    }
+    if (!presetInfo.level) {
+        presetInfo["level"] = 100;
     }
     if (!presetInfo.start) {
         presetInfo["start"] = undefined;
@@ -1537,6 +1585,9 @@ const handleLoading = async () => {
             toggleNode(talentNodes.find(item => item.identifier.number === id), true);
         }
     }
+
+    sidePanel.character.level.value = presetInfo.level;
+    sidePanel.character.levelLabel.innerText = presetInfo.level;
 
     drawLinesRegular();
     handleViewport();
@@ -1856,6 +1907,14 @@ window.onload = async () => {
     sidePanel.allocated.special = document.querySelector("#allocated-special");
     sidePanel.allocated.stat = document.querySelector("#allocated-stat");
     sidePanel.allocated.statList = document.querySelector("#allocated-stat-list");
+
+    sidePanel.character.levelLabel = document.querySelector("#player-level-label");
+    sidePanel.character.level = document.querySelector("#player-level");
+    sidePanel.character.level.oninput = (event) => {
+        sidePanel.character.levelLabel.innerText = event.target.value;
+        setUpURL();
+        handleSidePanel();
+    };
 
     const latest = RELEASES.at(0).version;
     const versionSelect = document.querySelector("#version-select");
