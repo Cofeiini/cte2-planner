@@ -1000,6 +1000,29 @@ const generateTree = () => {
     }
 };
 
+/**
+ * @param {HTMLSelectElement} select
+ */
+const handleVersionOptions = (select) => {
+    const latest = RELEASES.at(0).version;
+    for (const option of select.childNodes) {
+        option.style.color = "white";
+        option.innerText = option.value;
+        if (option.value === latest) {
+            option.innerText += " (latest)";
+        }
+    }
+
+    select.style.color = "white";
+    if (select.value !== latest) {
+        select.style.color = "red";
+
+        const option = select.childNodes[select.selectedIndex];
+        option.innerText = `${option.value} (outdated)`;
+        option.style.color = "red";
+    }
+};
+
 const handleLoading = async () => {
     const progress = document.querySelector("#progress");
     progress.innerText = "Processing...";
@@ -1049,6 +1072,10 @@ const handleLoading = async () => {
         presetInfo["talents"] = [];
     }
 
+    const versionSelect = document.querySelector("#version-select");
+    versionSelect.value = presetInfo.version;
+    handleVersionOptions(versionSelect);
+
     const points = releaseInfo.points;
     updatePoints(points.starting + points.leveling + points.questing);
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
@@ -1077,29 +1104,6 @@ const handleLoading = async () => {
 
     progress.innerText = "Done.";
     loading.classList.add("invisible");
-};
-
-/**
- * @param {HTMLSelectElement} select
- */
-const handleVersionOptions = (select) => {
-    const latest = RELEASES.at(0).version;
-    for (const option of select.childNodes) {
-        option.style.color = "white";
-        option.innerText = option.value;
-        if (option.value === latest) {
-            option.innerText += " (latest)";
-        }
-    }
-
-    select.style.color = "white";
-    if (select.value !== latest) {
-        select.style.color = "red";
-
-        const option = select.childNodes[select.selectedIndex];
-        option.innerText = `${option.value} (outdated)`;
-        option.style.color = "red";
-    }
 };
 
 const resetMessageBox = () => {
@@ -1399,7 +1403,6 @@ window.onload = async () => {
         handleSidePanel();
     };
 
-    const latest = RELEASES.at(0).version;
     const versionSelect = document.querySelector("#version-select");
     for (const release of RELEASES) {
         const option = document.createElement("option");
@@ -1407,9 +1410,7 @@ window.onload = async () => {
         option.innerText = release.version;
         versionSelect.appendChild(option);
     }
-    versionSelect.value = latest;
     versionSelect.onchange = handleVersionChange;
-    handleVersionOptions(versionSelect);
 
     document.querySelector("#import-button").onclick = handleDataImport;
     document.querySelector("#export-button").onclick = handleDataExport;
