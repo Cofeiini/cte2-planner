@@ -1,17 +1,35 @@
-import { BinaryHeap } from "./binary-heap.js";
-import { CELL_SIZE, controls, viewport } from "../data/constants.js";
-import { drawLinesInitial } from "./drawing.js";
+import { BinaryHeap } from "../type/binary-heap.js";
 import {
     exclusiveNodeValues,
     startingNode,
     talentAddLeftovers,
     talentExclusions,
     talentGrid,
-    TalentNode,
     talentNodes,
     talentSelections,
     TOTAL_POINTS,
-} from "./talent-node.js";
+} from "../type/talent-node.js";
+
+/**
+ * @param {number} level
+ * @param {number} value
+ * @returns {number}
+ */
+export const scaleValueToLevel = (level, value) => {
+    if (value > 1.0) {
+        value = 4;
+        if (level > 1) {
+            value = 4 + level;
+        }
+    } else {
+        value = 1 + (0.2 * (level - 1)) + Math.min(Math.max(0, level - 71), 5);
+        if (level > 71) {
+            value = 15.0 + Math.floor((level - 71) / 5.0);
+        }
+    }
+
+    return value;
+};
 
 /**
  * @param {TalentNode} node
@@ -224,7 +242,7 @@ export const findShortestRoute = (target) => {
     }
 
     let shortest = [];
-    let min = viewport.max;
+    let min = Number.MAX_VALUE;
     for (const route of routeList) {
         if (route.length < min) {
             min = route.length;
@@ -268,45 +286,6 @@ export const findRoutes = (targetNode) => {
 
     talentSelections.length = 0;
     talentSelections.push(...Array.from(allNodes));
-};
-
-const handleCanvas = () => {
-    viewport.width = talentGrid.at(0).length * CELL_SIZE;
-    viewport.height = talentGrid.length * CELL_SIZE;
-    viewport.max = Math.max(talentGrid.length, talentGrid.at(0).length);
-
-    const tree = document.querySelector("#talent-tree");
-    tree.style.width = `${viewport.width}px`;
-    tree.style.height = `${viewport.height}px`;
-
-    let centerNode = {
-        center: {
-            x: (viewport.width * -0.5),
-            y: (viewport.height * -0.5),
-        },
-    };
-    for (const branch of talentGrid) {
-        for (const leaf of branch) {
-            if (leaf.identifier.talent.includes("[CENTER]")) {
-                centerNode = leaf;
-                break;
-            }
-        }
-    }
-
-    const container = document.querySelector("#talent-container").getBoundingClientRect();
-    controls.x = (centerNode.center.x * -controls.zoom) + (container.width * 0.5);
-    controls.y = (centerNode.center.y * -controls.zoom) + (container.height * 0.5);
-
-    const canvas = document.querySelector("#line-canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    canvas.offscreenCanvas = document.createElement("canvas");
-    canvas.offscreenCanvas.width = viewport.width;
-    canvas.offscreenCanvas.height = viewport.height;
-
-    drawLinesInitial();
 };
 
 /**
@@ -360,60 +339,4 @@ export const generatePath = (current, route) => {
     }
 
     return path.filter(item => item.steps <= steps).map(item => item.node);
-};
-
-/**
- * @param {string} data
- */
-export const generateTalentGrid = (data) => {
-    talentGrid.length = 0;
-    const rows = data.trim().split(/\r?\n/);
-    for (let y = 0; y < rows.length; ++y) {
-        /** @type {TalentNode[]} */
-        const branch = [];
-        const columns = rows.at(y).split(",");
-        for (let x = 0; x < columns.length; ++x) {
-            const value = columns.at(x).trim();
-            branch.push(new TalentNode({
-                x: x,
-                y: y,
-                length: columns.length,
-                value: value,
-            }));
-        }
-
-        talentGrid.push(branch);
-    }
-
-    talentNodes.length = 0;
-    for (const branch of talentGrid) {
-        for (const leaf of branch) {
-            if (!leaf.selectable) {
-                continue;
-            }
-
-            talentNodes.push(leaf);
-
-            for (let y = -1; y <= 1; ++y) {
-                for (let x = -1; x <= 1; ++x) {
-                    if (x === 0 && y === 0) {
-                        continue;
-                    }
-
-                    const node = talentGrid.at(leaf.y + y)?.at(leaf.x + x);
-                    if (!node) {
-                        continue;
-                    }
-
-                    if (node.identifier.talent.length !== 1) {
-                        continue;
-                    }
-
-                    generatePath(node, [leaf, node]).forEach(item => leaf.neighbors.push(item));
-                }
-            }
-        }
-    }
-
-    handleCanvas();
 };

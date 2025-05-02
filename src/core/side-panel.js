@@ -1,0 +1,429 @@
+import { RELEASES } from "../releases.js";
+import { talentSelections } from "../type/talent-node.js";
+import { handleLoading } from "../util/loading.js";
+import { resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
+
+export const sidePanel = {
+    allocated: {
+        points: undefined,
+        start: undefined,
+        major: undefined,
+        special: undefined,
+        stat: undefined,
+        statList: undefined,
+    },
+    character: {
+        level: undefined,
+        levelLabel: undefined,
+    },
+};
+
+/** @type {Map<string, Object>} */
+export const totalStats = new Map();
+
+/** @type {Map<string, Object>} */
+export const totalGameChangers = new Map();
+
+export let releaseInfo = undefined;
+export const updateReleaseInfo = (json) => {
+    releaseInfo = json;
+};
+
+export let presetInfo = undefined;
+export const updatePresetInfo = (json) => {
+    presetInfo = json;
+};
+
+/**
+ * @param {HTMLSelectElement} select
+ */
+export const handleVersionOptions = (select) => {
+    const latest = RELEASES.at(0).version;
+    for (const option of select.childNodes) {
+        option.style.color = "white";
+        option.innerText = option.value;
+        if (option.value === latest) {
+            option.innerText += " (latest)";
+        }
+    }
+
+    select.style.color = "white";
+    if (select.value !== latest) {
+        select.style.color = "red";
+
+        const option = select.childNodes[select.selectedIndex];
+        option.innerText = `${option.value} (outdated)`;
+        option.style.color = "red";
+    }
+};
+
+export const handleSidePanel = () => {
+    sidePanel.allocated.points.innerText = `${talentSelections.length}`;
+    sidePanel.allocated.start.innerText = `${talentSelections.filter(item => item.type === "start").length}`;
+    sidePanel.allocated.major.innerText = `${talentSelections.filter(item => item.type === "major").length}`;
+    sidePanel.allocated.special.innerText = `${talentSelections.filter(item => item.type === "special").length}`;
+    sidePanel.allocated.stat.innerText = `${talentSelections.filter(item => item.type === "stat").length}`;
+
+    const panelStatList = document.querySelector("#allocated-stat-list");
+    panelStatList.classList.remove("hidden");
+    if ((totalStats.size + totalGameChangers.size) === 0) {
+        panelStatList.classList.add("hidden");
+        return;
+    }
+
+    const totalStatList = Array.from(totalStats.values());
+
+    const attributeContainer = document.createElement("div");
+    attributeContainer.classList.add("panel-group-item-container");
+    attributeContainer.classList.add("hidden");
+    const totalStatAttributes = totalStatList.filter(item => !item["is_percent"]);
+    if (totalStatAttributes.length > 0) {
+        attributeContainer.classList.remove("hidden");
+
+        const attributesTitle = document.createElement("div");
+        attributesTitle.classList.add("panel-group-title-small");
+        attributesTitle.innerText = "Attributes";
+
+        const attributeItems = [];
+        for (const stat of totalStatAttributes) {
+            attributeItems.push(setUpStatContainer(stat));
+        }
+        attributeItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+
+        attributeContainer.replaceChildren(attributesTitle, ...attributeItems);
+    }
+
+    const statContainer = document.createElement("div");
+    statContainer.classList.add("panel-group-item-container");
+    statContainer.classList.add("hidden");
+    const totalStatValues = totalStatList.filter(item => item["is_percent"]);
+    if (totalStatValues.length > 0) {
+        statContainer.classList.remove("hidden");
+
+        const statsTitle = document.createElement("div");
+        statsTitle.classList.add("panel-group-title-small");
+        statsTitle.innerText = "Stats";
+
+        const statItems = [];
+        for (const stat of totalStatValues) {
+            statItems.push(setUpStatContainer(stat));
+        }
+        statItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+
+        statContainer.replaceChildren(statsTitle, ...statItems);
+    }
+
+    const gameChangerContainer = document.createElement("div");
+    gameChangerContainer.classList.add("panel-group-item-container");
+    gameChangerContainer.classList.add("hidden");
+    if (totalGameChangers.size > 0) {
+        gameChangerContainer.classList.remove("hidden");
+
+        const mainTitle = document.createElement("div");
+        mainTitle.classList.add("panel-group-title-small");
+        mainTitle.innerText = "Game Changers";
+
+        const gameChangerItems = [];
+        const gameChangerList = [...totalGameChangers.values()].sort((a, b) => a.name.localeCompare(b.name));
+        for (const gameChanger of gameChangerList) {
+            const itemContainer = document.createElement("div");
+            itemContainer.style.display = "flex";
+            itemContainer.style.padding = "0.5em";
+            itemContainer.style.gap = "1.0em";
+
+            itemContainer.appendChild(setUpStatIcon(gameChanger.id));
+
+            const statsContainer = document.createElement("div");
+            statsContainer.style.display = "flex";
+            statsContainer.style.flexDirection = "column";
+            statsContainer.style.width = "100%";
+            statsContainer.style.textAlign = "left";
+            statsContainer.style.fontSize = "small";
+
+            const title = document.createElement("div");
+            title.innerText = gameChanger.name;
+            title.style.color = "white";
+            title.style.fontWeight = "bold";
+            statsContainer.appendChild(title);
+
+            for (const stat of gameChanger.value.values()) {
+                statsContainer.appendChild(setUpStatContainer(stat));
+            }
+            itemContainer.appendChild(statsContainer);
+            gameChangerItems.push(itemContainer);
+            gameChangerItems.push(setUpSeparator());
+        }
+        gameChangerItems.splice(-1);
+        gameChangerContainer.replaceChildren(mainTitle, ...gameChangerItems);
+    }
+
+    sidePanel.allocated.statList.replaceChildren(attributeContainer, statContainer, gameChangerContainer);
+};
+
+/**
+ * @returns {HTMLButtonElement}
+ */
+const setUpCancelButton = () => {
+    const button = document.createElement("button");
+    button.innerText = "Cancel";
+    button.classList.add("custom-button");
+    button.onclick = (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        resetMessageBox();
+    };
+
+    return button;
+};
+
+/**
+ * @param {string[]} textList
+ * @returns {HTMLDivElement}
+ */
+const setUpMessageBox = (textList) => {
+    const content = document.createElement("div");
+    content.style.display = "flex";
+    content.style.flexDirection = "column";
+    content.style.height = "100%";
+    content.style.gap = "1.0em";
+
+    const message = document.createElement("div");
+    message.style.display = "flex";
+    message.style.flexDirection = "column";
+    message.style.width = "100%";
+    message.style.height = "100%";
+    message.style.fontSize = "larger";
+    message.style.gap = "0.5em";
+    content.appendChild(message);
+
+    message.replaceChildren(...textList.map(item => {
+        const element = document.createElement("div");
+        element.innerText = item;
+        return element;
+    }));
+
+    return content;
+};
+
+/**
+ * @param {InputEvent} event
+ */
+export const handleVersionChange = async (event) => {
+    const shouldConfirm = (releaseInfo.version !== event.target.value);
+    updateReleaseInfo(RELEASES.find(item => item.version === event.target.value));
+
+    if ((shouldConfirm || (releaseInfo.version !== presetInfo.version)) && (talentSelections.length > 0)) {
+        const content = setUpMessageBox([
+            "You are attempting to load a different version of the talent tree than what your preset is made for.",
+            "This tool will attempt to convert the data, but the process might fail or have strange results.",
+            "Are you sure you want to proceed?",
+        ]);
+
+        const buttons = document.querySelector("#message-box-buttons");
+
+        const proceedButton = document.createElement("button");
+        proceedButton.innerText = "Proceed";
+        proceedButton.classList.add("custom-button");
+        proceedButton.onclick = async (mouse) => {
+            if (mouse.button !== 0) {
+                return;
+            }
+
+            resetMessageBox();
+
+            presetInfo.version = releaseInfo.version;
+            setUpURL();
+            handleVersionOptions(event.target);
+
+            await handleLoading();
+        };
+        buttons.appendChild(proceedButton);
+
+        const cancelButton = document.createElement("button");
+        cancelButton.innerText = "Cancel";
+        cancelButton.classList.add("custom-button");
+        cancelButton.onclick = (mouse) => {
+            if (mouse.button !== 0) {
+                return;
+            }
+
+            document.querySelector("#version-select").value = presetInfo.version;
+            handleVersionOptions(event.target);
+
+            resetMessageBox();
+        };
+        buttons.appendChild(cancelButton);
+
+        document.querySelector("#message-box-title").innerText = `Loading talent tree version ${releaseInfo.version}`;
+        document.querySelector("#message-box-content").replaceChildren(content);
+
+        document.querySelector("#message-overlay").classList.remove("hidden");
+
+        return;
+    }
+
+    presetInfo.version = releaseInfo.version;
+    setUpURL();
+    handleVersionOptions(event.target);
+
+    await handleLoading();
+};
+
+export const handleDataImport = () => {
+    const content = setUpMessageBox([
+        "You can import a build that was exported in JSON format by this tool.",
+    ]);
+
+    const footer = document.createElement("div");
+    footer.classList.add("hidden");
+    footer.style.display = "flex";
+    footer.style.width = "100%";
+    footer.style.justifyContent = "center";
+    footer.style.color = "red";
+    footer.fontSize = "larger";
+    footer.innerText = "An error occurred while reading the data. Make sure it's valid and correctly formatted.";
+    content.appendChild(footer);
+
+    const input = document.createElement("textarea");
+    input.placeholder = "Paste JSON data here...";
+    input.rows = 20;
+    input.style.backgroundColor = "darkslategray";
+    input.style.color = "white";
+    content.appendChild(input);
+
+    const buttons = [];
+
+    const importFileInput = document.createElement("input");
+    importFileInput.type = "file";
+    importFileInput.classList.add("hidden");
+    importFileInput.onchange = (event) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            input.value = reader.result.toString();
+            input.dispatchEvent(new Event("input"));
+        };
+        reader.readAsText(event.target.files[0]);
+    };
+    buttons.push(importFileInput);
+
+    const importFile = document.createElement("button");
+    importFile.innerText = "Import JSON File";
+    importFile.classList.add("custom-button");
+    importFile.onclick = (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        importFileInput.click();
+    };
+    buttons.push(importFile);
+
+    const importTooltip = "You need to add some JSON before importing.";
+    const importButton = document.createElement("button");
+    importButton.innerText = "Import JSON";
+    importButton.classList.add("custom-button");
+    importButton.disabled = true;
+    importButton.title = importTooltip;
+    importButton.onclick = async (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        let json = {};
+        try {
+            json = JSON.parse(input.value);
+        } catch (error) {
+            console.error(error);
+            footer.classList.remove("hidden");
+            return;
+        }
+
+        if (!json.version || !RELEASES.some(item => item.version === json.version)) {
+            footer.classList.remove("hidden");
+            return;
+        }
+
+        updateReleaseInfo(RELEASES.find(item => item.version === json.version));
+        const versionSelect = document.querySelector("#version-select");
+        versionSelect.value = json.version;
+        handleVersionOptions(versionSelect);
+        setUpURL(json);
+
+        resetMessageBox();
+
+        await handleLoading();
+    };
+    buttons.push(importButton);
+    buttons.push(setUpCancelButton());
+
+    input.oninput = () => {
+        footer.classList.add("hidden");
+        const hasData = input.value.length > 0;
+        importButton.disabled = !hasData;
+        importButton.title = hasData ? "" : importTooltip;
+    };
+
+    document.querySelector("#message-box-title").innerText = "Import your build";
+    document.querySelector("#message-box-content").replaceChildren(content);
+    document.querySelector("#message-box-buttons").replaceChildren(...buttons);
+
+    document.querySelector("#message-overlay").classList.remove("hidden");
+};
+
+export const handleDataExport = () => {
+    const content = setUpMessageBox([
+        "You can export a build in JSON format.",
+    ]);
+
+    const input = document.createElement("textarea");
+    input.readOnly = true;
+    input.rows = 20;
+    input.style.backgroundColor = "darkslategray";
+    input.style.color = "white";
+    input.value = JSON.stringify(presetInfo, null, 4);
+    content.appendChild(input);
+
+    const buttons = [];
+
+    const clipboardButton = document.createElement("button");
+    clipboardButton.innerText = "Export to Clipboard";
+    clipboardButton.classList.add("custom-button");
+    clipboardButton.onclick = async (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        await navigator.clipboard.writeText(JSON.stringify(presetInfo, null, 4));
+
+        resetMessageBox();
+    };
+    buttons.push(clipboardButton);
+
+    const exportButton = document.createElement("button");
+    exportButton.innerText = "Export to File";
+    exportButton.classList.add("custom-button");
+    exportButton.onclick = (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        const file = new Blob([JSON.stringify(presetInfo, null, 4)], { type: "application/json;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(file);
+        link.download = `CtE2Planner_${new Date().toISOString().replace(/\..+$/, "").replaceAll(/\D/g, "")}.json`;
+        link.click();
+        link.remove();
+
+        resetMessageBox();
+    };
+    buttons.push(exportButton);
+    buttons.push(setUpCancelButton());
+
+    document.querySelector("#message-box-title").innerText = "Export your build";
+    document.querySelector("#message-box-content").replaceChildren(content);
+    document.querySelector("#message-box-buttons").replaceChildren(...buttons);
+
+    document.querySelector("#message-overlay").classList.remove("hidden");
+};

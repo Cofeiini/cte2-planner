@@ -1,4 +1,5 @@
-import { talentAddPreview, talentExclusions, talentNodes, talentRemovePreview, talentSelections } from "./talent-node.js";
+import { LINE_WIDTH } from "../data/constants.js";
+import { talentAddPreview, talentExclusions, talentNodes, talentRemovePreview, talentSelections } from "../type/talent-node.js";
 
 /**
  * @param {CanvasRenderingContext2D} context
@@ -56,7 +57,7 @@ export const drawLinesInitial = () => {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     context.strokeStyle = "#222222";
-    context.lineWidth = 10;
+    context.lineWidth = LINE_WIDTH;
     drawLinesSimple(context, talentNodes);
     context.stroke();
 };
@@ -68,7 +69,7 @@ export const drawLinesRegular = () => {
 
     context.drawImage(canvas.offscreenCanvas, 0, 0);
 
-    context.lineWidth = 10;
+    context.lineWidth = LINE_WIDTH;
 
     context.strokeStyle = "#3E3E3E";
     const excluded = [];

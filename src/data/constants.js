@@ -1,5 +1,6 @@
 export const CELL_SIZE = 50.0;
 export const CELL_HALF = CELL_SIZE * 0.5;
+export const LINE_WIDTH = 10;
 
 /** @type {Map<string, string>} */
 export const colorMap = new Map([
@@ -29,10 +30,4 @@ export const controls = {
     hovering: false,
     shouldRedraw: false,
     clickTarget: undefined,
-};
-
-export const viewport = {
-    width: 0,
-    height: 0,
-    max: 0,
 };
