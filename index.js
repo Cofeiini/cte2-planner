@@ -126,7 +126,8 @@ const setUpStatContainer = (stat) => {
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
     container.style.color = "white";
-    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" })))}</p>`;
+    const description = stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }));
+    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(description)}</p>`;
 
     return container;
 };
@@ -673,7 +674,6 @@ const handleLoadingAssets = async () => {
             item["scale_to_lvl"] = isScaled;
             item["is_percent"] = isPercent;
             item["description"] = description;
-            item["description_html"] = generateDescriptionHTML(description);
         }
 
         switch (node.type) {
@@ -815,7 +815,8 @@ const handleTooltip = (talent) => {
         if (stat["scale_to_lvl"]) {
             value = scaleValueToLevel(level, value);
         }
-        formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${stat["description_html"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }))}</p></div>`);
+        const description = stat["description"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }));
+        formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }
     if (talent.type === "major") {
         formatted.push(`<span style="color: red;">Game Changer Talent</span>`);
