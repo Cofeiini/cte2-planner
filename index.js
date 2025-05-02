@@ -157,19 +157,19 @@ const setUpStatIcon = (nodeId) => {
     container.style.width = "78px";
     container.style.height = "78px";
 
-    const border = document.createElement("img");
-    border.src = borderAssets.get("major_on");
-    border.width = 78;
-    border.height = 78;
-    setUpIcon(border);
-    container.appendChild(border);
-
     const indicator = document.createElement("img");
     indicator.src = indicatorAssets.get("yes");
     indicator.width = 40;
     indicator.height = 40;
     setUpIcon(indicator);
     container.appendChild(indicator);
+
+    const border = document.createElement("img");
+    border.src = borderAssets.get("major_on");
+    border.width = 78;
+    border.height = 78;
+    setUpIcon(border);
+    container.appendChild(border);
 
     const icon = document.createElement("img");
     icon.src = iconAssets.get(nodeId);
@@ -923,6 +923,14 @@ const generateTree = () => {
         container.style.left = `${talent.center.x}px`;
         container.style.top = `${talent.center.y}px`;
 
+        const indicator = document.createElement("img");
+        indicator.classList.add("talent-node-indicator");
+        indicator.src = indicatorAssets.get("no");
+        indicator.width = 40;
+        indicator.height = 40;
+        setUpIcon(indicator);
+        container.appendChild(indicator);
+
         const border = document.createElement("img");
         border.classList.add("talent-node-border");
         border.src = borderAssets.get(`${talent.type}_off`);
@@ -950,14 +958,6 @@ const generateTree = () => {
         }
         setUpIcon(border);
         container.appendChild(border);
-
-        const indicator = document.createElement("img");
-        indicator.classList.add("talent-node-indicator");
-        indicator.src = indicatorAssets.get("no");
-        indicator.width = 40;
-        indicator.height = 40;
-        setUpIcon(indicator);
-        container.appendChild(indicator);
 
         const icon = document.createElement("img");
         icon.classList.add("talent-node-icon");
