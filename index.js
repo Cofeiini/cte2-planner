@@ -1005,7 +1005,7 @@ const handleLoading = async () => {
     progress.innerText = "Processing...";
 
     const loading = document.querySelector("#loading");
-    loading.classList.remove("invisible", "hidden");
+    loading.classList.remove("invisible");
 
     let shouldLoadAssets = true;
     try {
@@ -1446,11 +1446,6 @@ window.onload = async () => {
         infoTooltip.node.text.classList.remove("hidden");
         infoTooltip.main.classList.remove("visible");
         infoTooltip.main.classList.add("invisible");
-    };
-
-    const loading = document.querySelector("#loading");
-    loading.ontransitionend = () => {
-        loading.classList.add("hidden");
     };
 
     handleEvents();
