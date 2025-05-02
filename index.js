@@ -731,10 +731,6 @@ const handleSearch = (event) => {
 const handleEvents = () => {
     const container = document.querySelector("#talent-container");
 
-    container.oncontextmenu = () => {
-        return false;
-    };
-
     container.onwheel = (event) => {
         event.preventDefault();
 
@@ -758,7 +754,7 @@ const handleEvents = () => {
             return;
         }
 
-        document.querySelector("#talent-container").style.cursor = "grabbing";
+        container.style.cursor = "grabbing";
         container.addEventListener("mousemove", handleMouseDrag);
     };
 
@@ -770,12 +766,25 @@ const handleEvents = () => {
         }
 
         controls.panning = false;
-        document.querySelector("#talent-container").style.cursor = null;
+        container.style.cursor = null;
         if (controls.hovering) {
             infoTooltip.main.classList.remove("invisible");
         }
 
         container.removeEventListener("mousemove", handleMouseDrag);
+    };
+
+    const viewport = document.querySelector("#viewport-container");
+    const bounds = viewport.getBoundingClientRect();
+
+    viewport.oncontextmenu = () => {
+        return false;
+    };
+
+    viewport.onmousemove = (event) => {
+        const tooltipBounds = infoTooltip.main.getBoundingClientRect();
+        infoTooltip.main.style.left = `${event.clientX + 20}px`;
+        infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
     };
 };
 
@@ -832,9 +841,7 @@ const handleTooltip = (talent) => {
  * @param {HTMLDivElement} container
  */
 const handleTalentEvents = (talent, container) => {
-    const bounds = document.querySelector("#talent-container").getBoundingClientRect();
-
-    container.onmouseenter = (event) => {
+    container.onmouseenter = () => {
         controls.hovering = true;
 
         if (controls.panning) {
@@ -842,10 +849,6 @@ const handleTalentEvents = (talent, container) => {
         }
 
         handleTooltip(talent);
-
-        const tooltipBounds = infoTooltip.main.getBoundingClientRect();
-        infoTooltip.main.style.left = `${event.clientX + 20}px`;
-        infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
 
         clearTimeout(drawingTimer);
         drawingTimer = setTimeout(() => {
@@ -871,12 +874,6 @@ const handleTalentEvents = (talent, container) => {
                 drawLinesRegular();
             }, 80);
         }
-    };
-
-    container.onmousemove = (event) => {
-        const tooltipBounds = infoTooltip.main.getBoundingClientRect();
-        infoTooltip.main.style.left = `${event.clientX + 20}px`;
-        infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
     };
 
     container.onmousedown = (event) => {
@@ -1061,8 +1058,6 @@ const handleLoading = async () => {
 
     if (shouldLoadAssets) {
         await handleLoadingAssets();
-
-        handleEvents();
         generateTree();
     }
 
@@ -1452,15 +1447,13 @@ window.onload = async () => {
         infoTooltip.main.classList.remove("visible");
         infoTooltip.main.classList.add("invisible");
     };
-    searchInfo.onmousemove = (event) => {
-        infoTooltip.main.style.left = `${event.clientX + 20}px`;
-        infoTooltip.main.style.top = `${event.clientY + 20}px`;
-    };
 
     const loading = document.querySelector("#loading");
     loading.ontransitionend = () => {
         loading.classList.add("hidden");
     };
+
+    handleEvents();
 
     await handleLoading();
 };

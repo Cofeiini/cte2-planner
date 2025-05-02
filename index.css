@@ -154,6 +154,14 @@ html, body {
     height: 100%;
 }
 
+#viewport-container {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
 #talent-container {
     background-color: #191821;
     display: flex;
