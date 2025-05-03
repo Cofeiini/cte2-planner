@@ -2,7 +2,15 @@
     --fade-time: 80ms;
 }
 
+@font-face {
+    font-family: "AshenCustom";
+    font-style: normal;
+    font-weight: normal;
+    src: url("./assets/ashen_custom.ttf");
+}
+
 html, body {
+    font-family: AshenCustom, sans-serif;
     height: 100%;
     margin: 0;
     overflow: hidden;
@@ -45,6 +53,7 @@ html, body {
     border-radius: 0.25em;
     color: white;
     display: flex;
+    font-family: AshenCustom, sans-serif;
     font-size: large;
     justify-content: center;
     padding: 0.5em;
@@ -259,7 +268,7 @@ html, body {
     gap: 0.25em;
     height: 100%;
     left: 5%;
-    margin-top: 6px;
+    margin-top: 0.5em;
     position: absolute;
     top: 40%;
     transform: translateY(-50%);
@@ -282,7 +291,8 @@ html, body {
     background-color: black;
     border: none;
     color: white;
-    font-size: 1.25em;
+    font-family: AshenCustom, sans-serif;
+    font-size: 1.0em;
     height: 100%;
     outline: white solid 1px;
     position: relative;
