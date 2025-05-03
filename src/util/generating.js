@@ -162,6 +162,8 @@ export const handleTalentEvents = (talent, container) => {
             return;
         }
 
+        infoTooltip.node.count.classList.remove("hidden");
+        infoTooltip.node.text.classList.remove("hidden");
         handleTooltip(talent);
 
         clearTimeout(drawingTimer);

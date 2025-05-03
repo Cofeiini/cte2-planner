@@ -172,7 +172,7 @@ window.onload = async () => {
         }
         const tooltip = [
             `<p style="margin: 0 0 0.5em 0;">You can search talents or stats by name or description.</p>`,
-            `<p style="margin: 0">The following keywords are recognized:</p>`,
+            `<p style="margin: 0">The following keywords are also recognized:</p>`,
             `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li>${item}</li>`).join("")}</ul>`,
         ];
         infoTooltip.stats.innerHTML = tooltip.join("");
@@ -181,8 +181,6 @@ window.onload = async () => {
         infoTooltip.main.classList.add("visible");
     };
     searchInfo.onmouseleave = () => {
-        infoTooltip.node.count.classList.remove("hidden");
-        infoTooltip.node.text.classList.remove("hidden");
         infoTooltip.main.classList.remove("visible");
         infoTooltip.main.classList.add("invisible");
     };
