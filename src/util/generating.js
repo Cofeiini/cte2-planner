@@ -56,13 +56,13 @@ export const generateDescriptionHTML = (description) => {
     return results.flat().join("");
 };
 
-export const handleCanvas = () => {
+export const generateCanvas = () => {
     viewport.width = talentGrid.at(0).length * CELL_SIZE;
     viewport.height = talentGrid.length * CELL_SIZE;
     viewport.max = Math.max(talentGrid.length, talentGrid.at(0).length);
 
-    talentTree.style.width = `${viewport.width}px`;
     talentTree.style.height = `${viewport.height}px`;
+    talentTree.style.width = `${viewport.width}px`;
 
     let centerNode = {
         center: {
@@ -147,7 +147,7 @@ export const generateTalentGrid = (data) => {
         }
     }
 
-    handleCanvas();
+    generateCanvas();
 };
 
 /**

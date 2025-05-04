@@ -43,7 +43,7 @@ export const handleTooltip = (talent) => {
     for (const stat of talent.stats) {
         let bullet = "";
         if (stat.type.toLowerCase() !== "more") {
-            bullet = `<span style="color: purple;">&#9670;</span>`;
+            bullet = `<span style="color: purple; margin-right: 0.25em;">&#9670;</span>`;
         }
 
         let value = parseFloat(stat["v1"]);

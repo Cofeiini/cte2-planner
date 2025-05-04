@@ -128,22 +128,23 @@ export const handleSidePanel = () => {
         for (const gameChanger of gameChangerList) {
             const itemContainer = document.createElement("div");
             itemContainer.style.display = "flex";
-            itemContainer.style.padding = "0.5em";
             itemContainer.style.gap = "1.0em";
+            itemContainer.style.padding = "0.5em";
 
             itemContainer.appendChild(setUpStatIcon(gameChanger.id));
 
             const statsContainer = document.createElement("div");
             statsContainer.style.display = "flex";
             statsContainer.style.flexDirection = "column";
-            statsContainer.style.width = "100%";
-            statsContainer.style.textAlign = "left";
             statsContainer.style.fontSize = "small";
+            statsContainer.style.textAlign = "left";
+            statsContainer.style.width = "100%";
 
             const title = document.createElement("div");
             title.innerText = gameChanger.name;
             title.style.color = "white";
             title.style.fontWeight = "bold";
+            title.style.marginBottom = "0.5em";
             statsContainer.appendChild(title);
 
             for (const stat of gameChanger.value.values()) {
@@ -186,16 +187,16 @@ const setUpMessageBox = (textList) => {
     const content = document.createElement("div");
     content.style.display = "flex";
     content.style.flexDirection = "column";
-    content.style.height = "100%";
     content.style.gap = "1.0em";
+    content.style.height = "100%";
 
     const message = document.createElement("div");
     message.style.display = "flex";
     message.style.flexDirection = "column";
-    message.style.width = "100%";
-    message.style.height = "100%";
     message.style.fontSize = "larger";
     message.style.gap = "0.5em";
+    message.style.height = "100%";
+    message.style.width = "100%";
     content.appendChild(message);
 
     message.replaceChildren(...textList.map(item => {
@@ -278,10 +279,10 @@ export const handleDataImport = () => {
 
     const footer = document.createElement("div");
     footer.classList.add("hidden");
-    footer.style.display = "flex";
-    footer.style.width = "100%";
-    footer.style.justifyContent = "center";
     footer.style.color = "red";
+    footer.style.display = "flex";
+    footer.style.justifyContent = "center";
+    footer.style.width = "100%";
     footer.fontSize = "larger";
     footer.innerText = "An error occurred while reading the data. Make sure it's valid and correctly formatted.";
     content.appendChild(footer);

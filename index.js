@@ -167,15 +167,14 @@ window.onload = async () => {
         const keywords = new Set();
         for (const talent of talentNodes) {
             for (const key of talent.keywords) {
-                keywords.add(key);
+                keywords.add(key.replaceAll("_", " "));
             }
         }
-        const tooltip = [
+        infoTooltip.stats.innerHTML = [
             `<p style="margin: 0 0 0.5em 0;">You can search talents or stats by name or description.</p>`,
             `<p style="margin: 0">The following keywords are also recognized:</p>`,
-            `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li>${item}</li>`).join("")}</ul>`,
-        ];
-        infoTooltip.stats.innerHTML = tooltip.join("");
+            `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li style="color: darkorange;">${item}</li>`).join("")}</ul>`,
+        ].join("");
 
         infoTooltip.main.classList.remove("invisible");
         infoTooltip.main.classList.add("visible");

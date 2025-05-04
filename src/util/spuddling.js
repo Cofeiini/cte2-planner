@@ -52,10 +52,10 @@ export const setUpStatContainer = (stat) => {
  * @param {HTMLElement} element
  */
 export const setUpIcon = (element) => {
-    element.style.transform = "translate(-50%, -50%)";
     element.style.left = "50%";
-    element.style.top = "50%";
     element.style.position = "absolute";
+    element.style.top = "50%";
+    element.style.transform = "translate(-50%, -50%)";
 };
 
 /**
@@ -65,13 +65,13 @@ export const setUpIcon = (element) => {
 export const setUpStatIcon = (nodeId) => {
     const container = document.createElement("div");
     container.style.display = "flex";
+    container.style.height = "80px";
     container.style.imageRendering = "pixelated";
-    container.style.userSelect = "none";
+    container.style.padding = "0.25em";
     container.style.pointerEvents = "none";
     container.style.position = "relative";
-    container.style.padding = "0.25em";
+    container.style.userSelect = "none";
     container.style.width = "80px";
-    container.style.height = "80px";
 
     const indicator = document.createElement("img");
     indicator.src = indicatorAssets.get("yes");

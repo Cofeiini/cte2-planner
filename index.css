@@ -112,6 +112,8 @@ html, body {
 
 .panel-group-item-container .panel-group-item + .panel-group-item {
     border-top: 1px solid #384848;
+    margin-top: 0.25em;
+    padding-top: 0.25em;
 }
 
 .panel-group-item {
@@ -192,9 +194,9 @@ html, body {
     color: #AAAAAA;
     display: flex;
     flex-direction: column;
-    font-size: 1.5em;
+    font-size: 1.0em;
     left: 0;
-    max-width: 35vw;
+    max-width: 30vw;
     outline: white solid 2px;
     position: absolute;
     top: 0;
@@ -228,6 +230,7 @@ html, body {
 #info-stats {
     display: flex;
     flex-direction: column;
+    gap: 0.25em;
     padding: 0.5em;
 }
 
