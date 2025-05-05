@@ -1,5 +1,5 @@
 import { generatePath } from "../core/algorithm.js";
-import { handleTooltip, infoTooltip } from "../core/tooltip.js";
+import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { CELL_SIZE, colorMap, controls } from "../data/constants.js";
 import {
@@ -166,6 +166,10 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.node.text.classList.remove("hidden");
         handleTooltip(talent);
 
+        infoTooltip.arrow.style.left = `${tooltipOffsets.pointer + Math.floor(tooltipOffsets.arrow * 2.5)}px`;
+        infoTooltip.arrow.style.top = `${tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)}px`;
+        infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(225deg)`;
+
         clearTimeout(drawingTimer);
         drawingTimer = setTimeout(() => {
             controls.shouldRedraw = true;
@@ -177,8 +181,8 @@ export const handleTalentEvents = (talent, container) => {
     container.onmouseleave = () => {
         controls.hovering = false;
 
-        infoTooltip.main.classList.remove("visible");
-        infoTooltip.main.classList.add("invisible");
+        infoTooltip.container.classList.remove("visible");
+        infoTooltip.container.classList.add("invisible");
 
         talentAddPreview.length = 0;
         talentRemovePreview.length = 0;
@@ -190,6 +194,44 @@ export const handleTalentEvents = (talent, container) => {
                 drawLinesRegular();
             }, 80);
         }
+    };
+
+    container.onmousemove = (event) => {
+        const containerBounds = infoTooltip.container.getBoundingClientRect();
+        const contentBounds = infoTooltip.main.getBoundingClientRect();
+
+        const origin = {
+            x: Math.floor(event.clientX - containerBounds.left),
+            y: Math.floor(event.clientY - containerBounds.top),
+        };
+        const center = {
+            x: Math.floor(contentBounds.width * 0.5),
+            y: Math.floor(contentBounds.height * 0.5),
+        };
+        const delta = {
+            x: origin.x - center.x,
+            y: (origin.y + tooltipOffsets.pointer) - center.y,
+        };
+        const radians = Math.atan2(delta.y, delta.x);
+
+        const limits = {
+            x: Math.ceil(Math.cos(radians) * center.x),
+            y: Math.floor(Math.sin(radians) * (contentBounds.height * 2.0)),
+            left: tooltipOffsets.pointer + Math.floor(tooltipOffsets.arrow * 2.5),
+            right: contentBounds.width - (tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)),
+            top: tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5),
+            bottom: contentBounds.height - (tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)),
+        };
+        const arrow = {
+            x: Math.min(Math.max(center.x + limits.x, limits.left), limits.right),
+            y: Math.min(Math.max(center.y + limits.y, limits.top), limits.bottom),
+        };
+        infoTooltip.arrow.style.left = `${arrow.x}px`;
+        infoTooltip.arrow.style.top = `${arrow.y}px`;
+
+        const degrees = radians * (180 / Math.PI);
+        const angle = (((180 + (degrees * 4.0)) % 360) + 360) % 360;
+        infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(${Math.max(Math.min(angle, 225), 135)}deg)`;
     };
 
     container.onmousedown = (event) => {

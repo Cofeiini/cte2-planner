@@ -187,17 +187,19 @@ html, body {
     transform-origin: 0 0;
 }
 
+#tooltip-container {
+    filter: drop-shadow(-1px -1px white) drop-shadow(1px -1px white) drop-shadow(1px 1px white) drop-shadow(-1px 1px white);
+}
+
 #info-tooltip {
     background-color: #101010;
-    border-radius: 0 0.5em 0.5em 0.5em;
-    box-shadow: black 0 0 1.0em 0.25em;
+    border-radius: 0.5em;
     color: #AAAAAA;
     display: flex;
     flex-direction: column;
     font-size: 1.0em;
     left: 0;
     max-width: 30vw;
-    outline: white solid 2px;
     position: absolute;
     top: 0;
 }
@@ -232,6 +234,20 @@ html, body {
     flex-direction: column;
     gap: 0.25em;
     padding: 0.5em;
+}
+
+#tooltip-arrow {
+    border-bottom: 12px solid transparent;
+    border-left: 12px solid #101010;
+    border-top: 12px solid transparent;
+    height: 0;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: -100% 50%;
+    width: 0;
 }
 
 #top-bar {

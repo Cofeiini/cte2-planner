@@ -5,13 +5,21 @@ import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorith
 import { sidePanel } from "./side-panel.js";
 
 export const infoTooltip = {
+    container: undefined,
     main: undefined,
+    arrow: undefined,
     name: undefined,
     node: {
         count: undefined,
         text: undefined,
     },
     stats: undefined,
+};
+
+export const tooltipOffsets = {
+    pointer: 20,
+    arrow: 6,
+    edge: 2,
 };
 
 /**
@@ -58,6 +66,6 @@ export const handleTooltip = (talent) => {
     }
     infoTooltip.stats.innerHTML = formatted.join("");
 
-    infoTooltip.main.classList.remove("invisible");
-    infoTooltip.main.classList.add("visible");
+    infoTooltip.container.classList.remove("invisible");
+    infoTooltip.container.classList.add("visible");
 };

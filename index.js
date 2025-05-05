@@ -1,5 +1,5 @@
 import { handleDataExport, handleDataImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
-import { infoTooltip } from "./src/core/tooltip.js";
+import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
 import { controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
 import { talentNodes } from "./src/type/talent-node.js";
@@ -96,7 +96,7 @@ const handleEvents = () => {
         controls.panning = false;
         container.style.cursor = null;
         if (controls.hovering) {
-            infoTooltip.main.classList.remove("invisible");
+            infoTooltip.container.classList.remove("invisible");
         }
 
         container.removeEventListener("mousemove", handleMouseDrag);
@@ -110,9 +110,10 @@ const handleEvents = () => {
     };
 
     viewport.onmousemove = (event) => {
-        const tooltipBounds = infoTooltip.main.getBoundingClientRect();
-        infoTooltip.main.style.left = `${event.clientX + 20}px`;
-        infoTooltip.main.style.top = `${Math.min(event.clientY + 20, bounds.height - tooltipBounds.height)}px`;
+        const contentBounds = infoTooltip.main.getBoundingClientRect();
+
+        infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
+        infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.height - contentBounds.height - tooltipOffsets.edge)}px`;
     };
 };
 
@@ -120,7 +121,9 @@ window.onload = async () => {
     updateLineCanvas(document.querySelector("#line-canvas"));
     updateTalentTree(document.querySelector("#talent-tree"));
 
+    infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");
+    infoTooltip.arrow = document.querySelector("#tooltip-arrow");
     infoTooltip.name = document.querySelector("#info-name");
     infoTooltip.node.count = document.querySelector("#info-node-count");
     infoTooltip.node.text = document.querySelector("#info-node-text");
@@ -176,12 +179,12 @@ window.onload = async () => {
             `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li style="color: darkorange;">${item}</li>`).join("")}</ul>`,
         ].join("");
 
-        infoTooltip.main.classList.remove("invisible");
-        infoTooltip.main.classList.add("visible");
+        infoTooltip.container.classList.remove("invisible");
+        infoTooltip.container.classList.add("visible");
     };
     searchInfo.onmouseleave = () => {
-        infoTooltip.main.classList.remove("visible");
-        infoTooltip.main.classList.add("invisible");
+        infoTooltip.container.classList.remove("visible");
+        infoTooltip.container.classList.add("invisible");
     };
 
     handleEvents();

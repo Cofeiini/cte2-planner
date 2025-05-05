@@ -26,16 +26,19 @@
                 <div id="talent-search-info">?</div>
             </div>
         </div>
-        <div class="invisible" id="info-tooltip">
-            <div style="display: flex; padding: 0.5em; gap: 0.5em;">
-                <div id="info-name">Talent</div>
-                <div id="info-node-container">
-                    <div id="info-node-count">0</div>
-                    <div id="info-node-text">Node</div>
+        <div id="tooltip-container" class="invisible" style="display: flex; position: absolute; width: 30vw;">
+            <div id="tooltip-arrow"></div>
+            <div id="info-tooltip">
+                <div style="display: flex; padding: 0.5em; gap: 0.5em;">
+                    <div id="info-name">Talent</div>
+                    <div id="info-node-container">
+                        <div id="info-node-count">0</div>
+                        <div id="info-node-text">Node</div>
+                    </div>
                 </div>
+                <div class="horizontal-line" style="background-color: white;"></div>
+                <div id="info-stats"></div>
             </div>
-            <div class="horizontal-line" style="background-color: white;"></div>
-            <div id="info-stats"></div>
         </div>
     </div>
     <div id="side-panel">
