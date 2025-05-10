@@ -1,7 +1,7 @@
 import { generatePath } from "../core/algorithm.js";
 import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
-import { CELL_SIZE, colorMap, controls } from "../data/constants.js";
+import { CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
 import {
     exclusiveNodeValues,
     startingNode,
@@ -21,7 +21,6 @@ import { setUpIcon } from "./spuddling.js";
 export const viewport = {
     width: 0,
     height: 0,
-    max: 0,
 };
 
 export let talentTree = undefined;
@@ -59,7 +58,6 @@ export const generateDescriptionHTML = (description) => {
 export const generateCanvas = () => {
     viewport.width = talentGrid.at(0).length * CELL_SIZE;
     viewport.height = talentGrid.length * CELL_SIZE;
-    viewport.max = Math.max(talentGrid.length, talentGrid.at(0).length);
 
     talentTree.style.height = `${viewport.height}px`;
     talentTree.style.width = `${viewport.width}px`;
@@ -210,7 +208,7 @@ export const handleTalentEvents = (talent, container) => {
         };
         const delta = {
             x: origin.x - center.x,
-            y: (origin.y + tooltipOffsets.pointer) - center.y,
+            y: origin.y - center.y,
         };
         const radians = Math.atan2(delta.y, delta.x);
 
@@ -229,9 +227,13 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.arrow.style.left = `${arrow.x}px`;
         infoTooltip.arrow.style.top = `${arrow.y}px`;
 
-        const degrees = radians * (180 / Math.PI);
-        const angle = (((180 + (degrees * 4.0)) % 360) + 360) % 360;
-        infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(${Math.max(Math.min(angle, 225), 135)}deg)`;
+        const angle = ((radians * RAD_TO_DEG) + 360) % 360;
+        const minAngle = ((Math.atan2(contentBounds.height - center.y, delta.x) * RAD_TO_DEG) + 360) % 360;
+        const maxAngle = ((Math.atan2(-center.y, delta.x) * RAD_TO_DEG) + 360) % 360;
+
+        const mapped = 135 + (((angle - minAngle) / (maxAngle - minAngle)) * (225 - 135));
+
+        infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(${Math.max(Math.min(mapped, 225), 135)}deg)`;
     };
 
     container.onmousedown = (event) => {

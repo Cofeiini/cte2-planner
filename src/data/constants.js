@@ -1,6 +1,7 @@
 export const CELL_SIZE = 50.0;
 export const CELL_HALF = CELL_SIZE * 0.5;
 export const LINE_WIDTH = 10;
+export const RAD_TO_DEG = 180 / Math.PI;
 
 /** @type {Map<string, string>} */
 export const colorMap = new Map([

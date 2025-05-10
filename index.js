@@ -44,12 +44,12 @@ const handleSearch = (event) => {
         node.visual.classList.add("filtered");
         node.visual.classList.remove("highlighted");
 
-        const isNameMatch = node.name.toLowerCase().includes(filter) || node.name.toLowerCase().includes(altFilter);
-        const isIdMatch = node.identifier.talent.includes(filter) || node.identifier.talent.includes(altFilter);
-        const isKeywordMatch = node.keywords.includes(filter) || node.keywords.includes(altFilter);
-        const isStatMatch = node.stats.some(item => item.stat.includes(filter) || item.description.toLowerCase().includes(filter) || item.stat.includes(altFilter));
+        let isMatch = node.name.toLowerCase().includes(filter) || node.name.toLowerCase().includes(altFilter);
+        isMatch = isMatch || node.identifier.talent.includes(filter) || node.identifier.talent.includes(altFilter);
+        isMatch = isMatch || node.keywords.includes(filter) || node.keywords.includes(altFilter);
+        isMatch = isMatch || node.stats.some(item => item.stat.includes(filter) || item.description.toLowerCase().includes(filter) || item.stat.includes(altFilter));
 
-        if (isNameMatch || isIdMatch || isKeywordMatch || isStatMatch) {
+        if (isMatch) {
             node.visual.classList.remove("filtered");
             node.visual.classList.add("highlighted");
         }
