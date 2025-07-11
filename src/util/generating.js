@@ -5,6 +5,7 @@ import { CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js"
 import {
     ascendancyGrid,
     ascendancyNodes,
+    ascendancySelections,
     exclusiveNodeValues,
     startingNode,
     talentAddLeftovers,
@@ -16,6 +17,8 @@ import {
     talentRemovePreview,
     talentSelections,
     toggleNode,
+    TOTAL_ASCENDANCY_POINTS,
+    TOTAL_POINTS,
     updateTargetTree,
 } from "../type/talent-node.js";
 import { drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
@@ -556,12 +559,19 @@ const generateTalentNode = (talent) => {
     handleTalentEvents(talent, container);
 
     talent.update = () => {
+        let totalPoints = TOTAL_POINTS;
+        let selections = talentSelections;
+        if (talent.parentTree !== "main") {
+            totalPoints = TOTAL_ASCENDANCY_POINTS;
+            selections = ascendancySelections;
+        }
+
         container.classList.remove("active");
 
         let isExcluded = false;
         if (!talent.selected) {
             for (const values of exclusiveNodeValues.values()) {
-                const existingSelection = talentSelections.some(item => values.includes(item.identifier.talent));
+                const existingSelection = selections.some(item => values.includes(item.identifier.talent));
                 if (existingSelection && values.includes(talent.identifier.talent)) {
                     isExcluded = true;
                     break;
@@ -573,7 +583,7 @@ const generateTalentNode = (talent) => {
         if (talent.selected) {
             assetId = "yes";
             container.classList.add("active");
-        } else if (!isExcluded && talent.neighbors.some(item => item.selected)) {
+        } else if (!isExcluded && talent.neighbors.some(item => item.selected) && (selections.length < totalPoints)) {
             assetId = "can";
         }
 
