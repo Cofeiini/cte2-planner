@@ -1,23 +1,39 @@
 import { scaleValueToLevel } from "../core/algorithm.js";
-import { presetInfo, releaseInfo, sidePanel, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
+import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
-import { startingNode, talentSelections } from "../type/talent-node.js";
-import { generateDescriptionHTML, talentTree } from "./generating.js";
+import { ascendancySelections, ascendancyStartNodes, startingNode, talentSelections } from "../type/talent-node.js";
+import { ascendancyContainer, generateDescriptionHTML, talentTree, viewport } from "./generating.js";
 
+/** @type {HTMLCanvasElement} */
 let lineCanvas = undefined;
 export const updateLineCanvas = (element) => {
     lineCanvas = element;
 };
 
-export const handleViewport = () => {
-    lineCanvas.style.left = `${controls.x}px`;
-    lineCanvas.style.top = `${controls.y}px`;
-    lineCanvas.style.transform = `scale(${controls.zoom})`;
+/** @type {HTMLDivElement} */
+let ascendancyButton = undefined;
+export const updateAscendancyButton = (element) => {
+    ascendancyButton = element;
+};
 
-    talentTree.style.left = `${controls.x}px`;
-    talentTree.style.top = `${controls.y}px`;
-    talentTree.style.transform = `scale(${controls.zoom})`;
+export const handleViewport = () => {
+    [
+        lineCanvas,
+        talentTree,
+    ].forEach(item => {
+        item.style.transform = `scale(${controls.zoom})`;
+        item.style.left = `${controls.x}px`;
+        item.style.top = `${controls.y}px`;
+    });
+
+    ascendancyButton.style.transform = `scale(calc(${controls.zoom} * ${parseFloat(ascendancyButton.getAttribute("base-scale"))}))`;
+    ascendancyButton.style.left = `${controls.x + (viewport.center.x * controls.zoom)}px`;
+    ascendancyButton.style.top = `${controls.y + (viewport.center.y * controls.zoom)}px`;
+
+    ascendancyContainer.style.transform = `scale(${controls.zoom})`;
+    ascendancyContainer.style.left = `${controls.x + (viewport.center.x * controls.zoom)}px`;
+    ascendancyContainer.style.top = `${controls.y + ((viewport.center.y - ascendancyContainer.offsetHeight) * controls.zoom)}px`;
 };
 
 export const resetMessageBox = () => {
@@ -60,9 +76,10 @@ export const setUpIcon = (element) => {
 
 /**
  * @param {string} nodeId
+ * @param {string} type
  * @returns {HTMLDivElement}
  */
-export const setUpStatIcon = (nodeId) => {
+export const setUpStatIcon = (nodeId, type = "major") => {
     const container = document.createElement("div");
     container.style.display = "flex";
     container.style.height = "80px";
@@ -81,9 +98,13 @@ export const setUpStatIcon = (nodeId) => {
     container.appendChild(indicator);
 
     const border = document.createElement("img");
-    border.src = borderAssets.get("major_on");
+    border.src = borderAssets.get(`${type}_on`);
     border.width = 78;
     border.height = 78;
+    if (type === "asc") {
+        border.width = 68;
+        border.height = 68;
+    }
     setUpIcon(border);
     container.appendChild(border);
 
@@ -109,11 +130,17 @@ export const setUpSeparator = () => {
  * @param {Object} json
  */
 export const setUpURL = (json = undefined) => {
+    const ascendancyStart = ascendancyStartNodes.get(ascendancyInfo);
+
     updatePresetInfo(json || {
         version: releaseInfo.version,
         level: sidePanel.character.level.value,
         start: startingNode?.identifier.number,
         talents: talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort(),
+        ascendancy: {
+            selection: ascendancyInfo,
+            talents: ascendancySelections.filter(item => item.identifier.number !== ascendancyStart?.identifier.number).map(item => item.identifier.number).sort(),
+        },
     });
 
     const url = new URL(location.href);
@@ -122,8 +149,10 @@ export const setUpURL = (json = undefined) => {
 };
 
 export const collectStatInformation = () => {
+    const allNodes = [...talentSelections, ...ascendancySelections];
+
     totalGameChangers.clear();
-    const majorSelections = talentSelections.filter(item => item.type === "major");
+    const majorSelections = allNodes.filter(item => item.type === "major");
     for (const talent of majorSelections) {
         const gameChangerStats = new Map();
         for (const stat of talent.stats) {
@@ -150,7 +179,7 @@ export const collectStatInformation = () => {
     }
 
     totalStats.clear();
-    const regularSelections = talentSelections.filter(item => item.type !== "major");
+    const regularSelections = allNodes.filter(item => item.type !== "major");
     for (const talent of regularSelections) {
         for (const stat of talent.stats) {
             const key = stat["stat"];

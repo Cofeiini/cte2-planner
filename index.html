@@ -15,6 +15,18 @@
         <div id="talent-container">
             <canvas id="line-canvas" style="position: absolute; transform-origin: 0 0;"></canvas>
             <div id="talent-tree"></div>
+            <div class="hidden" id="ascendancy-container">
+                <canvas id="ascendancy-canvas" style="position: absolute; transform-origin: 0 0; bottom: 0; left: 50%; transform: translateX(-50%)"></canvas>
+                <div id="ascendancy-tree-container"></div>
+                <div id="ascendancy-bar">
+                    <div id="ascendancy-points-container">Points:
+                        <div id="ascendancy-points"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="talent-node" id="ascendancy-button">
+            </div>
+            <div class="hidden" id="ascendancy-menu"></div>
         </div>
         <div id="top-bar">
             <div id="points-container">Points:
@@ -48,6 +60,10 @@
             <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
                 <label for="version-select" style="font-size: small; color: white;">Tree Version</label>
                 <select id="version-select"></select>
+            </div>
+            <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
+                <label for="ascendancy-select" style="font-size: small; color: white;">Ascendancy</label>
+                <select id="ascendancy-select"></select>
             </div>
         </div>
         <div class="panel-group" style="gap: 0.5em;">

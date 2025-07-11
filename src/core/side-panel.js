@@ -1,7 +1,11 @@
+import { iconAssets } from "../data/assets.js";
+import { controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
-import { talentSelections } from "../type/talent-node.js";
+import { ascendancySelections, talentSelections, toggleNode } from "../type/talent-node.js";
+import { drawLinesAscendancy } from "../util/drawing.js";
+import { ascendancyContainer, ascendancyTreeContainer } from "../util/generating.js";
 import { handleLoading } from "../util/loading.js";
-import { resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
+import { handleViewport, resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
 
 export const sidePanel = {
     allocated: {
@@ -34,6 +38,12 @@ export const updatePresetInfo = (json) => {
     presetInfo = json;
 };
 
+/** @type {string} */
+export let ascendancyInfo = "none";
+export const updateAscendancyInfo = (ascendancy) => {
+    ascendancyInfo = ascendancy;
+};
+
 /**
  * @param {HTMLSelectElement} select
  */
@@ -55,6 +65,29 @@ export const handleVersionOptions = (select) => {
         option.innerText = `${option.value} (outdated)`;
         option.style.color = "red";
     }
+};
+
+export const handleAscendancyOptions = () => {
+    updateAscendancyInfo(controls.ascendancy);
+
+    ascendancyContainer.classList.add("hidden");
+    const icon = document.querySelector("#ascendancy-button-icon");
+    icon.classList.add("hidden");
+
+    if (controls.ascendancy !== "none") {
+        const canvas = document.querySelector("#ascendancy-canvas").offscreenCanvasMap.get(controls.ascendancy);
+        ascendancyTreeContainer.style.width = `${canvas.width}px`;
+        ascendancyTreeContainer.style.height = `${canvas.height}px`;
+
+        icon.src = iconAssets.get(controls.ascendancy);
+        icon.classList.remove("hidden");
+        document.querySelector(`#${controls.ascendancy}_tree`).classList.remove("hidden");
+        drawLinesAscendancy();
+
+        ascendancyContainer.classList.remove("hidden");
+    }
+
+    document.querySelector("#ascendancy-button").refresh();
 };
 
 export const handleSidePanel = () => {
@@ -94,8 +127,7 @@ export const handleSidePanel = () => {
     }
 
     const statContainer = document.createElement("div");
-    statContainer.classList.add("panel-group-item-container");
-    statContainer.classList.add("hidden");
+    statContainer.classList.add("panel-group-item-container", "hidden");
     const totalStatValues = totalStatList.filter(item => item["is_percent"]);
     if (totalStatValues.length > 0) {
         statContainer.classList.remove("hidden");
@@ -113,9 +145,56 @@ export const handleSidePanel = () => {
         statContainer.replaceChildren(statsTitle, ...statItems);
     }
 
+    const ascendancyStatContainer = document.createElement("div");
+    ascendancyStatContainer.classList.add("panel-group-item-container", "hidden");
+    const ascendancyTalent = ascendancySelections.find(item => item.type === "asc");
+    if (ascendancyTalent) {
+        ascendancyStatContainer.classList.remove("hidden");
+
+        const ascendancyStats = new Map();
+        for (const stat of ascendancyTalent.stats) {
+            const key = stat["stat"];
+            const type = stat["type"].toLowerCase();
+
+            const valueList = [parseFloat(stat["v1"])];
+            if (ascendancyStats.has(key)) {
+                valueList.push(...totalStats.get(key).values);
+            }
+            ascendancyStats.set(key, {
+                type: type,
+                values: valueList,
+                description: stat["description"],
+                is_percent: stat["is_percent"],
+                scale_to_lvl: stat["scale_to_lvl"],
+            });
+        }
+
+        const mainTitle = document.createElement("div");
+        mainTitle.classList.add("panel-group-title-small");
+        mainTitle.innerText = "Ascendancy";
+
+        const itemContainer = document.createElement("div");
+        itemContainer.classList.add("panel-stats-group");
+        itemContainer.append(setUpStatIcon(ascendancyTalent.identifier.talent, "asc"));
+
+        const statsContainer = document.createElement("div");
+        statsContainer.classList.add("panel-stats-container-group");
+
+        const title = document.createElement("div");
+        title.classList.add("panel-stats-group-title");
+        title.innerText = ascendancyTalent.name;
+        statsContainer.append(title);
+
+        for (const stat of ascendancyStats.values()) {
+            statsContainer.append(setUpStatContainer(stat));
+        }
+        itemContainer.append(statsContainer);
+
+        ascendancyStatContainer.replaceChildren(mainTitle, itemContainer);
+    }
+
     const gameChangerContainer = document.createElement("div");
-    gameChangerContainer.classList.add("panel-group-item-container");
-    gameChangerContainer.classList.add("hidden");
+    gameChangerContainer.classList.add("panel-group-item-container", "hidden");
     if (totalGameChangers.size > 0) {
         gameChangerContainer.classList.remove("hidden");
 
@@ -127,24 +206,15 @@ export const handleSidePanel = () => {
         const gameChangerList = [...totalGameChangers.values()].sort((a, b) => a.name.localeCompare(b.name));
         for (const gameChanger of gameChangerList) {
             const itemContainer = document.createElement("div");
-            itemContainer.style.display = "flex";
-            itemContainer.style.gap = "1.0em";
-            itemContainer.style.padding = "0.5em";
-
+            itemContainer.classList.add("panel-stats-group");
             itemContainer.appendChild(setUpStatIcon(gameChanger.id));
 
             const statsContainer = document.createElement("div");
-            statsContainer.style.display = "flex";
-            statsContainer.style.flexDirection = "column";
-            statsContainer.style.fontSize = "small";
-            statsContainer.style.textAlign = "left";
-            statsContainer.style.width = "100%";
+            statsContainer.classList.add("panel-stats-container-group");
 
             const title = document.createElement("div");
+            title.classList.add("panel-stats-group-title");
             title.innerText = gameChanger.name;
-            title.style.color = "white";
-            title.style.fontWeight = "bold";
-            title.style.marginBottom = "0.5em";
             statsContainer.appendChild(title);
 
             for (const stat of gameChanger.value.values()) {
@@ -158,7 +228,7 @@ export const handleSidePanel = () => {
         gameChangerContainer.replaceChildren(mainTitle, ...gameChangerItems);
     }
 
-    sidePanel.allocated.statList.replaceChildren(attributeContainer, statContainer, gameChangerContainer);
+    sidePanel.allocated.statList.replaceChildren(attributeContainer, statContainer, ascendancyStatContainer, gameChangerContainer);
 };
 
 /**
@@ -270,6 +340,27 @@ export const handleVersionChange = async (event) => {
     handleVersionOptions(event.target);
 
     await handleLoading();
+};
+
+/**
+ * @param {InputEvent} event
+ */
+export const handleAscendancyChange = (event) => {
+    if (controls.ascendancy && controls.ascendancy !== "none") {
+        if (controls.ascendancy !== event.target.value) {
+            const selectedNode = ascendancySelections.find(item => item.identifier.talent === controls.ascendancy);
+            if (selectedNode) {
+                toggleNode(selectedNode);
+            }
+        }
+
+        document.querySelector(`#${controls.ascendancy}_tree`).classList.add("hidden");
+    }
+    controls.ascendancy = event.target.value;
+
+    handleAscendancyOptions();
+    setUpURL();
+    handleViewport();
 };
 
 export const handleDataImport = () => {

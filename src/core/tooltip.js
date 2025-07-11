@@ -1,5 +1,5 @@
 import { colorMap } from "../data/constants.js";
-import { startingNode, talentAddPreview, talentRemovePreview, talentSelections } from "../type/talent-node.js";
+import { ascendancySelections, ascendancyStartNodes, startingNode, talentAddPreview, talentRemovePreview, talentSelections } from "../type/talent-node.js";
 import { generateDescriptionHTML } from "../util/generating.js";
 import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorithm.js";
 import { sidePanel } from "./side-panel.js";
@@ -28,9 +28,16 @@ export const tooltipOffsets = {
 export const handleTooltip = (talent) => {
     let nodeTotal = 0;
     if (talent.selected) {
-        const previewNeighbors = talentSelections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
+        let start = startingNode;
+        let selections = talentSelections;
+        if (talent.parentTree !== "main") {
+            start = ascendancyStartNodes.get(talent.parentTree);
+            selections = ascendancySelections;
+        }
+
+        const previewNeighbors = selections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
         talentRemovePreview.length = 0;
-        talentRemovePreview.push(...findDeadBranch(startingNode, talent), ...previewNeighbors);
+        talentRemovePreview.push(...findDeadBranch(start, talent), ...previewNeighbors);
         nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
     } else {
         talentAddPreview.length = 0;

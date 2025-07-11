@@ -1,5 +1,9 @@
 import { BinaryHeap } from "../type/binary-heap.js";
 import {
+    ascendancyGrid,
+    ascendancyNodes,
+    ascendancySelections,
+    ascendancyStartNodes,
     exclusiveNodeValues,
     startingNode,
     talentAddLeftovers,
@@ -37,6 +41,11 @@ export const scaleValueToLevel = (level, value) => {
  * @param {Set<TalentNode>} collected
  */
 export const searchNodes = (node, paths, collected) => {
+    let selections = talentSelections;
+    if (node.parentTree !== "main") {
+        selections = ascendancySelections;
+    }
+
     const visited = new Set();
 
     const search = (current) => {
@@ -48,7 +57,7 @@ export const searchNodes = (node, paths, collected) => {
                 continue;
             }
 
-            if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
+            if (!selections.some(item => item.identifier.number === neighbor.identifier.number)) {
                 continue;
             }
 
@@ -70,6 +79,11 @@ export const searchNodes = (node, paths, collected) => {
  * @param {TalentNode[][]} allPaths
  */
 export const findPaths = (start, end, currentPath, allPaths) => {
+    let selections = talentSelections;
+    if (start.parentTree !== "main") {
+        selections = ascendancySelections;
+    }
+
     const node = currentPath.at(-1);
     if (node.identifier.number === end.identifier.number) {
         allPaths.push(currentPath);
@@ -81,7 +95,7 @@ export const findPaths = (start, end, currentPath, allPaths) => {
             continue;
         }
 
-        if (!talentSelections.some(item => item.identifier.number === neighbor.identifier.number)) {
+        if (!selections.some(item => item.identifier.number === neighbor.identifier.number)) {
             continue;
         }
 
@@ -140,7 +154,12 @@ export const findDistance = (start, end) => {
 };
 
 export const resetNodeHeuristics = () => {
-    for (const talent of talentNodes) {
+    const allNodes = [...talentNodes];
+    for (const nodes of ascendancyNodes.values()) {
+        allNodes.push(...nodes);
+    }
+
+    for (const talent of allNodes) {
         talent.travel.source = undefined;
         talent.travel.closed = false;
         talent.travel.cost.total = Number.MAX_VALUE;
@@ -212,20 +231,29 @@ export const algorithm = (start, end) => {
  * @returns {TalentNode[]}
  */
 export const findShortestRoute = (target) => {
+    let origin = startingNode;
+    let selections = talentSelections;
+    let exclude = "start";
+    if (target.parentTree !== "main") {
+        origin = ascendancyStartNodes.get(target.parentTree);
+        selections = ascendancySelections;
+        exclude = "ascendancy";
+    }
+
     /** @type {string[]} */
     const excluded = [];
     for (const values of exclusiveNodeValues.values()) {
-        if (talentSelections.some(item => values.some(element => item.identifier.talent === element))) {
+        if (selections.some(item => values.some(element => item.identifier.talent === element))) {
             excluded.push(...values);
         }
     }
 
-    if (!startingNode) {
-        excluded.push(...exclusiveNodeValues.get("start"));
+    if (!origin) {
+        excluded.push(...exclusiveNodeValues.get(exclude));
     }
 
     if (excluded.some(item => item === target.identifier.talent)) {
-        if (startingNode) {
+        if (origin) {
             return [];
         }
 
@@ -233,7 +261,7 @@ export const findShortestRoute = (target) => {
     }
 
     const routeList = [];
-    for (const start of talentSelections) {
+    for (const start of selections) {
         if (start.identifier.number === target.identifier.number) {
             continue;
         }
@@ -257,17 +285,22 @@ export const findShortestRoute = (target) => {
  * @param {TalentNode} targetNode
  */
 export const findRoutes = (targetNode) => {
+    let selections = talentSelections;
+    if (targetNode.parentTree !== "main") {
+        selections = ascendancySelections;
+    }
+
     /** @type {TalentNode[]} */
     let shortest = findShortestRoute(targetNode);
 
     resetNodeHeuristics();
 
     const allNodes = new Set();
-    for (const node of talentSelections) {
+    for (const node of selections) {
         allNodes.add(node);
     }
 
-    const possiblePoints = talentSelections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
+    const possiblePoints = selections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
     if (possiblePoints > TOTAL_POINTS) {
         if ((possiblePoints - TOTAL_POINTS) > shortest.length) {
             console.error("Actually too many points!");
@@ -284,8 +317,8 @@ export const findRoutes = (targetNode) => {
         allNodes.add(node);
     }
 
-    talentSelections.length = 0;
-    talentSelections.push(...Array.from(allNodes));
+    selections.length = 0;
+    selections.push(...Array.from(allNodes));
 };
 
 /**
@@ -320,6 +353,62 @@ export const generatePath = (current, route) => {
 
             if (node.identifier.talent === current.identifier.talent) {
                 generatePath(node, [...route, node]).forEach(item => path.push({
+                    node: item,
+                    steps: route.length + 1,
+                }));
+            }
+        }
+    }
+
+    if (path.length === 0) {
+        return [];
+    }
+
+    let steps = Number.MAX_VALUE;
+    for (const item of path) {
+        if (item.steps < steps) {
+            steps = item.steps;
+        }
+    }
+
+    return path.filter(item => item.steps <= steps).map(item => item.node);
+};
+
+/**
+ * @param {string} ascendancy
+ * @param {TalentNode} current
+ * @param {TalentNode[]} route
+ * @returns {talentNodes[]}
+ */
+export const generateAscendancyPath = (ascendancy, current, route) => {
+    const grid = ascendancyGrid.get(ascendancy);
+
+    const path = [];
+    for (let y = -1; y <= 1; ++y) {
+        for (let x = -1; x <= 1; ++x) {
+            if (x === 0 && y === 0) {
+                continue;
+            }
+
+            const node = grid.at(current.y + y)?.at(current.x + x);
+            if (!node) {
+                continue;
+            }
+
+            if (route.some(item => item.identifier.number === node.identifier.number)) {
+                continue;
+            }
+
+            if (node.selectable) {
+                path.push({
+                    node: node,
+                    steps: route.length,
+                });
+                continue;
+            }
+
+            if (node.identifier.talent === current.identifier.talent) {
+                generateAscendancyPath(ascendancy, node, [...route, node]).forEach(item => path.push({
                     node: item,
                     steps: route.length + 1,
                 }));

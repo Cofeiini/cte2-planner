@@ -21,6 +21,12 @@ export const colorMap = new Map([
     ["d", "#FF55FF"],
     ["e", "#FFFF55"],
     ["f", "#FFFFFF"],
+    ["background", "#191821"],
+    ["line", "#222222"],
+    ["line_connect", "#3E3E3E"],
+    ["line_select", "#1A5A1A"],
+    ["line_remove", "#9F1F1F"],
+    ["line_add", "#1F1F9F"],
 ]);
 
 export const controls = {
@@ -31,4 +37,5 @@ export const controls = {
     hovering: false,
     shouldRedraw: false,
     clickTarget: undefined,
+    ascendancy: "none",
 };

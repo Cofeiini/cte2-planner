@@ -138,6 +138,26 @@ html, body {
     white-space: nowrap;
 }
 
+.panel-stats-group {
+    display: flex;
+    gap: 1.0em;
+    padding: 0.5em;
+}
+
+.panel-stats-group-title {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+.panel-stats-container-group {
+    display: flex;
+    flex-direction: column;
+    font-size: small;
+    text-align: left;
+    width: 100%;
+}
+
 .talent-node {
     image-rendering: pixelated;
     position: absolute;
@@ -154,7 +174,7 @@ html, body {
     opacity: 1.0;
 }
 
-.talent-node:hover {
+.talent-node:not(.panning):hover {
     cursor: pointer;
     transform: scale(1.5);
 }
@@ -185,6 +205,51 @@ html, body {
     display: flex;
     position: absolute;
     transform-origin: 0 0;
+}
+
+#ascendancy-container {
+    background-color: #191821;
+    box-shadow: black 0 0 1.0em 0.5em;
+    display: flex;
+    outline: white solid 3px;
+    position: absolute;
+    transform-origin: 0 0;
+}
+
+#ascendancy-tree-container {
+    bottom: 0;
+    display: flex;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    transform-origin: 0 0
+}
+
+.ascendancy-tree {
+    height: 100%;
+    width: 100%;
+}
+
+#ascendancy-menu {
+    background-color: #191821;
+    box-shadow: black 0 0 1.0em 0.5em;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 0.5em;
+    position: absolute;
+    z-index: 1;
+}
+
+#ascendancy-menu div {
+    display: flex;
+    padding: 0.25em;
+}
+
+#ascendancy-menu div:hover {
+    background-color: #182828;
+    cursor: pointer;
 }
 
 #tooltip-container {
@@ -250,7 +315,7 @@ html, body {
     width: 0;
 }
 
-#top-bar {
+#top-bar, #ascendancy-bar {
     aspect-ratio: 256 / 22;
     background-image: url('assets/textures/gui/bar.png');
     background-position: center top;
@@ -263,8 +328,13 @@ html, body {
     left: 50%;
     padding: 0 1em;
     position: absolute;
+    top: 0;
     transform: translateX(-50%);
     user-select: none;
+}
+
+#ascendancy-bar {
+    box-shadow: black 0 0.25em 1.0em 0;
 }
 
 #side-panel {
@@ -291,6 +361,18 @@ html, body {
     position: absolute;
     top: 40%;
     transform: translateY(-50%);
+}
+
+#ascendancy-points-container {
+    color: yellow;
+    display: flex;
+    font-size: 1.25em;
+    gap: 0.25em;
+    left: 50%;
+    margin-top: 0.5em;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
 }
 
 #talent-search-container {
@@ -331,7 +413,7 @@ html, body {
     position: relative;
 }
 
-#version-select {
+#version-select, #ascendancy-select {
     background-color: inherit;
     border: none;
     border-bottom: 1px solid white;
@@ -339,7 +421,7 @@ html, body {
     font-size: large;
 }
 
-#version-select option {
+#version-select option, #ascendancy-select option {
     background-color: #182828;
 }
 

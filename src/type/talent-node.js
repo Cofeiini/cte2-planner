@@ -6,11 +6,20 @@ import { collectStatInformation, setUpURL } from "../util/spuddling.js";
 /** @type {TalentNode[][]} */
 export const talentGrid = [];
 
+/** @type {Map<string, TalentNode[][]>} */
+export const ascendancyGrid = new Map();
+
 /** @type {TalentNode[]} */
 export const talentNodes = [];
 
+/** @type {Map<string, TalentNode[]>} */
+export const ascendancyNodes = new Map([["none", []]]);
+
 /** @type {TalentNode[]} */
 export const talentSelections = [];
+
+/** @type {TalentNode[]} */
+export const ascendancySelections = [];
 
 /** @type {TalentNode[]} */
 export const talentAddPreview = [];
@@ -27,17 +36,29 @@ export const talentExclusions = new Map();
 /** @type {Map<string, string[]>} */
 export const exclusiveNodeValues = new Map();
 
-/** @type {TalentNode|undefined} */
+/** @type {TalentNode} */
 export let startingNode = undefined;
-
 export const updateStartingNode = (node) => {
     startingNode = node;
 };
 
-export let TOTAL_POINTS = 0;
+/** @type {Map<string, TalentNode>} */
+export const ascendancyStartNodes = new Map();
 
+/** @type {HTMLDivElement} */
+export let targetTree = undefined;
+export const updateTargetTree = (element) => {
+    targetTree = element;
+};
+
+export let TOTAL_POINTS = 0;
 export const updatePoints = (value) => {
     TOTAL_POINTS = value;
+};
+
+export let TOTAL_ASCENDANCY_POINTS = 0;
+export const updateAscendancyPoints = (value) => {
+    TOTAL_ASCENDANCY_POINTS = value;
 };
 
 export class TalentNode {
@@ -61,6 +82,7 @@ export class TalentNode {
     selected = false;
     update = () => {};
     neighbors = [];
+    parentTree = "main";
     travel = {
         source: undefined,
         closed: false,
@@ -89,6 +111,7 @@ export class TalentNode {
         this.selected = false;
         this.update = undefined;
         this.neighbors = [];
+        this.parentTree = input.parentTree;
         this.travel.source = undefined;
         this.travel.closed = false;
         this.travel.visited = false;
@@ -103,14 +126,26 @@ export class TalentNode {
  * @param {boolean} isPreset
  */
 export const toggleNode = (node, isPreset = false) => {
-    const isClassNode = exclusiveNodeValues.get("start").includes(node.identifier.talent);
-    if (!startingNode && !isClassNode) {
+    let origin = startingNode;
+    let selections = talentSelections;
+    let exclusive = "start";
+    let totalPoints = TOTAL_POINTS;
+
+    if (node.parentTree !== "main") {
+        origin = ascendancyStartNodes.get(node.parentTree);
+        selections = ascendancySelections;
+        exclusive = "ascendancy";
+        totalPoints = TOTAL_ASCENDANCY_POINTS;
+    }
+
+    const isClassNode = exclusiveNodeValues.get(exclusive).includes(node.identifier.talent);
+    if (!origin && !isClassNode) {
         return;
     }
 
     if (!node.selected) {
         for (const values of exclusiveNodeValues.values()) {
-            const existingSelection = talentSelections.find(item => values.includes(item.identifier.talent));
+            const existingSelection = selections.find(item => values.includes(item.identifier.talent));
             if (existingSelection && values.includes(node.identifier.talent)) {
                 return;
             }
@@ -120,30 +155,35 @@ export const toggleNode = (node, isPreset = false) => {
     node.selected = !node.selected;
 
     if (node.selected) {
-        if ((talentSelections.length + (talentAddPreview.length - 1)) > TOTAL_POINTS) {
+        if ((selections.length + (talentAddPreview.length - 1)) > totalPoints) {
             node.selected = false;
         }
 
         if (node.selected) {
-            if (!isPreset && startingNode && talentSelections.length > 0) {
+            if (!isPreset && origin && selections.length > 0) {
                 findRoutes(node);
-            } else if (!startingNode || !exclusiveNodeValues.get("start").some(item => item === node.identifier.talent)) {
-                talentSelections.push(node);
+            } else if (!origin || (!exclusiveNodeValues.get(exclusive).some(item => item === node.identifier.talent))) {
+                selections.push(node);
             }
 
-            if (!startingNode && isClassNode) {
-                updateStartingNode(node);
+            if (!origin && isClassNode) {
+                if (node.parentTree === "main") {
+                    updateStartingNode(node);
+                } else {
+                    ascendancyStartNodes.set(node.parentTree, node);
+                }
             }
         }
     } else {
-        const deadBranch = findDeadBranch(startingNode, node);
+        const deadBranch = findDeadBranch(origin, node);
 
         for (const talent of deadBranch) {
             talent.selected = false;
         }
 
-        talentSelections.length = 0;
-        talentSelections.push(...talentSelections.filter(item => item.selected));
+        const temp = selections.filter(item => item.selected);
+        selections.length = 0;
+        selections.push(...temp);
 
         for (const talent of deadBranch) {
             talent.update();
@@ -153,12 +193,16 @@ export const toggleNode = (node, isPreset = false) => {
             neighbor.update();
         }
 
-        if (startingNode?.identifier.number === node.identifier.number) {
-            updateStartingNode(undefined);
+        if (origin?.identifier.number === node.identifier.number) {
+            if (node.parentTree === "main") {
+                updateStartingNode(undefined);
+            } else {
+                ascendancyStartNodes.set(node.parentTree, undefined);
+            }
         }
     }
 
-    for (const talent of talentSelections) {
+    for (const talent of selections) {
         talent.selected = true;
         talent.update();
 
@@ -176,4 +220,5 @@ export const toggleNode = (node, isPreset = false) => {
     }
 
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS - talentSelections.length}`;
+    document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS - ascendancySelections.length}`;
 };

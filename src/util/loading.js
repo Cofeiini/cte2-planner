@@ -1,9 +1,21 @@
-import { handleVersionOptions, presetInfo, releaseInfo, sidePanel, updatePresetInfo, updateReleaseInfo } from "../core/side-panel.js";
+import { handleAscendancyOptions, handleVersionOptions, presetInfo, releaseInfo, sidePanel, updatePresetInfo, updateReleaseInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
+import { controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
-import { exclusiveNodeValues, talentExclusions, talentNodes, talentSelections, toggleNode, TOTAL_POINTS, updatePoints } from "../type/talent-node.js";
-import { drawLinesRegular } from "./drawing.js";
-import { generateTalentGrid, generateTree } from "./generating.js";
+import {
+    ascendancyNodes,
+    exclusiveNodeValues,
+    talentExclusions,
+    talentNodes,
+    talentSelections,
+    toggleNode,
+    TOTAL_ASCENDANCY_POINTS,
+    TOTAL_POINTS,
+    updateAscendancyPoints,
+    updatePoints,
+} from "../type/talent-node.js";
+import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
+import { generateAscendancyGrid, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
 import { handleViewport } from "./spuddling.js";
 
 export const handleLoadingImageAssets = async () => {
@@ -40,7 +52,13 @@ export const handleLoadingImageAssets = async () => {
 
     await fetch(`data/${releaseInfo.version}/perks.json`).then(response => response.json()).then(data => {
         const requested = new Set();
-        for (const node of talentNodes) {
+
+        const allNodes = [...talentNodes];
+        for (const nodes of ascendancyNodes.values()) {
+            allNodes.push(...nodes);
+        }
+
+        for (const node of allNodes) {
             let key = node.identifier.talent;
 
             const json = data.find(item => item.id === key);
@@ -48,7 +66,7 @@ export const handleLoadingImageAssets = async () => {
                 continue;
             }
 
-            node.type = json.type.toLowerCase(); // This should be one of these: start, major, special, stat
+            node.type = json.type.toLowerCase(); // This should be one of these: asc, start, major, special, stat
             node.stats = json.stats;
             node.identifier.data = json.id;
             if (node.type === "stat" || node.type === "special") {
@@ -119,10 +137,20 @@ export const handleLoadingAssets = async () => {
         generateTalentGrid(data);
     });
 
+    progress.innerText = "Processing the ascendancy tree...";
+    await fetch(`data/${releaseInfo.version}/ascendancy.csv`).then(response => response.text()).then(data => {
+        generateAscendancyGrid(data);
+    });
+
     await handleLoadingImageAssets();
 
+    const allNodes = [...talentNodes];
+    for (const nodes of ascendancyNodes.values()) {
+        allNodes.push(...nodes);
+    }
+
     for (const [key, values] of exclusiveNodeValues) {
-        talentExclusions.set(key, talentNodes.filter(item => values.includes(item.identifier.talent)));
+        talentExclusions.set(key, allNodes.filter(item => values.includes(item.identifier.talent)));
     }
 
     progress.innerText = "Processing talent descriptions...";
@@ -143,12 +171,14 @@ export const handleLoadingAssets = async () => {
         started: 0,
         completed: 0,
     };
+
     progress.innerText = "Processing talent details...";
     const statData = new Map();
     await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
-        tasks.started = talentNodes.reduce((accumulated, item) => accumulated + item.stats.length, 0);
+        tasks.started = allNodes.reduce((accumulated, item) => accumulated + item.stats.length, 0);
         progress.innerText = `Processing talent details...\n${tasks.completed} of ${tasks.started} done.`;
-        for (const node of talentNodes) {
+
+        for (const node of allNodes) {
             for (const stat of node.stats) {
                 const identifier = stat["stat"];
                 let json = data.find(item => (item.id === identifier) || (item.data?.id === identifier));
@@ -176,7 +206,7 @@ export const handleLoadingAssets = async () => {
         }
     }));
 
-    const statNodeList = talentNodes.filter(item => item.type === "stat" || item.type === "special");
+    const statNodeList = allNodes.filter(item => item.type === "stat" || item.type === "special");
     for (const node of statNodeList) {
         node.name = descriptionData[`mmorpg.stat.${node.identifier.data}`];
         if (!node.name) {
@@ -187,7 +217,7 @@ export const handleLoadingAssets = async () => {
         }
     }
 
-    const talentNodeList = talentNodes.filter(item => item.type === "start" || item.type === "major");
+    const talentNodeList = allNodes.filter(item => item.type === "start" || item.type === "major" || item.type === "asc");
     for (const node of talentNodeList) {
         node.name = descriptionData[`mmorpg.talent.${node.identifier.data}`];
         if (!node.name) {
@@ -195,8 +225,8 @@ export const handleLoadingAssets = async () => {
         }
     }
 
-    for (const node of talentNodes) {
-        const isStat = node.type === "stat" || node.type === "special";
+    for (const node of allNodes) {
+        const isStat = node.type === "stat" || node.type === "special" || node.type === "asc";
         const isPerk = node.type === "start" || node.type === "major";
 
         const nodeData = statData.get(node.identifier.talent);
@@ -244,6 +274,18 @@ export const handleLoadingAssets = async () => {
         }
     }
 
+    const ascendancySelect = document.querySelector("#ascendancy-select");
+    for (const option of ascendancySelect.options) {
+        option.innerText = descriptionData[`mmorpg.talent.${option.value}`];
+    }
+    const options = Array.from(ascendancySelect.children);
+    ascendancySelect.replaceChildren(...options.sort((a, b) => a.innerText.localeCompare(b.innerText)));
+
+    const noneOption = document.createElement("option");
+    noneOption.innerText = "None";
+    noneOption.value = "none";
+    ascendancySelect.prepend(noneOption);
+
     progress.innerText = "Processing done.";
 };
 
@@ -276,6 +318,10 @@ export const handleLoading = async () => {
             level: 100,
             start: undefined,
             talents: [],
+            ascendancy: {
+                selection: "none",
+                talents: [],
+            },
         });
     }
 
@@ -296,13 +342,27 @@ export const handleLoading = async () => {
         presetInfo["talents"] = [];
     }
 
+    if (!presetInfo.ascendancy) {
+        presetInfo["ascendancy"] = {};
+    }
+    if (!presetInfo.ascendancy.selection) {
+        presetInfo.ascendancy["selection"] = "none";
+    }
+    if (!presetInfo.ascendancy.talents) {
+        presetInfo.ascendancy["talents"] = [];
+    }
+
     const versionSelect = document.querySelector("#version-select");
     versionSelect.value = presetInfo.version;
     handleVersionOptions(versionSelect);
 
     const points = releaseInfo.points;
     updatePoints(points.starting + points.leveling + points.questing);
+    updateAscendancyPoints(points.ascendancy);
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
+    document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS}`;
+
+    controls.ascendancy = presetInfo.ascendancy.selection;
 
     sidePanel.character.level.value = presetInfo.level;
     sidePanel.character.levelLabel.innerText = presetInfo.level;
@@ -310,7 +370,11 @@ export const handleLoading = async () => {
     if (shouldLoadAssets) {
         await handleLoadingAssets();
         generateTree();
+        generateAscendancyTree();
     }
+
+    document.querySelector("#ascendancy-select").value = controls.ascendancy;
+    handleAscendancyOptions();
 
     for (const talent of talentSelections) {
         toggleNode(talent, true);
@@ -323,7 +387,15 @@ export const handleLoading = async () => {
         }
     }
 
+    if (presetInfo.ascendancy.selection !== "none") {
+        toggleNode(talentExclusions.get("ascendancy").find(item => item.identifier.talent === presetInfo.ascendancy.selection), true);
+        for (const id of presetInfo.ascendancy.talents) {
+            toggleNode(ascendancyNodes.get(presetInfo.ascendancy.selection).find(item => item.identifier.number === id), true);
+        }
+    }
+
     drawLinesRegular();
+    drawLinesAscendancy();
     handleViewport();
 
     progress.innerText = "Done.";

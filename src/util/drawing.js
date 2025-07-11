@@ -1,5 +1,13 @@
-import { LINE_WIDTH } from "../data/constants.js";
-import { talentAddPreview, talentExclusions, talentNodes, talentRemovePreview, talentSelections } from "../type/talent-node.js";
+import { colorMap, controls, LINE_WIDTH } from "../data/constants.js";
+import {
+    ascendancyNodes,
+    ascendancySelections,
+    talentAddPreview,
+    talentExclusions,
+    talentNodes,
+    talentRemovePreview,
+    talentSelections,
+} from "../type/talent-node.js";
 
 /**
  * @param {CanvasRenderingContext2D} context
@@ -53,13 +61,61 @@ export const drawLinesInitial = () => {
     const context = canvas.getContext("2d", { alpha: false });
     context.imageSmoothingEnabled = false;
 
-    context.fillStyle = "#191821";
+    context.fillStyle = colorMap.get("background");
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    context.strokeStyle = "#222222";
+    context.strokeStyle = colorMap.get("line");
     context.lineWidth = LINE_WIDTH;
     drawLinesSimple(context, talentNodes);
     context.stroke();
+};
+
+export const drawLinesAscendancyInitial = () => {
+    for (const [ascendancy, subCanvas] of document.querySelector("#ascendancy-canvas").offscreenCanvasMap) {
+        const subContext = subCanvas.getContext("2d", { alpha: false });
+        subContext.imageSmoothingEnabled = false;
+
+        subContext.fillStyle = colorMap.get("background");
+        subContext.fillRect(0, 0, subCanvas.width, subCanvas.height);
+
+        subContext.strokeStyle = colorMap.get("line");
+        subContext.lineWidth = LINE_WIDTH;
+        drawLinesSimple(subContext, ascendancyNodes.get(ascendancy));
+        subContext.stroke();
+    }
+};
+
+export const drawLinesAscendancy = () => {
+    const canvas = document.querySelector("#ascendancy-canvas");
+    const context = canvas.getContext("2d", { alpha: false });
+    context.imageSmoothingEnabled = false;
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    if (!controls.ascendancy || controls.ascendancy === "none") {
+        return;
+    }
+
+    context.drawImage(canvas.offscreenCanvasMap.get(controls.ascendancy), 0, 0);
+
+    context.lineWidth = LINE_WIDTH;
+
+    context.strokeStyle = colorMap.get("line_connect");
+    const excluded = [];
+    for (const values of talentExclusions.values()) {
+        if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+            excluded.push(...values);
+        }
+    }
+    drawLinesSimple(context, ascendancySelections, excluded);
+
+    context.strokeStyle = colorMap.get("line_select");
+    drawLinesComplex(context, ascendancySelections);
+
+    context.strokeStyle = colorMap.get("line_remove");
+    drawLinesComplex(context, talentRemovePreview, []);
+
+    context.strokeStyle = colorMap.get("line_add");
+    drawLinesComplex(context, talentAddPreview, []);
 };
 
 export const drawLinesRegular = () => {
@@ -71,7 +127,7 @@ export const drawLinesRegular = () => {
 
     context.lineWidth = LINE_WIDTH;
 
-    context.strokeStyle = "#3E3E3E";
+    context.strokeStyle = colorMap.get("line_connect");
     const excluded = [];
     for (const values of talentExclusions.values()) {
         if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
@@ -80,12 +136,14 @@ export const drawLinesRegular = () => {
     }
     drawLinesSimple(context, talentSelections, excluded);
 
-    context.strokeStyle = "#1A5A1A";
+    context.strokeStyle = colorMap.get("line_select");
     drawLinesComplex(context, talentSelections);
 
-    context.strokeStyle = "#9F1F1F";
+    context.strokeStyle = colorMap.get("line_remove");
     drawLinesComplex(context, talentRemovePreview, []);
 
-    context.strokeStyle = "#1F1F9F";
+    context.strokeStyle = colorMap.get("line_add");
     drawLinesComplex(context, talentAddPreview, []);
+
+    drawLinesAscendancy();
 };

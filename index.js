@@ -1,9 +1,9 @@
-import { handleDataExport, handleDataImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
+import { handleAscendancyChange, handleDataExport, handleDataImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
 import { controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { talentNodes } from "./src/type/talent-node.js";
-import { updateTalentTree } from "./src/util/generating.js";
+import { talentNodes, updateTargetTree } from "./src/type/talent-node.js";
+import { talentTree, updateAscendancyContainer, updateAscendancyTreeContainer, updateTalentTree } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL, updateLineCanvas } from "./src/util/spuddling.js";
 
@@ -84,6 +84,7 @@ const handleEvents = () => {
 
         container.style.cursor = "grabbing";
         container.addEventListener("mousemove", handleMouseDrag);
+        document.querySelector("#ascendancy-menu").classList.add("hidden");
     };
 
     container.onmouseup = (event) => {
@@ -96,6 +97,7 @@ const handleEvents = () => {
         controls.panning = false;
         container.style.cursor = null;
         if (controls.hovering) {
+            infoTooltip.container.classList.add("visible");
             infoTooltip.container.classList.remove("invisible");
         }
 
@@ -120,6 +122,9 @@ const handleEvents = () => {
 window.onload = async () => {
     updateLineCanvas(document.querySelector("#line-canvas"));
     updateTalentTree(document.querySelector("#talent-tree"));
+    updateAscendancyContainer(document.querySelector("#ascendancy-container"));
+    updateAscendancyTreeContainer(document.querySelector("#ascendancy-tree-container"));
+    updateTargetTree(talentTree);
 
     infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");
@@ -144,6 +149,9 @@ window.onload = async () => {
         handleSidePanel();
     };
 
+    document.querySelector("#import-button").onclick = handleDataImport;
+    document.querySelector("#export-button").onclick = handleDataExport;
+
     const versionSelect = document.querySelector("#version-select");
     for (const release of RELEASES) {
         const option = document.createElement("option");
@@ -153,8 +161,7 @@ window.onload = async () => {
     }
     versionSelect.onchange = handleVersionChange;
 
-    document.querySelector("#import-button").onclick = handleDataImport;
-    document.querySelector("#export-button").onclick = handleDataExport;
+    document.querySelector("#ascendancy-select").onchange = handleAscendancyChange;
 
     const search = document.querySelector("#talent-search");
     search.value = "";
