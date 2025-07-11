@@ -1,6 +1,5 @@
 import { findDeadBranch, findRoutes } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
-import { CELL_HALF, CELL_SIZE } from "../data/constants.js";
 import { collectStatInformation, setUpURL } from "../util/spuddling.js";
 
 /** @type {TalentNode[][]} */
@@ -97,8 +96,8 @@ export class TalentNode {
     constructor(input) {
         this.x = input.x;
         this.y = input.y;
-        this.center.x = (input.x * CELL_SIZE) + CELL_HALF;
-        this.center.y = (input.y * CELL_SIZE) + CELL_HALF;
+        this.center.x = input.x;
+        this.center.y = input.y;
         this.identifier.number = input.x + (input.y * input.length);
         this.identifier.talent = input.value;
         this.identifier.data = "";

@@ -1,7 +1,7 @@
 import { generateAscendancyPath, generatePath } from "../core/algorithm.js";
 import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
-import { CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
+import { CELL_HALF, CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
 import {
     ascendancyGrid,
     ascendancyNodes,
@@ -27,6 +27,12 @@ import { setUpIcon, updateAscendancyButton } from "./spuddling.js";
 export const viewport = {
     width: 0,
     height: 0,
+    offset: {
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
     center: {
         x: 0,
         y: 0,
@@ -79,16 +85,16 @@ export const generateDescriptionHTML = (description) => {
 };
 
 export const generateCanvas = () => {
-    viewport.width = talentGrid.at(0).length * CELL_SIZE;
-    viewport.height = talentGrid.length * CELL_SIZE;
+    viewport.width = (viewport.offset.right - viewport.offset.left) * CELL_SIZE;
+    viewport.height = (viewport.offset.bottom - viewport.offset.top) * CELL_SIZE;
 
     talentTree.style.height = `${viewport.height}px`;
     talentTree.style.width = `${viewport.width}px`;
 
     let centerNode = {
         center: {
-            x: (viewport.width * -0.5),
-            y: (viewport.height * -0.5),
+            x: (viewport.width * -0.5) - viewport.offset.left,
+            y: (viewport.height * -0.5) - viewport.offset.top,
         },
     };
     for (const branch of talentGrid) {
@@ -177,9 +183,47 @@ export const generateTalentGrid = (data) => {
         talentGrid.push(branch);
     }
 
+    const bounds = {
+        top: Number.MAX_VALUE,
+        left: Number.MAX_VALUE,
+        right: 0,
+        bottom: 0,
+    };
+    for (const branch of talentGrid) {
+        for (const node of branch) {
+            if (!node.selectable) {
+                continue;
+            }
+
+            if (node.x < bounds.left) {
+                bounds.left = node.x;
+            }
+            if (node.x > bounds.right) {
+                bounds.right = node.x;
+            }
+            if (node.y < bounds.top) {
+                bounds.top = node.y;
+            }
+            if (node.y > bounds.bottom) {
+                bounds.bottom = node.y;
+            }
+        }
+    }
+
+    // Add 1 cell of padding
+    viewport.offset.top = Math.max(0, bounds.top - 1);
+    viewport.offset.left = Math.max(0, bounds.left - 1);
+
+    // Include the current cell and add 1 cell of padding
+    viewport.offset.right = bounds.right + 2;
+    viewport.offset.bottom = bounds.bottom + 2;
+
     talentNodes.length = 0;
     for (const branch of talentGrid) {
         for (const leaf of branch) {
+            leaf.center.x = ((leaf.x - viewport.offset.left) * CELL_SIZE) + CELL_HALF;
+            leaf.center.y = ((leaf.y - viewport.offset.top) * CELL_SIZE) + CELL_HALF;
+
             if (!leaf.selectable) {
                 continue;
             }
@@ -331,6 +375,8 @@ export const generateAscendancyGrid = (data) => {
         for (const branch of grid) {
             for (const leaf of branch) {
                 leaf.parentTree = ascendancy;
+                leaf.center.x = (leaf.x * CELL_SIZE) + CELL_HALF;
+                leaf.center.y = (leaf.y * CELL_SIZE) + CELL_HALF;
 
                 if (!leaf.selectable) {
                     continue;
@@ -606,8 +652,6 @@ export const generateTree = () => {
         const item = document.createElement("div");
         item.innerText = option.innerText;
         item.onmousedown = (event) => {
-            event.preventDefault();
-
             if (event.button !== 0) {
                 return;
             }

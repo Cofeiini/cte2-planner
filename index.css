@@ -24,12 +24,14 @@ html, body {
     opacity: 0.0;
     transition: visibility 0ms var(--fade-time), opacity var(--fade-time) linear;
     visibility: hidden;
+    will-change: opacity;
 }
 
 .visible {
     opacity: 1.0;
     transition: opacity var(--fade-time) linear;
     visibility: visible;
+    will-change: opacity;
 }
 
 .filtered {
@@ -42,6 +44,7 @@ html, body {
 }
 
 .word {
+    contain: paint layout;
     display: inline-block;
     min-width: fit-content;
 }
@@ -52,6 +55,7 @@ html, body {
     border: 0.25em solid dimgray;
     border-radius: 0.25em;
     color: white;
+    contain: paint layout;
     display: flex;
     font-family: AshenCustom, sans-serif;
     font-size: large;
@@ -72,6 +76,7 @@ html, body {
 }
 
 .horizontal-line {
+    contain: size paint layout;
     display: flex;
     height: 1px;
     margin: 0;
@@ -81,6 +86,7 @@ html, body {
 .panel-group {
     background-color: #182828;
     color: #AAAAAA;
+    contain: paint layout;
     display: flex;
     flex-direction: column;
     padding: 0.25em;
@@ -88,6 +94,7 @@ html, body {
 
 .panel-group-title-big {
     background-color: #243C3C;
+    contain: paint layout;
     font-size: small;
     padding: 0.25em;
     text-align: center;
@@ -96,6 +103,7 @@ html, body {
 .panel-group-title-small {
     background-color: #243C3C;
     color: #AAAAAA;
+    contain: paint layout;
     font-size: small;
     padding: 0.25em;
     text-align: left;
@@ -103,7 +111,6 @@ html, body {
 
 .panel-group-item-container {
     background-color: #081818;
-    box-shadow: black 0 0 0.25em 0;
     display: flex;
     flex-direction: column;
     gap: 0.25em;
@@ -112,15 +119,13 @@ html, body {
 
 .panel-group-item-container .panel-group-item + .panel-group-item {
     border-top: 1px solid #384848;
-    margin-top: 0.25em;
     padding-top: 0.25em;
 }
 
 .panel-group-item {
+    contain: layout;
     display: flex;
     gap: 0.25em;
-    overflow-x: scroll;
-    overflow-y: hidden;
     padding: 0 0.5em;
     scrollbar-width: none;
 }
@@ -128,11 +133,12 @@ html, body {
 .panel-group-item-allocated {
     background-color: #1E3232;
     border-radius: 0.25em;
-    box-shadow: black 0 0 0.25em 0;
+    contain: layout;
     display: flex;
     flex-direction: column;
     font-size: small;
     min-width: 20%;
+    outline: 1px solid black;
     padding: 0.25em;
     text-align: center;
     white-space: nowrap;
@@ -146,6 +152,7 @@ html, body {
 
 .panel-stats-group-title {
     color: white;
+    contain: paint layout;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
@@ -159,9 +166,15 @@ html, body {
 }
 
 .talent-node {
+    contain: size layout;
+    display: flex;
     image-rendering: pixelated;
     position: absolute;
     user-select: none;
+}
+
+.talent-node img {
+    contain: size paint layout;
 }
 
 .talent-node img:not(.talent-node-icon) {
@@ -181,20 +194,22 @@ html, body {
 
 #content-container {
     background-color: black;
+    contain: size layout;
     display: flex;
     height: 100%;
 }
 
 #viewport-container {
+    contain: size layout;
     display: flex;
     height: 100%;
-    overflow: hidden;
     position: relative;
     width: 100%;
 }
 
 #talent-container {
     background-color: #191821;
+    contain: size layout;
     display: flex;
     height: 100%;
     position: absolute;
@@ -202,18 +217,21 @@ html, body {
 }
 
 #talent-tree {
+    contain: size layout;
     display: flex;
     position: absolute;
     transform-origin: 0 0;
+    will-change: transform;
 }
 
 #ascendancy-container {
     background-color: #191821;
-    box-shadow: black 0 0 1.0em 0.5em;
+    contain: size paint layout;
     display: flex;
-    outline: white solid 3px;
+    outline: white solid 4px;
     position: absolute;
     transform-origin: 0 0;
+    will-change: transform;
 }
 
 #ascendancy-tree-container {
@@ -222,10 +240,11 @@ html, body {
     left: 50%;
     position: absolute;
     transform: translateX(-50%);
-    transform-origin: 0 0
+    transform-origin: 0 0;
 }
 
 .ascendancy-tree {
+    contain: size layout;
     height: 100%;
     width: 100%;
 }
@@ -253,20 +272,26 @@ html, body {
 }
 
 #tooltip-container {
+    display: flex;
     filter: drop-shadow(-1px -1px white) drop-shadow(1px -1px white) drop-shadow(1px 1px white) drop-shadow(-1px 1px white);
+    left: 100%;
+    position: absolute;
+    top: 100%;
+    will-change: transform;
 }
 
 #info-tooltip {
     background-color: #101010;
     border-radius: 0.5em;
     color: #AAAAAA;
+    contain: layout;
     display: flex;
     flex-direction: column;
     font-size: 1.0em;
     left: 0;
-    max-width: 30vw;
     position: absolute;
     top: 0;
+    will-change: contents, transform;
 }
 
 #info-name {
@@ -322,6 +347,7 @@ html, body {
     background-repeat: no-repeat;
     background-size: cover;
     box-shadow: black 0 0 1.0em 0.25em;
+    contain: size paint layout;
     display: flex;
     gap: 1.0em;
     height: 44px;
@@ -339,6 +365,7 @@ html, body {
 
 #side-panel {
     background-color: black;
+    contain: size layout;
     display: flex;
     flex-direction: column;
     gap: 0.25em;
@@ -351,6 +378,7 @@ html, body {
 
 #points-container {
     color: yellow;
+    contain: size layout;
     display: flex;
     font-size: 1.25em;
     gap: 0.25em;
@@ -364,6 +392,7 @@ html, body {
 
 #ascendancy-points-container {
     color: yellow;
+    contain: size layout;
     display: flex;
     font-size: 1.25em;
     gap: 0.25em;
@@ -378,6 +407,7 @@ html, body {
     align-items: center;
     background-color: black;
     border: 1px solid white;
+    contain: size layout;
     display: flex;
     height: 2em;
     left: calc(50% + 1.0em);

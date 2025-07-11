@@ -260,13 +260,18 @@ export const findShortestRoute = (target) => {
         return [target];
     }
 
+    let distant = Number.MAX_VALUE;
     const routeList = [];
     for (const start of selections) {
         if (start.identifier.number === target.identifier.number) {
             continue;
         }
 
-        routeList.push(algorithm(start, target));
+        const current = findDistance(start, target);
+        if (current < distant) {
+            distant = current;
+            routeList.push(algorithm(start, target));
+        }
     }
 
     let shortest = [];
