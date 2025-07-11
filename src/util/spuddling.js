@@ -32,7 +32,7 @@ export const handleViewport = () => {
     ascendancyButton.style.top = `${controls.y + (viewport.center.y * controls.zoom)}px`;
 
     ascendancyContainer.style.transform = `scale(${controls.zoom})`;
-    ascendancyContainer.style.left = `${controls.x + (viewport.center.x * controls.zoom)}px`;
+    ascendancyContainer.style.left = `${controls.x + ((viewport.center.x - Math.floor(ascendancyContainer.offsetWidth * 0.5)) * controls.zoom)}px`;
     ascendancyContainer.style.top = `${controls.y + ((viewport.center.y - ascendancyContainer.offsetHeight) * controls.zoom)}px`;
 };
 

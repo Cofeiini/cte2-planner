@@ -15,7 +15,7 @@ const handleMouseDrag = (event) => {
 
     if (!controls.panning) {
         const distance = Math.pow(event.movementX, 2) + Math.pow(event.movementY, 2);
-        if (distance < 4) {
+        if (distance < 2) {
             return;
         }
     }
@@ -105,17 +105,17 @@ const handleEvents = () => {
     };
 
     const viewport = document.querySelector("#viewport-container");
-    const bounds = viewport.getBoundingClientRect();
 
     viewport.oncontextmenu = () => {
         return false;
     };
 
     viewport.onmousemove = (event) => {
+        const bounds = viewport.getBoundingClientRect();
         const contentBounds = infoTooltip.main.getBoundingClientRect();
-
         infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
-        infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.height - contentBounds.height - tooltipOffsets.edge)}px`;
+        infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.bottom - contentBounds.height - tooltipOffsets.edge)}px`;
+        infoTooltip.main.style.width = `min(33vw, max(20vw, ${bounds.right - Math.floor(event.clientX) - tooltipOffsets.pointer - tooltipOffsets.edge}px))`;
     };
 };
 

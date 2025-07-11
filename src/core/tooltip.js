@@ -5,14 +5,21 @@ import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorith
 import { sidePanel } from "./side-panel.js";
 
 export const infoTooltip = {
+    /** @type {HTMLDivElement} */
     container: undefined,
+    /** @type {HTMLDivElement} */
     main: undefined,
+    /** @type {HTMLDivElement} */
     arrow: undefined,
+    /** @type {HTMLDivElement} */
     name: undefined,
     node: {
+        /** @type {HTMLDivElement} */
         count: undefined,
+        /** @type {HTMLDivElement} */
         text: undefined,
     },
+    /** @type {HTMLDivElement} */
     stats: undefined,
 };
 
