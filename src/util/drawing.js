@@ -7,6 +7,8 @@ import {
     talentNodes,
     talentRemovePreview,
     talentSelections,
+    TOTAL_ASCENDANCY_POINTS,
+    TOTAL_POINTS,
 } from "../type/talent-node.js";
 
 /**
@@ -99,14 +101,16 @@ export const drawLinesAscendancy = () => {
 
     context.lineWidth = LINE_WIDTH;
 
-    context.strokeStyle = colorMap.get("line_connect");
-    const excluded = [];
-    for (const values of talentExclusions.values()) {
-        if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
-            excluded.push(...values);
+    if (ascendancySelections.length < TOTAL_ASCENDANCY_POINTS) {
+        context.strokeStyle = colorMap.get("line_connect");
+        const excluded = [];
+        for (const values of talentExclusions.values()) {
+            if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+                excluded.push(...values);
+            }
         }
+        drawLinesSimple(context, ascendancySelections, excluded);
     }
-    drawLinesSimple(context, ascendancySelections, excluded);
 
     context.strokeStyle = colorMap.get("line_select");
     drawLinesComplex(context, ascendancySelections);
@@ -127,14 +131,16 @@ export const drawLinesRegular = () => {
 
     context.lineWidth = LINE_WIDTH;
 
-    context.strokeStyle = colorMap.get("line_connect");
-    const excluded = [];
-    for (const values of talentExclusions.values()) {
-        if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
-            excluded.push(...values);
+    if (talentSelections.length < TOTAL_POINTS) {
+        context.strokeStyle = colorMap.get("line_connect");
+        const excluded = [];
+        for (const values of talentExclusions.values()) {
+            if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+                excluded.push(...values);
+            }
         }
+        drawLinesSimple(context, talentSelections, excluded);
     }
-    drawLinesSimple(context, talentSelections, excluded);
 
     context.strokeStyle = colorMap.get("line_select");
     drawLinesComplex(context, talentSelections);
