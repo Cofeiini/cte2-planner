@@ -343,10 +343,9 @@ html, body {
     flex-direction: column;
     gap: 0.25em;
     height: 100%;
-    min-width: 25em;
+    min-width: 32em;
     padding: 0.25em;
     user-select: none;
-    width: 20vw;
     z-index: 1;
 }
 
