@@ -686,9 +686,8 @@ export const generateTree = () => {
     ascendancyButton.append(border);
 
     const icon = document.createElement("img");
-    icon.id = "ascendancy-button-icon";
     icon.classList.add("talent-node-icon");
-    icon.src = iconAssets.get("ascendant_class");
+    icon.src = iconAssets.get("ascendancy");
     icon.width = 32;
     icon.height = 32;
     setUpIcon(icon);
@@ -761,7 +760,13 @@ export const generateTree = () => {
     ascendancyButton.refresh = () => {
         const isHidden = ascendancyContainer.classList.contains("hidden");
         border.src = borderAssets.get(`asc_${isHidden ? "off" : "on"}`);
-        indicator.src = indicatorAssets.get(isHidden ? "can" : "yes");
+
+        let assetId = isHidden ? "can" : "yes";
+        if (controls.ascendancy === "none") {
+            assetId = "no";
+        }
+        indicator.src = indicatorAssets.get(assetId);
+
         ascendancyButton.classList.add("active");
         if (isHidden) {
             ascendancyButton.classList.remove("active");

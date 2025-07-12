@@ -55,6 +55,10 @@ export const handleLoadingImageAssets = async () => {
         }));
     }
 
+    await fetch(`assets/textures/gui/ascendancy.png`).then(response => response.blob()).then(bitmap => {
+        iconAssets.set("ascendancy", URL.createObjectURL(bitmap));
+    });
+
     await fetch(`data/${releaseInfo.version}/perks.json`).then(response => response.json()).then(data => {
         const requested = new Set();
 

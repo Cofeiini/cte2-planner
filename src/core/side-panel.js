@@ -71,16 +71,11 @@ export const handleAscendancyOptions = () => {
     updateAscendancyInfo(controls.ascendancy);
 
     ascendancyContainer.classList.add("hidden");
-    const icon = document.querySelector("#ascendancy-button-icon");
-    icon.classList.add("hidden");
-
     if (controls.ascendancy !== "none") {
         const canvas = document.querySelector("#ascendancy-canvas").offscreenCanvasMap.get(controls.ascendancy);
         ascendancyTreeContainer.style.width = `${canvas.width}px`;
         ascendancyTreeContainer.style.height = `${canvas.height}px`;
 
-        icon.src = iconAssets.get(controls.ascendancy);
-        icon.classList.remove("hidden");
         document.querySelector(`#${controls.ascendancy}_tree`).classList.remove("hidden");
         drawLinesAscendancy();
 
