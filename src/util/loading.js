@@ -144,6 +144,7 @@ export const handleLoadingAssets = async () => {
 
     await handleLoadingImageAssets();
 
+    progress.innerText = "Processing the talent nodes...";
     const allNodes = [...talentNodes];
     for (const nodes of ascendancyNodes.values()) {
         allNodes.push(...nodes);
@@ -185,6 +186,7 @@ export const handleLoadingAssets = async () => {
                 if (!json) {
                     json = {
                         is_perc: node.type !== "special",
+                        format: (parseFloat(stat["v1"]) === 1.0) || undefined,
                     };
                 }
                 const type = stat["type"].toLowerCase();
@@ -249,6 +251,7 @@ export const handleLoadingAssets = async () => {
                 description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
             }
 
+            item["is_long"] = info["is_long"] ?? false;
             item["scale_to_lvl"] = isScaled;
             item["is_percent"] = isPercent;
             item["description"] = description;

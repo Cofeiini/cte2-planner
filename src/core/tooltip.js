@@ -64,7 +64,7 @@ export const handleTooltip = (talent) => {
     const formatted = [];
     for (const stat of talent.stats) {
         let bullet = "";
-        if (stat.type.toLowerCase() !== "more") {
+        if (stat["is_long"]) {
             bullet = `<span style="color: purple; margin-right: 0.25em;">&#9670;</span>`;
         }
 
