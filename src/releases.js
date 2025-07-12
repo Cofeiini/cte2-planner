@@ -1,16 +1,7 @@
 // Remember to keep the latest release at the top
 export const RELEASES = [
     {
-        version: "0.9.3b",
-        points: {
-            starting: 1,
-            leveling: 100,
-            questing: 25,
-            ascendancy: 7,
-        },
-    },
-    {
-        version: "0.9.3",
+        version: "0.9.5",
         points: {
             starting: 1,
             leveling: 100,

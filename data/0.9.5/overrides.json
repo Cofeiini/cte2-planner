@@ -68,6 +68,9 @@
   "jewel_socket": {
     "is_perc": false
   },
+  "max_frenzy_charge_charges": {
+    "format": true
+  },
   "max_fire_resist": {
     "is_perc": true
   },
