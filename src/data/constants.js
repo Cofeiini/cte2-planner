@@ -39,3 +39,9 @@ export const controls = {
     clickTarget: undefined,
     ascendancy: "none",
 };
+
+export const welcomeMessages = [
+    "Welcome", // Remember to keep this first, so the randomization picks the correct lines
+    "Welcome back, Exile",
+    "Still sane, Exile?",
+];

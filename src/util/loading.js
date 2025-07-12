@@ -1,6 +1,6 @@
 import { handleAscendancyOptions, handleVersionOptions, presetInfo, releaseInfo, sidePanel, updatePresetInfo, updateReleaseInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
-import { controls } from "../data/constants.js";
+import { controls, welcomeMessages } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
 import {
     ascendancyNodes,
@@ -18,13 +18,18 @@ import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
 import { generateAscendancyGrid, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
 import { handleViewport } from "./spuddling.js";
 
-export const handleLoadingImageAssets = async () => {
-    const progress = document.querySelector("#progress");
+const updateProgress = async (text) => {
+    document.querySelector("#progress").innerText = text;
+    await new Promise(resolve => {
+        setTimeout(resolve, 1);
+    });
+};
 
-    progress.innerText = "Processing assets...";
+export const handleLoadingImageAssets = async () => {
+    await updateProgress("Processing assets...");
     const promises = [];
     const tasks = {
-        started: 0,
+        started: Array.from(borderAssets.keys()).length + Array.from(indicatorAssets.keys()).length,
         completed: 0,
     };
 
@@ -35,7 +40,7 @@ export const handleLoadingImageAssets = async () => {
 
         promises.push(fetch(`assets/textures/gui/skill_tree/borders/${key}.png`).then(response => response.blob()).then(bitmap => {
             borderAssets.set(key, URL.createObjectURL(bitmap));
-            progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
+            updateProgress(`Processing assets...\n${++tasks.completed} of ${tasks.started} done.`);
         }));
     }
 
@@ -46,7 +51,7 @@ export const handleLoadingImageAssets = async () => {
 
         promises.push(fetch(`assets/textures/gui/skill_tree/indic/${key}.png`).then(response => response.blob()).then(bitmap => {
             indicatorAssets.set(key, URL.createObjectURL(bitmap));
-            progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
+            updateProgress(`Processing assets...\n${++tasks.completed} of ${tasks.started} done.`);
         }));
     }
 
@@ -104,7 +109,7 @@ export const handleLoadingImageAssets = async () => {
 
             promises.push(fetch(`assets/${path}/${key}.png`).then(response => response.blob()).then(bitmap => {
                 iconAssets.set(node.identifier.talent, URL.createObjectURL(bitmap));
-                progress.innerText = `Processing assets...\n${++tasks.completed} of ${tasks.started} done.`;
+                updateProgress(`Processing assets...\n${++tasks.completed} of ${tasks.started} done.`);
             }).catch(error => {
                 iconAssets.set(node.identifier.talent, iconAssets.get("missing"));
                 console.error(node.identifier.talent, error);
@@ -117,34 +122,31 @@ export const handleLoadingImageAssets = async () => {
 };
 
 export const handleLoadingAssets = async () => {
-    const progress = document.querySelector("#progress");
-
+    await updateProgress("Processing fallback assets...");
     if (!iconAssets.has("default")) {
-        progress.innerText = "Processing fallback assets...";
         await fetch(`assets/textures/gui/stat_icons/default.png`).then(response => response.blob()).then(bitmap => {
             iconAssets.set("default", URL.createObjectURL(bitmap));
         });
     }
-
     if (!iconAssets.has("missing")) {
         await fetch(`assets/textures/gui/stat_icons/missing.png`).then(response => response.blob()).then(bitmap => {
             iconAssets.set("missing", URL.createObjectURL(bitmap));
         });
     }
 
-    progress.innerText = "Processing the talent tree...";
+    await updateProgress("Processing the talent tree...");
     await fetch(`data/${releaseInfo.version}/talents_new.csv`).then(response => response.text()).then(data => {
         generateTalentGrid(data);
     });
 
-    progress.innerText = "Processing the ascendancy tree...";
+    await updateProgress("Processing the ascendancy tree...");
     await fetch(`data/${releaseInfo.version}/ascendancy.csv`).then(response => response.text()).then(data => {
         generateAscendancyGrid(data);
     });
 
     await handleLoadingImageAssets();
 
-    progress.innerText = "Processing the talent nodes...";
+    await updateProgress("Processing the talent nodes...");
     const allNodes = [...talentNodes];
     for (const nodes of ascendancyNodes.values()) {
         allNodes.push(...nodes);
@@ -154,7 +156,7 @@ export const handleLoadingAssets = async () => {
         talentExclusions.set(key, allNodes.filter(item => values.includes(item.identifier.talent)));
     }
 
-    progress.innerText = "Processing talent descriptions...";
+    await updateProgress("Processing talent descriptions...");
     const descriptionData = {};
     await fetch(`data/${releaseInfo.version}/lang/en_us.json`).then(response => response.json()).then(data => {
         Object.assign(descriptionData, data);
@@ -168,17 +170,9 @@ export const handleLoadingAssets = async () => {
         overrideData = data;
     });
 
-    const tasks = {
-        started: 0,
-        completed: 0,
-    };
-
-    progress.innerText = "Processing talent details...";
+    await updateProgress("Processing talent details...");
     const statData = new Map();
     await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
-        tasks.started = allNodes.reduce((accumulated, item) => accumulated + item.stats.length, 0);
-        progress.innerText = `Processing talent details...\n${tasks.completed} of ${tasks.started} done.`;
-
         for (const node of allNodes) {
             for (const stat of node.stats) {
                 const identifier = stat["stat"];
@@ -202,12 +196,11 @@ export const handleLoadingAssets = async () => {
                     newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
                 }
                 statData.set(node.identifier.talent, newData);
-
-                progress.innerText = `Processing talent details...\n${++tasks.completed} of ${tasks.started} done.`;
             }
         }
     }));
 
+    await updateProgress("Processing talent information...");
     const statNodeList = allNodes.filter(item => item.type === "stat" || item.type === "special");
     for (const node of statNodeList) {
         node.name = descriptionData[`mmorpg.stat.${node.identifier.data}`];
@@ -289,12 +282,14 @@ export const handleLoadingAssets = async () => {
     noneOption.value = "none";
     ascendancySelect.prepend(noneOption);
 
-    progress.innerText = "Processing done.";
+    await updateProgress("Processing done.");
 };
 
 export const handleLoading = async () => {
-    const progress = document.querySelector("#progress");
-    progress.innerText = "Processing...";
+    const title = document.querySelector("#loading-title");
+    title.classList.remove("hidden");
+
+    await updateProgress("Preparing...");
 
     const loading = document.querySelector("#loading");
     loading.classList.remove("invisible");
@@ -355,6 +350,10 @@ export const handleLoading = async () => {
         presetInfo.ascendancy["talents"] = [];
     }
 
+    if (RELEASES.find(item => item.version !== presetInfo.version)) {
+        presetInfo.version = RELEASES.at(0).version;
+    }
+
     const versionSelect = document.querySelector("#version-select");
     versionSelect.value = presetInfo.version;
     handleVersionOptions(versionSelect);
@@ -372,6 +371,7 @@ export const handleLoading = async () => {
 
     if (shouldLoadAssets) {
         await handleLoadingAssets();
+        await updateProgress("Generating the node trees...");
         generateTree();
         generateAscendancyTree();
     }
@@ -397,10 +397,17 @@ export const handleLoading = async () => {
         }
     }
 
+    await updateProgress("Drawing node trees...");
     drawLinesRegular();
     drawLinesAscendancy();
     handleViewport();
 
-    progress.innerText = "Done.";
+    title.classList.add("hidden");
+    let index = 0;
+    if (presetInfo.start) {
+        index = 1 + Math.floor(Math.random() * (welcomeMessages.length - 1));
+    }
+    await updateProgress(welcomeMessages.at(index));
+
     loading.classList.add("invisible");
 };
