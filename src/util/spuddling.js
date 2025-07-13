@@ -164,8 +164,9 @@ export const collectStatInformation = () => {
 
             const valueList = [parseFloat(stat["v1"])];
             if (gameChangerStats.has(key)) {
-                valueList.push(...totalStats.get(key).values);
+                valueList.push(...gameChangerStats.get(key).values);
             }
+
             gameChangerStats.set(key, {
                 type: type,
                 values: valueList,
@@ -189,11 +190,25 @@ export const collectStatInformation = () => {
             const type = stat["type"].toLowerCase();
 
             const valueList = [parseFloat(stat["v1"])];
-            if (totalStats.has(key)) {
-                valueList.push(...totalStats.get(key).values);
+
+            const valueMap = new Map();
+            valueMap.set(type, {
+                values: valueList,
+                description: stat["description"],
+                is_percent: stat["is_percent"],
+                scale_to_lvl: stat["scale_to_lvl"],
+            });
+
+            if (!totalStats.has(key)) {
+                totalStats.set(key, valueMap);
+                continue;
             }
-            totalStats.set(key, {
-                type: type,
+
+            if (totalStats.get(key).has(type)) {
+                valueList.push(...totalStats.get(key).get(type).values);
+            }
+
+            totalStats.get(key).set(type, {
                 values: valueList,
                 description: stat["description"],
                 is_percent: stat["is_percent"],

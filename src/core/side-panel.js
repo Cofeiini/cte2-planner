@@ -21,7 +21,7 @@ export const sidePanel = {
     },
 };
 
-/** @type {Map<string, Object>} */
+/** @type {Map<string, Map<string, Object>>} */
 export const totalStats = new Map();
 
 /** @type {Map<string, Object>} */
@@ -98,7 +98,12 @@ export const handleSidePanel = () => {
         return;
     }
 
-    const totalStatList = Array.from(totalStats.values());
+    const totalStatList = [];
+    for (const map of totalStats.values()) {
+        for (const stat of map.values()) {
+            totalStatList.push(stat);
+        }
+    }
 
     const attributeContainer = document.createElement("div");
     attributeContainer.classList.add("panel-group-item-container");
@@ -152,7 +157,7 @@ export const handleSidePanel = () => {
 
             const valueList = [parseFloat(stat["v1"])];
             if (ascendancyStats.has(key)) {
-                valueList.push(...totalStats.get(key).values);
+                valueList.push(...ascendancyStats.get(key).values);
             }
             ascendancyStats.set(key, {
                 type: type,
