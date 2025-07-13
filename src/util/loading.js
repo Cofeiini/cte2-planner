@@ -181,15 +181,15 @@ export const handleLoadingAssets = async () => {
         for (const node of allNodes) {
             for (const stat of node.stats) {
                 const identifier = stat["stat"];
-                let json = data.find(item => (item.id === identifier) || (item.data?.id === identifier));
+                const type = stat["type"].toLowerCase();
+                let json = structuredClone(data.find(item => (item.id === identifier) || (item.data?.id === identifier)));
                 if (!json) {
                     json = {
                         is_perc: node.type !== "special",
-                        format: (parseFloat(stat["v1"]) === 1.0) || undefined,
+                        format: ((parseFloat(stat["v1"]) === 1.0) && (type !== "flat")) || undefined,
                     };
                 }
-                const type = stat["type"].toLowerCase();
-                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || ((type === "percent") || (type === "more"));
+                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more");
                 json["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/§\w/g, "");
 
                 if (overrideData[identifier]) {
@@ -238,7 +238,7 @@ export const handleLoadingAssets = async () => {
             const value = parseFloat(item["v1"]);
 
             const info = nodeData.get(item["stat"]);
-            const isPercent = (info["data"]?.["perc"] ?? info["is_perc"]) ?? true;
+            const isPercent = (info["data"]?.["perc"] ?? info["is_perc"]) || (item["type"].toLowerCase() === "percent");
             const isMinusGood = info["minus_is_good"] ?? false;
             const isScaled = item["scale_to_lvl"] ?? false;
             const isFormat = info["format"] ?? (isStat || (isPerk && (Math.abs(value) > 1)));
