@@ -52,7 +52,8 @@ export const resetMessageBox = () => {
 export const setUpStatContainer = (stat) => {
     let total = stat.values.reduce((accumulated, item) => accumulated + item, 0);
     if (stat["scale_to_lvl"]) {
-        total = stat.values.reduce((accumulated, item) => accumulated + scaleValueToLevel(parseInt(sidePanel.character.level.value), item), 0);
+        const level = parseInt(sidePanel.character.level.value);
+        total = stat.values.reduce((accumulated, item) => accumulated + scaleValueToLevel(level, item), 0);
     }
 
     const container = document.createElement("div");

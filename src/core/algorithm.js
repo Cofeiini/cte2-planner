@@ -20,19 +20,8 @@ import {
  * @returns {number}
  */
 export const scaleValueToLevel = (level, value) => {
-    if (value > 1.0) {
-        value = 4;
-        if (level > 1) {
-            value = 4 + level;
-        }
-    } else {
-        value = 1 + (0.2 * (level - 1)) + Math.min(Math.max(0, level - 71), 5);
-        if (level > 71) {
-            value = 15.0 + Math.floor((level - 71) / 5.0);
-        }
-    }
-
-    return value;
+    const result = value * (1 + (0.2 * (level - 1)));
+    return (result < 15.0) ? result : Math.floor(result);
 };
 
 /**
