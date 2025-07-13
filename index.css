@@ -396,6 +396,7 @@ html, body {
     display: flex;
     font-size: 1.25em;
     gap: 0.25em;
+    justify-content: center;
     left: 50%;
     margin-top: 0.5em;
     position: absolute;

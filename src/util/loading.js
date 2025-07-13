@@ -4,6 +4,7 @@ import { controls, welcomeMessages } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
 import {
     ascendancyNodes,
+    ascendancySelections,
     exclusiveNodeValues,
     talentExclusions,
     talentNodes,
@@ -298,11 +299,9 @@ export const handleLoading = async () => {
     const loading = document.querySelector("#loading");
     loading.classList.remove("invisible");
 
-    let shouldLoadAssets = true;
     try {
         updatePresetInfo(JSON.parse(atob(new URLSearchParams(location.search).get("preset"))));
 
-        const initialLoading = releaseInfo === undefined;
         if (!releaseInfo) {
             const overrideInfo = RELEASES.find(item => item.version === presetInfo.version);
             if (overrideInfo) {
@@ -311,8 +310,6 @@ export const handleLoading = async () => {
                 updateReleaseInfo(RELEASES.at(0));
             }
         }
-
-        shouldLoadAssets = initialLoading || (presetInfo.version !== releaseInfo.version);
     } catch (_error) {
         updateReleaseInfo(RELEASES.at(0));
         updatePresetInfo({
@@ -354,7 +351,7 @@ export const handleLoading = async () => {
         presetInfo.ascendancy["talents"] = [];
     }
 
-    if (RELEASES.find(item => item.version !== presetInfo.version)) {
+    if (!RELEASES.find(item => item.version === presetInfo.version)) {
         presetInfo.version = RELEASES.at(0).version;
     }
 
@@ -364,7 +361,7 @@ export const handleLoading = async () => {
 
     const points = releaseInfo.points;
     updatePoints(points.starting + points.leveling + points.questing);
-    updateAscendancyPoints(points.ascendancy);
+    updateAscendancyPoints(points.ascendancy.starting + points.ascendancy.questing);
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
     document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS}`;
 
@@ -373,17 +370,19 @@ export const handleLoading = async () => {
     sidePanel.character.level.value = presetInfo.level;
     sidePanel.character.levelLabel.innerText = presetInfo.level;
 
-    if (shouldLoadAssets) {
-        await handleLoadingAssets();
-        await updateProgress("Generating the node trees...");
-        generateTree();
-        generateAscendancyTree();
-    }
+    await handleLoadingAssets();
+    await updateProgress("Generating the node trees...");
+    generateTree();
+    generateAscendancyTree();
 
     document.querySelector("#ascendancy-select").value = controls.ascendancy;
     handleAscendancyOptions();
 
     for (const talent of talentSelections) {
+        toggleNode(talent, true);
+    }
+
+    for (const talent of ascendancySelections) {
         toggleNode(talent, true);
     }
 

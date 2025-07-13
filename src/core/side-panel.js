@@ -1,4 +1,3 @@
-import { iconAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
 import { ascendancySelections, talentSelections, toggleNode } from "../type/talent-node.js";

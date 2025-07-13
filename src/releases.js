@@ -6,7 +6,10 @@ export const RELEASES = [
             starting: 1,
             leveling: 100,
             questing: 25,
-            ascendancy: 7,
+            ascendancy: {
+                starting: 1,
+                questing: 6,
+            },
         },
     },
 ];

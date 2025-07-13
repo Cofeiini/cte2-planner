@@ -130,16 +130,18 @@ export const setUpSeparator = () => {
  * @param {Object} json
  */
 export const setUpURL = (json = undefined) => {
+    const talents = new Set(talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort());
     const ascendancyStart = ascendancyStartNodes.get(ascendancyInfo);
+    const ascendancy = new Set(ascendancySelections.filter(item => item.identifier.number !== ascendancyStart?.identifier.number).map(item => item.identifier.number).sort());
 
     updatePresetInfo(json || {
         version: releaseInfo.version,
         level: sidePanel.character.level.value,
         start: startingNode?.identifier.number,
-        talents: talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort(),
+        talents: Array.from(talents),
         ascendancy: {
             selection: ascendancyInfo,
-            talents: ascendancySelections.filter(item => item.identifier.number !== ascendancyStart?.identifier.number).map(item => item.identifier.number).sort(),
+            talents: Array.from(ascendancy),
         },
     });
 
