@@ -1134,6 +1134,43 @@
   },
   {
     "data": {
+      "base": 0.0,
+      "core_stat_data": {
+        "stats": [
+          {
+            "type": "PERCENT",
+            "scale_to_lvl": false,
+            "stat": "armor",
+            "v1": 1.0
+          }
+        ]
+      },
+      "effect_id": "frenzy_charge",
+      "ele": "Physical",
+      "id": "armor_er_frenzy_charge",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": false,
+      "scale": "NONE"
+    },
+    "ser": "bonus_stat_per_effect"
+  },
+  {
+    "data": {
+      "add_to": "armor_penetration",
+      "adder_stat": "dexterity",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "armor_penetration_per_perc_of_dexterity",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
       "add_to": "armor",
       "adder_stat": "dodge",
       "base": 0.0,
@@ -1438,6 +1475,20 @@
   },
   {
     "data": {
+      "add_to": "attack_damage",
+      "adder_stat": "intelligence",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "attack_damage_per_intelligence",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
       "attribute_id": "minecraft:generic.attack_speed",
       "base": 0.0,
       "cut_by_hundred": true,
@@ -1474,6 +1525,20 @@
       "base": 0.0,
       "ele": "Physical",
       "id": "attack_speed_per_perc_of_accuracy",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "attack_speed",
+      "adder_stat": "dexterity",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "attack_speed_per_perc_of_dexterity",
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
@@ -3962,6 +4027,65 @@
     "softcap": 0.0
   },
   {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_combo_extender_to_source"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "combo_extender_on_kill",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "data": {
+      "base": 0.0,
+      "core_stat_data": {
+        "stats": [
+          {
+            "type": "PERCENT",
+            "scale_to_lvl": false,
+            "stat": "critical_hit",
+            "v1": 1.0
+          }
+        ]
+      },
+      "effect_id": "frenzy_charge",
+      "ele": "Physical",
+      "id": "crit_chance_per_frenzy_charge",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": false,
+      "scale": "NONE"
+    },
+    "ser": "bonus_stat_per_effect"
+  },
+  {
     "data": {
       "base": 0.0,
       "core_stat_data": {
@@ -4361,6 +4485,42 @@
     "min": 0.0,
     "minus_is_good": false,
     "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "_additive_damage_number_add_stat_data"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "spell_has_tag_cursed"
+        ],
+        "order": "damage_layers",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "cursed_skill_damage",
+    "is_long": false,
+    "is_perc": true,
+    "max": 1.0E+8,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLICATIVE_DAMAGE",
     "order": 100,
     "scaling": "NONE",
     "ser": "data",
@@ -7103,6 +7263,44 @@
     "effect": [
       {
         "effects": [
+          "give_move_speed_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "exile_effect_to_source_move_speed_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "give_pedipalps_to_source"
         ],
         "events": [
@@ -8091,6 +8289,44 @@
     "has_softcap": false,
     "icon": "★",
     "id": "frenzy_charge_on_kill",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_frenzy_charge_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "frenzy_charge_when_hit",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -9157,6 +9393,80 @@
     "effect": [
       {
         "effects": [
+          "_additive_damage_number_add_stat_data"
+        ],
+        "events": [
+          "on_restore_resource"
+        ],
+        "ifs": [
+          "is_target_low_hp",
+          "resource_type_is_health"
+        ],
+        "order": "damage_layers",
+        "side": "Target"
+      }
+    ],
+    "ele": "ALL",
+    "format": "yellow",
+    "group": "RESTORATION",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "health_restore_effect_on_self_ll",
+    "is_long": false,
+    "is_perc": true,
+    "max": 1.0E+8,
+    "min": -100.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "_additive_damage_number_add_stat_data"
+        ],
+        "events": [
+          "on_restore_resource"
+        ],
+        "ifs": [
+          "is_target_very_low_hp",
+          "resource_type_is_health"
+        ],
+        "order": "damage_layers",
+        "side": "Target"
+      }
+    ],
+    "ele": "ALL",
+    "format": "yellow",
+    "group": "RESTORATION",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "health_restore_effect_on_self_vll",
+    "is_long": false,
+    "is_perc": true,
+    "max": 1.0E+8,
+    "min": -100.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "give_hemorrhage_to_source"
         ],
         "events": [
@@ -9219,6 +9529,80 @@
     "is_perc": true,
     "max": 1.0,
     "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "energy_inc__flat_damage_number_add_stat_percent"
+        ],
+        "events": [
+          "on_spend_resource"
+        ],
+        "ifs": [
+          "spell_has_resource_type_cost_energy",
+          "resource_type_is_energy"
+        ],
+        "order": "before_damage_layers",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "MAIN",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "⚔",
+    "id": "imbuement_energy_cost",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "energy_flat_damage_number_add_stat_percent"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "spell_has_resource_type_cost_energy",
+          "is_is_bonus_element_damage_true_is_false"
+        ],
+        "order": "damage_layers",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "MAIN",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "⚔",
+    "id": "imbuement",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
     "minus_is_good": false,
     "multiUseType": "MULTIPLY_STAT",
     "order": 100,
@@ -12781,6 +13165,29 @@
   },
   {
     "data": {
+      "base": 0.0,
+      "core_stat_data": {
+        "stats": [
+          {
+            "type": "FLAT",
+            "scale_to_lvl": false,
+            "stat": "move_speed",
+            "v1": 1.0
+          }
+        ]
+      },
+      "effect_id": "frenzy_charge",
+      "ele": "Physical",
+      "id": "move_speed_per_frenzy_charge",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": false,
+      "scale": "NONE"
+    },
+    "ser": "bonus_stat_per_effect"
+  },
+  {
+    "data": {
       "add_to": "magic_shield_regen",
       "adder_stat": "health_regen",
       "base": 0.0,
@@ -13127,6 +13534,42 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_passive_block"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "is_is_blocked_true"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "on_block",
+    "is_long": true,
+    "is_perc": false,
+    "max": 1.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_ignite_explosion"
         ],
         "events": [
@@ -13151,6 +13594,42 @@
     "is_perc": true,
     "max": 100.0,
     "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_dodge"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "is_is_dodged_true"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "on_dodge",
+    "is_long": true,
+    "is_perc": false,
+    "max": 1.0,
+    "min": 0.0,
     "minus_is_good": false,
     "multiUseType": "MULTIPLY_STAT",
     "order": 100,
@@ -13190,6 +13669,272 @@
     "min": -1000.0,
     "minus_is_good": false,
     "multiUseType": "MULTIPLICATIVE_DAMAGE",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_att_speed_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_att_speed_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_cast_speed_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_cast_speed_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_damage_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_damage_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_move_speed_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_move_speed_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_regen_life_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_regen_life_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_regen_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_regen_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_pants_resource_cost_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "pants_resource_cost_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
     "order": 100,
     "scaling": "NONE",
     "ser": "data",
@@ -14041,6 +14786,84 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_arrow_storm"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_ricochet_shot",
+          "attack_type_is_hit",
+          "is_arrow_storm_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_arrow_storm_on_ricochet_shot",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_black_hole"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_snipe",
+          "attack_type_is_hit",
+          "is_black_hole_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Shadow",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_black_hole_on_snipe",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_blood_explosion"
         ],
         "events": [
@@ -14177,6 +15000,45 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_chain_lightning_on_attack_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_chain_lightning"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_power_chord",
+          "attack_type_is_hit",
+          "is_chain_lightning_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_chain_lightning_on_power_chord_hit",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -14344,6 +15206,45 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_cold_snap"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false",
+          "is_cold_snap_not_on_cd"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cold_snap_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "give_combo_starter_to_source"
         ],
         "events": [
@@ -14365,6 +15266,514 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_combo_starter",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_arrow_barrage"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "is_crit_true",
+          "is_cursed_arrow_barrage_not_on_cd"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_arrow_barrage_on_crit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_axe_throw"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "style_is_int_is_false",
+          "attack_type_is_hit",
+          "is_cursed_axe_throw_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_axe_throw_on_attack_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_fist_of_judgment"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "attack_type_is_hit",
+          "is_cursed_fist_of_judgment_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_fist_of_judgment_on_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_lightning_nova"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "ele_match_stat",
+          "is_hit_or_bonus",
+          "is_cursed_lightning_nova_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_lightning_nova_on_lightning_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_meteor"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "spell_has_tag_magic",
+          "attack_type_is_hit",
+          "is_cursed_meteor_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_meteor_on_spell_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_power_chord"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "spell_has_tag_song",
+          "attack_type_is_hit",
+          "is_cursed_power_chord_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_power_chord_on_song_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_quake"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "attack_type_is_hit",
+          "is_cursed_quake_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_quake_on_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_raging_dragon"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "spell_has_tag_finisher",
+          "attack_type_is_hit",
+          "is_cursed_raging_dragon_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_raging_dragon_on_finisher_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_ricochet_shot"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "spell_has_tag_ricochet_shot",
+          "attack_type_is_hit",
+          "is_cursed_ricochet_shot_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_ricochet_shot_on_ricochet_shot",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_summon_zombie"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_cursed_summon_zombie_not_on_cd"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Shadow",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_summon_zombie_on_kill",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cursed_timewinder"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_cursed",
+          "is_crit_true",
+          "is_cursed_timewinder_not_on_cd"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cursed_timewinder_on_crit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_curse_of_agony"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Shadow",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_curse_of_agony_on_kill",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_cyclone"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_crit_true",
+          "is_cyclone_not_on_cd"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_cyclone_on_crit",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -14498,6 +15907,45 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_double_strike"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_is_basic_atk_true",
+          "attack_type_is_hit",
+          "is_double_strike_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_double_strike_on_basic_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_fan_of_knives"
         ],
         "events": [
@@ -14567,6 +16015,84 @@
     "scaling": "NONE",
     "ser": "data",
     "show_in_gui": false,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_fist_of_judgment"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_fist_of_judgment",
+          "attack_type_is_hit",
+          "is_fist_of_judgment_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_fist_of_judgment_on_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_frost_blade"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "style_is_int_is_false",
+          "attack_type_is_hit",
+          "is_frost_blade_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_frost_blade_on_attack_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
     "softcap": 0.0
   },
   {
@@ -14890,6 +16416,43 @@
         ],
         "ifs": [
           "random_roll",
+          "spell_has_tag_charged_bolt"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_lightning_bolt_charged_bolt",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_lightning_bolt"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
           "spell_has_tag_discharge"
         ],
         "order": "data_modification",
@@ -14957,6 +16520,45 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_meteor"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_arrow_storm",
+          "attack_type_is_hit",
+          "is_meteor_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_meteor_on_arrow_storm_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_discharge"
         ],
         "events": [
@@ -14980,6 +16582,83 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_noncrit_discharge",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_poison_ball"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "spell_has_tag_charged_bolt",
+          "is_poison_ball_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Shadow",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_poison_ball_on_charged_bolt",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_poison_ball"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_ailment_poison",
+          "is_poison_ball_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Shadow",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_poison_ball_on_poison",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -15151,6 +16830,84 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_pulsar_singularity_trap"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "spell_has_tag_beast",
+          "is_pulsar_singularity_trap_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_pulsar_singularity_trap_on_beast_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_puncture"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_blocked_true",
+          "is_puncture_not_on_cd"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_puncture_on_block",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_putrid_breath"
         ],
         "events": [
@@ -15200,7 +16957,7 @@
           "is_ritardando_not_on_cd"
         ],
         "order": "after_damage_bonuses",
-        "side": "Source"
+        "side": "Target"
       }
     ],
     "ele": "Physical",
@@ -15312,6 +17069,7 @@
         ],
         "ifs": [
           "random_roll",
+          "attack_type_is_hit",
           "is_slice_not_on_cd",
           "spell_has_tag_slice_is_false"
         ],
@@ -15403,6 +17161,45 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_splinter",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_steam_cloud"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_is_basic_atk_true",
+          "attack_type_is_hit",
+          "is_steam_cloud_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Fire",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_steam_cloud_on_basic_hit",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -15572,6 +17369,162 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_summon_wisp"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false",
+          "is_summon_wisp_not_on_cd"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_summon_wisp_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_target_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_target",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_tidal_strike"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "ele_match_stat",
+          "spell_has_tag_not_tidal_strike",
+          "is_hit_or_bonus",
+          "is_tidal_strike_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_tidal_strike_on_cold_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_turbo"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false",
+          "is_turbo_not_on_cd"
+        ],
+        "order": "after_damage_bonuses",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_turbo_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_venom"
         ],
         "events": [
@@ -15648,6 +17601,45 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_zap"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "spell_has_tag_not_zap",
+          "attack_type_is_hit",
+          "is_zap_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Nature",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_zap_on_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "_additive_damage_number_add_stat_data"
         ],
         "events": [
@@ -15671,7 +17663,7 @@
     "is_perc": true,
     "max": 1.0E+8,
     "min": -1000.0,
-    "minus_is_good": false,
+    "minus_is_good": true,
     "multiUseType": "MULTIPLY_STAT",
     "order": 100,
     "scaling": "NONE",
@@ -15936,6 +17928,78 @@
     "has_softcap": false,
     "icon": "★",
     "id": "projectile_spell_dmg_taken",
+    "is_long": false,
+    "is_perc": true,
+    "max": 1.0E+8,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLICATIVE_DAMAGE",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "increase_proj_spread_randomness_num"
+        ],
+        "events": [
+          "on_spell_stat_calc"
+        ],
+        "ifs": [
+          "spell_has_tag_random_spread"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "green",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "➹",
+    "id": "proj_spread_randomness",
+    "is_long": false,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -100.0,
+    "minus_is_good": true,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "_additive_damage_number_add_stat_data"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "spell_has_tag_random_spread"
+        ],
+        "order": "damage_layers",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "random_spread_damage",
     "is_long": false,
     "is_perc": true,
     "max": 1.0E+8,
@@ -17112,10 +19176,38 @@
   {
     "data": {
       "add_to": "spell_damage",
+      "adder_stat": "bleed_damage",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "skill_damage_per_bleed_damage",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "spell_damage",
       "adder_stat": "block_chance",
       "base": 0.0,
       "ele": "Physical",
       "id": "skill_damage_per_block_chance",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "spell_damage",
+      "adder_stat": "burn_damage",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "skill_damage_per_burn_damage",
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
@@ -18266,11 +20358,11 @@
       }
     ],
     "ele": "Physical",
-    "format": "red",
+    "format": "aqua",
     "group": "Misc",
     "gui_group": "NONE",
     "has_softcap": false,
-    "icon": "➹",
+    "icon": "★",
     "id": "summon_spider_damage",
     "is_long": false,
     "is_perc": true,
@@ -18302,11 +20394,11 @@
       }
     ],
     "ele": "Physical",
-    "format": "red",
+    "format": "aqua",
     "group": "Misc",
     "gui_group": "NONE",
     "has_softcap": false,
-    "icon": "➹",
+    "icon": "★",
     "id": "summon_undead_damage",
     "is_long": false,
     "is_perc": true,
@@ -18573,10 +20665,38 @@
   {
     "data": {
       "add_to": "weapon_damage",
+      "adder_stat": "dexterity",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "total_damage_per_perc_of_dexterity",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "weapon_damage",
       "adder_stat": "health",
       "base": 0.0,
       "ele": "Physical",
       "id": "total_damage_per_perc_of_health",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "weapon_damage",
+      "adder_stat": "intelligence",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "total_damage_per_perc_of_intelligence",
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
@@ -19585,6 +21705,80 @@
     "is_long": true,
     "is_perc": false,
     "max": 1.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_wrath_to_source"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll"
+        ],
+        "order": "final_damage",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "wrath_on_kill",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": 0.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "give_wrath_to_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "attack_type_is_hit",
+          "is_is_dodged_true_is_false"
+        ],
+        "order": "final_damage",
+        "side": "Target"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "wrath_when_hit",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
     "min": 0.0,
     "minus_is_good": false,
     "multiUseType": "MULTIPLY_STAT",

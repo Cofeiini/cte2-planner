@@ -7,10 +7,16 @@
     "max_lvls": 1,
     "stats": [
       {
+        "type": "FLAT",
+        "scale_to_lvl": true,
+        "stat": "accuracy",
+        "v1": 3.0
+      },
+      {
         "type": "PERCENT",
         "scale_to_lvl": false,
         "stat": "accuracy",
-        "v1": 20.0
+        "v1": 12.0
       }
     ]
   },
@@ -22,10 +28,16 @@
     "max_lvls": 1,
     "stats": [
       {
+        "type": "FLAT",
+        "scale_to_lvl": true,
+        "stat": "accuracy",
+        "v1": 1.0
+      },
+      {
         "type": "PERCENT",
         "scale_to_lvl": false,
         "stat": "accuracy",
-        "v1": 6.0
+        "v1": 4.0
       }
     ]
   },
@@ -2387,22 +2399,22 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "FLAT",
+        "type": "MORE",
         "scale_to_lvl": false,
-        "stat": "max_endurance_charge_charges",
-        "v1": 1.0
-      },
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "dmg_per_endurance_charge",
-        "v1": 6.0
-      },
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "armor_er_endurance_charge",
+        "stat": "health",
         "v1": 5.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "dmg_reduction_ll",
+        "v1": 4.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "dmg_reduction_vll",
+        "v1": 6.0
       }
     ]
   },
@@ -2414,22 +2426,22 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "MORE",
+        "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "armor",
-        "v1": 10.0
-      },
-      {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "dodge",
-        "v1": 10.0
+        "stat": "max_frenzy_charge_charges",
+        "v1": 1.0
       },
       {
         "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "move_speed_per_endurance_charge",
-        "v1": 3.0
+        "stat": "skill_damage_per_move_speed",
+        "v1": 50.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "move_speed_per_frenzy_charge",
+        "v1": 5.0
       }
     ]
   },
@@ -2443,20 +2455,20 @@
       {
         "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "aura_effect",
+        "stat": "health_restore_effect_on_self_ll",
+        "v1": 8.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "health_restore_effect_on_self_vll",
+        "v1": 12.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "proc_blood_explosion_on_crit",
         "v1": 25.0
-      },
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "spirit_cost",
-        "v1": -25.0
-      },
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "proc_blood_explosion",
-        "v1": 50.0
       }
     ]
   },
@@ -2471,7 +2483,7 @@
         "type": "MORE",
         "scale_to_lvl": false,
         "stat": "dmg_when_low_hp",
-        "v1": 25.0
+        "v1": 35.0
       },
       {
         "type": "FLAT",
@@ -2497,14 +2509,26 @@
       {
         "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "endurance_charge_on_kill",
+        "stat": "frenzy_charge_on_kill",
         "v1": 25.0
       },
       {
         "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "frenzy_charge_on_kill",
+        "stat": "frenzy_charge_when_hit",
         "v1": 25.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "armor_er_frenzy_charge",
+        "v1": 4.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "dodge_er_power_charge",
+        "v1": 4.0
       }
     ]
   },
@@ -2530,8 +2554,8 @@
       {
         "type": "FLAT",
         "scale_to_lvl": false,
-        "stat": "dodge_er_power_charge",
-        "v1": 5.0
+        "stat": "crit_chance_per_frenzy_charge",
+        "v1": 6.0
       }
     ]
   },
@@ -2545,6 +2569,12 @@
       {
         "type": "FLAT",
         "scale_to_lvl": false,
+        "stat": "wrath_when_hit",
+        "v1": 15.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
         "stat": "aura_effect",
         "v1": 30.0
       },
@@ -2553,12 +2583,6 @@
         "scale_to_lvl": false,
         "stat": "spirit_cost",
         "v1": -25.0
-      },
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "move_speed",
-        "v1": 10.0
       }
     ]
   },
@@ -3997,10 +4021,10 @@
         "v1": 12.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 8.0
+        "v1": 2.0
       }
     ]
   },
@@ -5067,10 +5091,10 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
-        "v1": 12.0
+        "v1": 1.0
       }
     ]
   },
@@ -5613,6 +5637,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/flamethrower_totem.png",
+    "id": "flamethrower_totem",
+    "is_entry": false,
+    "max_lvls": 16,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_flamethrower_totem",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/spells/icons/flicker_strike.png",
     "id": "flicker_strike",
     "is_entry": false,
@@ -5679,13 +5718,13 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "armor_per_perc_of_dodge",
-        "v1": 40.0
+        "v1": 50.0
       },
       {
         "type": "MORE",
         "scale_to_lvl": false,
         "stat": "dodge",
-        "v1": -50.0
+        "v1": -20.0
       }
     ]
   },
@@ -6298,7 +6337,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "dmg_received",
-        "v1": 20.0
+        "v1": 15.0
       }
     ]
   },
@@ -7044,10 +7083,10 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 10.0
+        "v1": 2.0
       }
     ]
   },
@@ -7297,8 +7336,8 @@
         "v1": 8.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
         "v1": 10.0
       }
@@ -7360,10 +7399,10 @@
         "v1": 8.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 8.0
+        "v1": 2.0
       }
     ]
   },
@@ -7402,10 +7441,10 @@
         "v1": 8.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "mana_regen",
-        "v1": 8.0
+        "v1": 1.0
       }
     ]
   },
@@ -7522,16 +7561,16 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 8.0
+        "v1": 2.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
-        "v1": 10.0
+        "v1": 1.0
       }
     ]
   },
@@ -7543,16 +7582,16 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 3.0
+        "v1": 2.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
-        "v1": 3.0
+        "v1": 1.0
       }
     ]
   },
@@ -7669,7 +7708,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "accuracy_per_perc_of_dexterity",
-        "v1": 150.0
+        "v1": 100.0
       }
     ]
   },
@@ -7826,16 +7865,10 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "dodge",
-        "v1": -100.0
-      },
-      {
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "elemental_resist",
-        "v1": -25.0
+        "v1": -15.0
       },
       {
         "type": "FLAT",
@@ -7874,7 +7907,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "inc_aoe",
-        "v1": 7.0
+        "v1": 15.0
       }
     ]
   },
@@ -7889,7 +7922,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "inc_aoe",
-        "v1": 2.0
+        "v1": 4.0
       }
     ]
   },
@@ -7987,6 +8020,21 @@
         "scale_to_lvl": false,
         "stat": "ailment_damage",
         "v1": 15.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/inferno.png",
+    "id": "inferno",
+    "is_entry": false,
+    "max_lvls": 16,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_inferno",
+        "v1": 1.0
       }
     ]
   },
@@ -8229,28 +8277,10 @@
         "v1": 25.0
       },
       {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "health_regen",
-        "v1": 10.0
-      },
-      {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "mana_regen",
-        "v1": 10.0
-      },
-      {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "energy_regen",
-        "v1": 10.0
-      },
-      {
-        "type": "MORE",
-        "scale_to_lvl": false,
-        "stat": "magic_shield_regen",
-        "v1": 10.0
+        "type": "FLAT",
+        "scale_to_lvl": true,
+        "stat": "resource_regen",
+        "v1": 25.0
       }
     ]
   },
@@ -8389,13 +8419,13 @@
         "type": "FLAT",
         "scale_to_lvl": true,
         "stat": "accuracy",
-        "v1": 25.0
+        "v1": 8.0
       },
       {
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "attack_speed_per_perc_of_accuracy",
-        "v1": 1.0
+        "v1": 25.0
       }
     ]
   },
@@ -8520,6 +8550,12 @@
         "scale_to_lvl": false,
         "stat": "knockback_resist",
         "v1": 15.0
+      },
+      {
+        "type": "PERCENT",
+        "scale_to_lvl": false,
+        "stat": "armor",
+        "v1": 5.0
       }
     ]
   },
@@ -8535,6 +8571,12 @@
         "scale_to_lvl": false,
         "stat": "knockback_resist",
         "v1": 5.0
+      },
+      {
+        "type": "PERCENT",
+        "scale_to_lvl": false,
+        "stat": "armor",
+        "v1": 2.0
       }
     ]
   },
@@ -9187,10 +9229,10 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "magic_shield_regen",
-        "v1": 6.0
+        "v1": 2.0
       }
     ]
   },
@@ -9421,16 +9463,16 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "mana_regen",
-        "v1": 8.0
+        "v1": 1.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
-        "v1": 10.0
+        "v1": 1.0
       }
     ]
   },
@@ -9463,16 +9505,16 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "health_regen",
-        "v1": 8.0
+        "v1": 2.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "mana_regen",
-        "v1": 8.0
+        "v1": 1.0
       }
     ]
   },
@@ -9505,10 +9547,10 @@
     "max_lvls": 1,
     "stats": [
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "mana_regen",
-        "v1": 10.0
+        "v1": 1.0
       }
     ]
   },
@@ -9737,6 +9779,12 @@
         "scale_to_lvl": false,
         "stat": "move_speed",
         "v1": 5.0
+      },
+      {
+        "type": "PERCENT",
+        "scale_to_lvl": false,
+        "stat": "dodge",
+        "v1": 5.0
       }
     ]
   },
@@ -9751,6 +9799,12 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "move_speed",
+        "v1": 2.0
+      },
+      {
+        "type": "PERCENT",
+        "scale_to_lvl": false,
+        "stat": "dodge",
         "v1": 2.0
       }
     ]
@@ -9796,10 +9850,10 @@
         "v1": 8.0
       },
       {
-        "type": "PERCENT",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "energy_regen",
-        "v1": 10.0
+        "v1": 1.0
       }
     ]
   },
@@ -10124,7 +10178,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "fire_dmg_received",
-        "v1": 35.0
+        "v1": 40.0
       }
     ]
   },
@@ -12784,7 +12838,7 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "health_leech_cap",
-        "v1": 3.0
+        "v1": 2.0
       },
       {
         "type": "MORE",
@@ -13959,10 +14013,10 @@
         "v1": 20.0
       },
       {
-        "type": "MORE",
-        "scale_to_lvl": false,
+        "type": "FLAT",
+        "scale_to_lvl": true,
         "stat": "accuracy",
-        "v1": 500.0
+        "v1": 10.0
       },
       {
         "type": "MORE",

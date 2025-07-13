@@ -948,6 +948,7 @@
   "mmorpg.stat.proc_profane_explosion_any": "§7§a[VAL1]%§7 Chance to cause a Profane Exposion on kill.",
   "mmorpg.stat.proc_shatter": "§7§a[VAL1]%§7 Chance to cast Bone Shatter when you shatter a bone-chilled enemy. Also gives you Essence of Frost",
   "mmorpg.stat.proj_dmg_received": "Projectile Damage Receieved",
+  "mmorpg.stat.proj_spread_randomness": "Random Projectile Spread",
   "mmorpg.stat.projectile_barrage": "Projectiles Barrage",
   "mmorpg.stat.projectile_cast_time": "Projectile Cast Time",
   "mmorpg.stat.projectile_cdr": "Projectile Spell Cooldown Reduction",
