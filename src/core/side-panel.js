@@ -27,6 +27,9 @@ export const totalStats = new Map();
 /** @type {Map<string, Object>} */
 export const totalGameChangers = new Map();
 
+/** @type {Map<string, Object>} */
+export const totalAscendancy = new Map();
+
 export let releaseInfo = undefined;
 export const updateReleaseInfo = (json) => {
     releaseInfo = json;
@@ -146,50 +149,40 @@ export const handleSidePanel = () => {
 
     const ascendancyStatContainer = document.createElement("div");
     ascendancyStatContainer.classList.add("panel-group-item-container", "hidden");
-    const ascendancyTalent = ascendancySelections.find(item => item.type === "asc");
-    if (ascendancyTalent) {
+    if (totalAscendancy.size > 0) {
         ascendancyStatContainer.classList.remove("hidden");
-
-        const ascendancyStats = new Map();
-        for (const stat of ascendancyTalent.stats) {
-            const key = stat["stat"];
-            const type = stat["type"].toLowerCase();
-
-            const valueList = [parseFloat(stat["v1"])];
-            if (ascendancyStats.has(key)) {
-                valueList.push(...ascendancyStats.get(key).values);
-            }
-            ascendancyStats.set(key, {
-                type: type,
-                values: valueList,
-                description: stat["description"],
-                is_percent: stat["is_percent"],
-                scale_to_lvl: stat["scale_to_lvl"],
-            });
-        }
 
         const mainTitle = document.createElement("div");
         mainTitle.classList.add("panel-group-title-small");
         mainTitle.innerText = "Ascendancy";
 
-        const itemContainer = document.createElement("div");
-        itemContainer.classList.add("panel-stats-group");
-        itemContainer.append(setUpStatIcon(ascendancyTalent.identifier.talent, "asc"));
+        const ascendancyItems = [];
 
-        const statsContainer = document.createElement("div");
-        statsContainer.classList.add("panel-stats-container-group");
+        const ascendancyList = [...totalAscendancy.values()].sort((a, b) => a.name.localeCompare(b.name));
+        const from = ascendancyList.findIndex(item => item.type === "asc");
+        ascendancyList.splice(0, 0, ascendancyList.splice(from, 1).at(0));
+        for (const majorAscendancy of ascendancyList) {
+            const itemContainer = document.createElement("div");
+            itemContainer.classList.add("panel-stats-group");
+            itemContainer.appendChild(setUpStatIcon(majorAscendancy.id, majorAscendancy.type));
 
-        const title = document.createElement("div");
-        title.classList.add("panel-stats-group-title");
-        title.innerText = ascendancyTalent.name;
-        statsContainer.append(title);
+            const statsContainer = document.createElement("div");
+            statsContainer.classList.add("panel-stats-container-group");
 
-        for (const stat of ascendancyStats.values()) {
-            statsContainer.append(setUpStatContainer(stat));
+            const title = document.createElement("div");
+            title.classList.add("panel-stats-group-title");
+            title.innerText = majorAscendancy.name;
+            statsContainer.appendChild(title);
+
+            for (const stat of majorAscendancy.value.values()) {
+                statsContainer.appendChild(setUpStatContainer(stat));
+            }
+            itemContainer.appendChild(statsContainer);
+            ascendancyItems.push(itemContainer);
+            ascendancyItems.push(setUpSeparator());
         }
-        itemContainer.append(statsContainer);
-
-        ascendancyStatContainer.replaceChildren(mainTitle, itemContainer);
+        ascendancyItems.splice(-1);
+        ascendancyStatContainer.replaceChildren(mainTitle, ...ascendancyItems);
     }
 
     const gameChangerContainer = document.createElement("div");

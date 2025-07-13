@@ -1,5 +1,5 @@
 import { scaleValueToLevel } from "../core/algorithm.js";
-import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
+import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
 import { ascendancySelections, ascendancyStartNodes, startingNode, talentSelections } from "../type/talent-node.js";
@@ -155,7 +155,7 @@ export const collectStatInformation = () => {
     const allNodes = [...talentSelections, ...ascendancySelections];
 
     totalGameChangers.clear();
-    const majorSelections = allNodes.filter(item => item.type === "major");
+    const majorSelections = allNodes.filter(item => item.type === "major" && item.parentTree === "main");
     for (const talent of majorSelections) {
         const gameChangerStats = new Map();
         for (const stat of talent.stats) {
@@ -179,6 +179,34 @@ export const collectStatInformation = () => {
             id: talent.identifier.talent,
             name: talent.name,
             value: gameChangerStats,
+        });
+    }
+
+    totalAscendancy.clear();
+    const majorAscendancy = allNodes.filter(item => (item.type === "major" || item.type === "asc") && item.parentTree !== "main");
+    for (const talent of majorAscendancy) {
+        const ascendancyStats = new Map();
+        for (const stat of talent.stats) {
+            const key = stat["stat"];
+
+            const valueList = [parseFloat(stat["v1"])];
+            if (ascendancyStats.has(key)) {
+                valueList.push(...ascendancyStats.get(key).values);
+            }
+
+            ascendancyStats.set(key, {
+                type: stat["type"].toLowerCase(),
+                values: valueList,
+                description: stat["description"],
+                is_percent: stat["is_percent"],
+                scale_to_lvl: stat["scale_to_lvl"],
+            });
+        }
+        totalAscendancy.set(talent.identifier.talent, {
+            id: talent.identifier.talent,
+            name: talent.name,
+            value: ascendancyStats,
+            type: talent.type,
         });
     }
 
