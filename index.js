@@ -167,7 +167,7 @@ window.onload = async () => {
         const option = document.createElement("option");
         option.value = release.version;
         option.innerText = release.version;
-        versionSelect.appendChild(option);
+        versionSelect.append(option);
     }
     versionSelect.onchange = handleVersionChange;
 

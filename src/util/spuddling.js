@@ -82,21 +82,20 @@ export const setUpIcon = (element) => {
  */
 export const setUpStatIcon = (nodeId, type = "major") => {
     const container = document.createElement("div");
+    container.style.aspectRatio = "1/1";
     container.style.display = "flex";
     container.style.height = "80px";
     container.style.imageRendering = "pixelated";
     container.style.padding = "0.25em";
-    container.style.pointerEvents = "none";
     container.style.position = "relative";
     container.style.userSelect = "none";
-    container.style.width = "80px";
 
     const indicator = document.createElement("img");
     indicator.src = indicatorAssets.get("yes");
     indicator.width = 40;
     indicator.height = 40;
     setUpIcon(indicator);
-    container.appendChild(indicator);
+    container.append(indicator);
 
     const border = document.createElement("img");
     border.src = borderAssets.get(`${type}_on`);
@@ -107,14 +106,14 @@ export const setUpStatIcon = (nodeId, type = "major") => {
         border.height = 68;
     }
     setUpIcon(border);
-    container.appendChild(border);
+    container.append(border);
 
     const icon = document.createElement("img");
     icon.src = iconAssets.get(nodeId);
     icon.width = 32;
     icon.height = 32;
     setUpIcon(icon);
-    container.appendChild(icon);
+    container.append(icon);
 
     return container;
 };

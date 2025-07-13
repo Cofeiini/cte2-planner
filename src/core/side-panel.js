@@ -164,7 +164,7 @@ export const handleSidePanel = () => {
         for (const majorAscendancy of ascendancyList) {
             const itemContainer = document.createElement("div");
             itemContainer.classList.add("panel-stats-group");
-            itemContainer.appendChild(setUpStatIcon(majorAscendancy.id, majorAscendancy.type));
+            itemContainer.append(setUpStatIcon(majorAscendancy.id, majorAscendancy.type));
 
             const statsContainer = document.createElement("div");
             statsContainer.classList.add("panel-stats-container-group");
@@ -172,12 +172,12 @@ export const handleSidePanel = () => {
             const title = document.createElement("div");
             title.classList.add("panel-stats-group-title");
             title.innerText = majorAscendancy.name;
-            statsContainer.appendChild(title);
+            statsContainer.append(title);
 
             for (const stat of majorAscendancy.value.values()) {
-                statsContainer.appendChild(setUpStatContainer(stat));
+                statsContainer.append(setUpStatContainer(stat));
             }
-            itemContainer.appendChild(statsContainer);
+            itemContainer.append(statsContainer);
             ascendancyItems.push(itemContainer);
             ascendancyItems.push(setUpSeparator());
         }
@@ -199,7 +199,7 @@ export const handleSidePanel = () => {
         for (const gameChanger of gameChangerList) {
             const itemContainer = document.createElement("div");
             itemContainer.classList.add("panel-stats-group");
-            itemContainer.appendChild(setUpStatIcon(gameChanger.id));
+            itemContainer.append(setUpStatIcon(gameChanger.id));
 
             const statsContainer = document.createElement("div");
             statsContainer.classList.add("panel-stats-container-group");
@@ -207,12 +207,12 @@ export const handleSidePanel = () => {
             const title = document.createElement("div");
             title.classList.add("panel-stats-group-title");
             title.innerText = gameChanger.name;
-            statsContainer.appendChild(title);
+            statsContainer.append(title);
 
             for (const stat of gameChanger.value.values()) {
-                statsContainer.appendChild(setUpStatContainer(stat));
+                statsContainer.append(setUpStatContainer(stat));
             }
-            itemContainer.appendChild(statsContainer);
+            itemContainer.append(statsContainer);
             gameChangerItems.push(itemContainer);
             gameChangerItems.push(setUpSeparator());
         }
@@ -259,7 +259,7 @@ const setUpMessageBox = (textList) => {
     message.style.gap = "0.5em";
     message.style.height = "100%";
     message.style.width = "100%";
-    content.appendChild(message);
+    content.append(message);
 
     message.replaceChildren(...textList.map(item => {
         const element = document.createElement("div");
@@ -302,7 +302,7 @@ export const handleVersionChange = async (event) => {
 
             await handleLoading();
         };
-        buttons.appendChild(proceedButton);
+        buttons.append(proceedButton);
 
         const cancelButton = document.createElement("button");
         cancelButton.innerText = "Cancel";
@@ -317,7 +317,7 @@ export const handleVersionChange = async (event) => {
 
             resetMessageBox();
         };
-        buttons.appendChild(cancelButton);
+        buttons.append(cancelButton);
 
         document.querySelector("#message-box-title").innerText = `Loading talent tree version ${releaseInfo.version}`;
         document.querySelector("#message-box-content").replaceChildren(content);
@@ -368,14 +368,14 @@ export const handleDataImport = () => {
     footer.style.width = "100%";
     footer.fontSize = "larger";
     footer.innerText = "An error occurred while reading the data. Make sure it's valid and correctly formatted.";
-    content.appendChild(footer);
+    content.append(footer);
 
     const input = document.createElement("textarea");
     input.placeholder = "Paste JSON data here...";
     input.rows = 20;
     input.style.backgroundColor = "darkslategray";
     input.style.color = "white";
-    content.appendChild(input);
+    content.append(input);
 
     const buttons = [];
 
@@ -467,7 +467,7 @@ export const handleDataExport = () => {
     input.style.backgroundColor = "darkslategray";
     input.style.color = "white";
     input.value = JSON.stringify(presetInfo, null, 4);
-    content.appendChild(input);
+    content.append(input);
 
     const buttons = [];
 
