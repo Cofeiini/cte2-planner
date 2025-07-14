@@ -22,7 +22,7 @@ import {
     updateTargetTree,
 } from "../type/talent-node.js";
 import { drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
-import { setUpIcon, updateAscendancyButton } from "./spuddling.js";
+import { handleViewport, setUpIcon, updateAscendancyButton } from "./spuddling.js";
 
 export const viewport = {
     width: 0,
@@ -792,6 +792,7 @@ export const generateTree = () => {
 
             handleSimpleTooltip();
             ascendancyButton.refresh();
+            handleViewport();
         }
     };
 
