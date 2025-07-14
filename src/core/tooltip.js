@@ -56,7 +56,7 @@ export const handleTooltip = (talent) => {
     }
 
     infoTooltip.name.innerText = talent.name;
-    infoTooltip.name.style.color = (talent.type === "major") ? colorMap.get("5") : colorMap.get("f");
+    infoTooltip.name.style.color = (talent.type === "major") ? colorMap.minecraft.get("5") : colorMap.minecraft.get("f");
     infoTooltip.node.count.innerText = nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" });
     infoTooltip.node.text.innerText = `Node${(Math.abs(nodeTotal) === 1) ? "" : "s"}`;
 

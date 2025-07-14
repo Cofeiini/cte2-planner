@@ -66,10 +66,10 @@ let drawingTimer = undefined;
 export const generateDescriptionHTML = (description) => {
     const results = [];
     const parts = description.split(/(§\w)/).filter(element => element);
-    let color = colorMap.get("7");
+    let color = colorMap.minecraft.get("7");
     for (const part of parts) {
         if (part.startsWith("§")) {
-            color = colorMap.get(part.at(1));
+            color = colorMap.minecraft.get(part.at(1));
             continue;
         }
 
@@ -709,7 +709,7 @@ export const generateTree = () => {
         const isHidden = ascendancyContainer.classList.contains("hidden");
 
         infoTooltip.name.innerText = "Ascendancy";
-        infoTooltip.name.style.color = colorMap.get("5");
+        infoTooltip.name.style.color = colorMap.minecraft.get("5");
         infoTooltip.node.count.classList.add("hidden");
         infoTooltip.node.text.classList.add("hidden");
         infoTooltip.stats.innerHTML = [

@@ -63,10 +63,10 @@ export const drawLinesInitial = () => {
     const context = canvas.getContext("2d", { alpha: false });
     context.imageSmoothingEnabled = false;
 
-    context.fillStyle = colorMap.get("background");
+    context.fillStyle = colorMap.custom.get("background");
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    context.strokeStyle = colorMap.get("line");
+    context.strokeStyle = colorMap.custom.get("line");
     context.lineWidth = LINE_WIDTH;
     drawLinesSimple(context, talentNodes);
     context.stroke();
@@ -77,10 +77,10 @@ export const drawLinesAscendancyInitial = () => {
         const subContext = subCanvas.getContext("2d", { alpha: false });
         subContext.imageSmoothingEnabled = false;
 
-        subContext.fillStyle = colorMap.get("background");
+        subContext.fillStyle = colorMap.custom.get("background");
         subContext.fillRect(0, 0, subCanvas.width, subCanvas.height);
 
-        subContext.strokeStyle = colorMap.get("line");
+        subContext.strokeStyle = colorMap.custom.get("line");
         subContext.lineWidth = LINE_WIDTH;
         drawLinesSimple(subContext, ascendancyNodes.get(ascendancy));
         subContext.stroke();
@@ -102,7 +102,7 @@ export const drawLinesAscendancy = () => {
     context.lineWidth = LINE_WIDTH;
 
     if (ascendancySelections.length < TOTAL_ASCENDANCY_POINTS) {
-        context.strokeStyle = colorMap.get("line_connect");
+        context.strokeStyle = colorMap.custom.get("line_connect");
         const excluded = [];
         for (const values of talentExclusions.values()) {
             if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
@@ -112,13 +112,13 @@ export const drawLinesAscendancy = () => {
         drawLinesSimple(context, ascendancySelections, excluded);
     }
 
-    context.strokeStyle = colorMap.get("line_select");
+    context.strokeStyle = colorMap.custom.get("line_select");
     drawLinesComplex(context, ascendancySelections);
 
-    context.strokeStyle = colorMap.get("line_remove");
+    context.strokeStyle = colorMap.custom.get("line_remove");
     drawLinesComplex(context, talentRemovePreview, []);
 
-    context.strokeStyle = colorMap.get("line_add");
+    context.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplex(context, talentAddPreview, []);
 };
 
@@ -132,7 +132,7 @@ export const drawLinesRegular = () => {
     context.lineWidth = LINE_WIDTH;
 
     if (talentSelections.length < TOTAL_POINTS) {
-        context.strokeStyle = colorMap.get("line_connect");
+        context.strokeStyle = colorMap.custom.get("line_connect");
         const excluded = [];
         for (const values of talentExclusions.values()) {
             if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
@@ -142,13 +142,13 @@ export const drawLinesRegular = () => {
         drawLinesSimple(context, talentSelections, excluded);
     }
 
-    context.strokeStyle = colorMap.get("line_select");
+    context.strokeStyle = colorMap.custom.get("line_select");
     drawLinesComplex(context, talentSelections);
 
-    context.strokeStyle = colorMap.get("line_remove");
+    context.strokeStyle = colorMap.custom.get("line_remove");
     drawLinesComplex(context, talentRemovePreview, []);
 
-    context.strokeStyle = colorMap.get("line_add");
+    context.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplex(context, talentAddPreview, []);
 
     drawLinesAscendancy();

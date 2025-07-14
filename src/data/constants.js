@@ -3,31 +3,35 @@ export const CELL_HALF = CELL_SIZE * 0.5;
 export const LINE_WIDTH = 10;
 export const RAD_TO_DEG = 180 / Math.PI;
 
-/** @type {Map<string, string>} */
-export const colorMap = new Map([
-    ["0", "#000000"],
-    ["1", "#0000AA"],
-    ["2", "#00AA00"],
-    ["3", "#00AAAA"],
-    ["4", "#AA0000"],
-    ["5", "#AA00AA"],
-    ["6", "#FFAA00"],
-    ["7", "#AAAAAA"],
-    ["8", "#555555"],
-    ["9", "#5555FF"],
-    ["a", "#55FF55"],
-    ["b", "#55FFFF"],
-    ["c", "#FF5555"],
-    ["d", "#FF55FF"],
-    ["e", "#FFFF55"],
-    ["f", "#FFFFFF"],
-    ["background", "#191821"],
-    ["line", "#222222"],
-    ["line_connect", "#3E3E3E"],
-    ["line_select", "#1A5A1A"],
-    ["line_remove", "#9F1F1F"],
-    ["line_add", "#1F1F9F"],
-]);
+/** @type {{minecraft: Map<string, string>, custom: Map<string, string>}} */
+export const colorMap = {
+    minecraft: new Map([
+        ["0", "#000000"],
+        ["1", "#0000AA"],
+        ["2", "#00AA00"],
+        ["3", "#00AAAA"],
+        ["4", "#AA0000"],
+        ["5", "#AA00AA"],
+        ["6", "#FFAA00"],
+        ["7", "#AAAAAA"],
+        ["8", "#555555"],
+        ["9", "#5555FF"],
+        ["a", "#55FF55"],
+        ["b", "#55FFFF"],
+        ["c", "#FF5555"],
+        ["d", "#FF55FF"],
+        ["e", "#FFFF55"],
+        ["f", "#FFFFFF"],
+    ]),
+    custom: new Map([
+        ["background", "#191821"],
+        ["line", "#222222"],
+        ["line_connect", "#3E3E3E"],
+        ["line_select", "#1A5A1A"],
+        ["line_remove", "#9F1F1F"],
+        ["line_add", "#1F1F9F"],
+    ]),
+};
 
 export const controls = {
     x: 0.0,
