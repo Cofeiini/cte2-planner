@@ -68,11 +68,24 @@
   "jewel_socket": {
     "is_perc": false
   },
+  "max_endurance_charge_charges": {
+    "format": true
+  },
   "max_frenzy_charge_charges": {
     "format": true
   },
   "max_fire_resist": {
+    "format": true,
     "is_perc": true
+  },
+  "max_lightning_resist": {
+    "format": true
+  },
+  "max_power_charge_charges": {
+    "format": true
+  },
+  "max_water_resist": {
+    "format": true
   },
   "phys_to_fire": {
     "is_perc": true
@@ -95,6 +108,9 @@
   "projectile_count": {
     "format": true,
     "is_perc": false
+  },
+  "slow_immunity": {
+    "format": false
   },
   "spirit_cost": {
     "is_perc": false
