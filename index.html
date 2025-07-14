@@ -53,48 +53,54 @@
             </div>
         </div>
     </div>
-    <div id="side-panel">
-        <div class="panel-group" style="flex-direction: row; gap: 0.25em;">
-            <button class="custom-button" id="import-button">Import</button>
-            <button class="custom-button" id="export-button">Export</button>
-            <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
-                <label for="version-select" style="font-size: small; color: white;">Tree Version</label>
-                <select id="version-select"></select>
+    <div style="display: flex; flex-direction: column; background-color: black; min-width: 32em; z-index: 1;">
+        <div id="side-panel">
+            <div class="panel-group" style="flex-direction: row; gap: 0.25em;">
+                <button class="custom-button" id="import-button">Import</button>
+                <button class="custom-button" id="export-button">Export</button>
+                <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
+                    <label for="version-select" style="font-size: small; color: white;">Tree Version</label>
+                    <select id="version-select"></select>
+                </div>
+                <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
+                    <label for="ascendancy-select" style="font-size: small; color: white;">Ascendancy</label>
+                    <select id="ascendancy-select"></select>
+                </div>
             </div>
-            <div style="display: flex; flex-direction: column; width: 100%; padding: 0.5em; justify-content: center;">
-                <label for="ascendancy-select" style="font-size: small; color: white;">Ascendancy</label>
-                <select id="ascendancy-select"></select>
+            <div class="panel-group" style="gap: 0.5em;">
+                <div class="panel-group-title-big">
+                    <div id="allocated-points" style="font-size: x-large; color: white;">0</div>
+                    Allocated Points
+                </div>
+                <div class="panel-group-item" style="justify-content: space-between; padding: 0.25em;">
+                    <div class="panel-group-item-allocated">
+                        <div id="allocated-start" style="font-size: x-large; color: white;">0</div>
+                        Start
+                    </div>
+                    <div class="panel-group-item-allocated">
+                        <div id="allocated-major" style="font-size: x-large; color: white;">0</div>
+                        Game Changer
+                    </div>
+                    <div class="panel-group-item-allocated">
+                        <div id="allocated-special" style="font-size: x-large; color: white;">0</div>
+                        Special
+                    </div>
+                    <div class="panel-group-item-allocated">
+                        <div id="allocated-stat" style="font-size: x-large; color: white;">0</div>
+                        Attribute
+                    </div>
+                </div>
             </div>
+            <div class="panel-group" style="gap: 0.25em;">
+                <input id="player-level" type="range" min="1" max="100" step="1" value="100">
+                <div class="panel-group-item" style="justify-content: center;">Character Level:<label for="player-level" id="player-level-label" style="color: white;">100</label></div>
+            </div>
+            <div class="panel-group hidden" id="allocated-stat-list" style="gap: 0.5em; overflow-y: scroll; scrollbar-width: thin;"></div>
         </div>
-        <div class="panel-group" style="gap: 0.5em;">
-            <div class="panel-group-title-big">
-                <div id="allocated-points" style="font-size: x-large; color: white;">0</div>
-                Allocated Points
-            </div>
-            <div class="panel-group-item" style="justify-content: space-between; padding: 0.25em;">
-                <div class="panel-group-item-allocated">
-                    <div id="allocated-start" style="font-size: x-large; color: white;">0</div>
-                    Start
-                </div>
-                <div class="panel-group-item-allocated">
-                    <div id="allocated-major" style="font-size: x-large; color: white;">0</div>
-                    Game Changer
-                </div>
-                <div class="panel-group-item-allocated">
-                    <div id="allocated-special" style="font-size: x-large; color: white;">0</div>
-                    Special
-                </div>
-                <div class="panel-group-item-allocated">
-                    <div id="allocated-stat" style="font-size: x-large; color: white;">0</div>
-                    Attribute
-                </div>
-            </div>
+        <div id="side-panel-footer">
+            <button class="custom-button" onclick="window.open('https://github.com/Cofeiini/cte2-planner/issues', '_blank').focus()" style="font-size: x-small;">Give Feedback</button>
+            <button class="custom-button" onclick="window.open('https://github.com/Cofeiini/cte2-planner/commits/main', '_blank').focus()" style="font-size: x-small;">Changelog</button>
         </div>
-        <div class="panel-group" style="gap: 0.25em;">
-            <input id="player-level" type="range" min="1" max="100" step="1" value="100">
-            <div class="panel-group-item" style="justify-content: center;">Character Level:<label for="player-level" id="player-level-label" style="color: white;">100</label></div>
-        </div>
-        <div class="panel-group hidden" id="allocated-stat-list" style="gap: 0.5em; overflow-y: scroll; scrollbar-width: thin;"></div>
     </div>
 </div>
 
