@@ -554,6 +554,7 @@ const generateTalentNode = (talent) => {
     container.style.top = `${talent.center.y}px`;
 
     const indicator = document.createElement("img");
+    indicator.loading = "lazy";
     indicator.classList.add("talent-node-indicator");
     indicator.src = indicatorAssets.get("no");
     indicator.width = 40;
@@ -562,6 +563,7 @@ const generateTalentNode = (talent) => {
     container.append(indicator);
 
     const border = document.createElement("img");
+    border.loading = "lazy";
     border.classList.add("talent-node-border");
     border.src = borderAssets.get(`${talent.type}_off`);
     switch (talent.type) {
@@ -595,6 +597,7 @@ const generateTalentNode = (talent) => {
     container.append(border);
 
     const icon = document.createElement("img");
+    icon.loading = "lazy";
     icon.classList.add("talent-node-icon");
     icon.src = iconAssets.get(talent.identifier.talent);
     icon.width = 32;
@@ -670,6 +673,7 @@ export const generateTree = () => {
     ascendancyButton.style.top = `${viewport.center.y}px`;
 
     const indicator = document.createElement("img");
+    indicator.loading = "lazy";
     indicator.classList.add("talent-node-indicator");
     indicator.src = indicatorAssets.get(isActive ? "yes" : "can");
     indicator.width = 40;
@@ -678,6 +682,7 @@ export const generateTree = () => {
     ascendancyButton.append(indicator);
 
     const border = document.createElement("img");
+    border.loading = "lazy";
     border.classList.add("talent-node-border");
     border.src = borderAssets.get(`asc_${isActive ? "on" : "off"}`);
     border.width = 64;
@@ -686,6 +691,7 @@ export const generateTree = () => {
     ascendancyButton.append(border);
 
     const icon = document.createElement("img");
+    icon.loading = "lazy";
     icon.classList.add("talent-node-icon");
     icon.src = iconAssets.get("ascendancy");
     icon.width = 32;

@@ -91,6 +91,7 @@ export const setUpStatIcon = (nodeId, type = "major") => {
     container.style.userSelect = "none";
 
     const indicator = document.createElement("img");
+    indicator.loading = "lazy";
     indicator.src = indicatorAssets.get("yes");
     indicator.width = 40;
     indicator.height = 40;
@@ -98,6 +99,7 @@ export const setUpStatIcon = (nodeId, type = "major") => {
     container.append(indicator);
 
     const border = document.createElement("img");
+    border.loading = "lazy";
     border.src = borderAssets.get(`${type}_on`);
     border.width = 78;
     border.height = 78;
@@ -109,6 +111,7 @@ export const setUpStatIcon = (nodeId, type = "major") => {
     container.append(border);
 
     const icon = document.createElement("img");
+    icon.loading = "lazy";
     icon.src = iconAssets.get(nodeId);
     icon.width = 32;
     icon.height = 32;
