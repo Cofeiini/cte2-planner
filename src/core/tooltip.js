@@ -72,6 +72,10 @@ export const handleTooltip = (talent) => {
         if (stat["scale_to_lvl"]) {
             value = scaleValueToLevel(level, value);
         }
+        if (Math.abs(value) >= 15.0) {
+            value = Math.trunc(value);
+        }
+
         const description = stat["description"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }));
         formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }

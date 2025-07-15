@@ -20,8 +20,7 @@ import {
  * @returns {number}
  */
 export const scaleValueToLevel = (level, value) => {
-    const result = value * (1 + (0.2 * (level - 1)));
-    return (result < 15.0) ? result : Math.floor(result);
+    return value * (1 + (0.2 * (level - 1)));
 };
 
 /**
