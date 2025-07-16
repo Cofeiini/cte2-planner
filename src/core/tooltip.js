@@ -48,6 +48,7 @@ export const tooltipOffsets = {
  */
 export const handleTooltip = (talent) => {
     let nodeTotal = 0;
+    let nodeOverflow = 0;
     if (talent.selected) {
         let start = startingNode;
         let selections = talentSelections;
@@ -80,6 +81,7 @@ export const handleTooltip = (talent) => {
                 const realPath = [...talentAddPreview].reverse();
                 const possiblePoints = talentSelections.length + (realPath.length - 1);
                 if (possiblePoints > TOTAL_POINTS) {
+                    nodeOverflow = TOTAL_POINTS - possiblePoints;
                     talentAddLeftovers.push(...realPath.slice(TOTAL_POINTS - possiblePoints - 1));
                 }
             }
@@ -96,6 +98,7 @@ export const handleTooltip = (talent) => {
                 const realPath = [...ascendancyAddPreview].reverse();
                 const possiblePoints = ascendancySelections.length + (realPath.length - 1);
                 if (possiblePoints > TOTAL_ASCENDANCY_POINTS) {
+                    nodeOverflow = TOTAL_ASCENDANCY_POINTS - possiblePoints;
                     ascendancyAddLeftovers.push(...realPath.slice(TOTAL_ASCENDANCY_POINTS - possiblePoints - 1));
                 }
             }
@@ -108,9 +111,22 @@ export const handleTooltip = (talent) => {
     } else if (talent.type === "asc") {
         color = colorMap.minecraft.get("6");
     }
+
+    let nodeColor = colorMap.minecraft.get("f");
+    if (nodeTotal > 0) {
+        nodeColor = colorMap.minecraft.get("a");
+    } else if (nodeTotal < 0) {
+        nodeColor = colorMap.minecraft.get("c");
+    }
+
+    let overflowText = "";
+    if (nodeOverflow !== 0) {
+        overflowText = `<span>(<span style="color: ${colorMap.minecraft.get("c")}">${nodeOverflow.toLocaleString("en", { signDisplay: "exceptZero" })}</span>)</span>`;
+    }
+
     infoTooltip.name.style.color = color;
     infoTooltip.name.innerText = talent.name;
-    infoTooltip.node.count.innerText = nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" });
+    infoTooltip.node.count.innerHTML = `<span style="color: ${nodeColor}">${nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" })}</span>${overflowText}`;
     infoTooltip.node.text.innerText = `Node${(Math.abs(nodeTotal) === 1) ? "" : "s"}`;
 
     const level = parseInt(sidePanel.character.level.value);
