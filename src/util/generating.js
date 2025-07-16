@@ -441,7 +441,7 @@ export const handleTalentEvents = (talent, container) => {
             controls.shouldRedraw = true;
 
             drawLinesRegular();
-        }, 80);
+        }, 10);
     };
 
     container.onmouseleave = () => {
@@ -461,7 +461,7 @@ export const handleTalentEvents = (talent, container) => {
             drawingTimer = setTimeout(() => {
                 controls.shouldRedraw = false;
                 drawLinesRegular();
-            }, 80);
+            }, 10);
         }
     };
 
