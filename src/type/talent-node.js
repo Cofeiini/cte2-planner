@@ -38,8 +38,11 @@ export const ascendancyRemovePreview = [];
 /** @type {Map<string, TalentNode[]>} */
 export const talentExclusions = new Map();
 
-/** @type {Map<string, string[]>} */
-export const exclusiveNodeValues = new Map();
+/** @type {{nodes: Map<string, string[]>, lang: Map<string, string>}} */
+export const exclusiveNodeValues = {
+    nodes: new Map(),
+    lang: new Map(),
+};
 
 /** @type {TalentNode} */
 export let startingNode = undefined;
@@ -85,7 +88,7 @@ export class TalentNode {
     visual = undefined;
     selectable = false;
     selected = false;
-    update = () => {};
+    update = undefined;
     neighbors = [];
     parentTree = "main";
     travel = {
@@ -143,13 +146,13 @@ export const toggleNode = (node, isPreset = false) => {
         totalPoints = TOTAL_ASCENDANCY_POINTS;
     }
 
-    const isClassNode = exclusiveNodeValues.get(exclusive).includes(node.identifier.talent);
+    const isClassNode = exclusiveNodeValues.nodes.get(exclusive).includes(node.identifier.talent);
     if (!origin && !isClassNode) {
         return;
     }
 
     if (!node.selected) {
-        for (const values of exclusiveNodeValues.values()) {
+        for (const values of exclusiveNodeValues.nodes.values()) {
             const existingSelection = selections.find(item => values.includes(item.identifier.talent));
             if (existingSelection && values.includes(node.identifier.talent)) {
                 return;
@@ -167,7 +170,7 @@ export const toggleNode = (node, isPreset = false) => {
         if (node.selected) {
             if (!isPreset && origin && selections.length > 0) {
                 findRoutes(node);
-            } else if (!origin || (!exclusiveNodeValues.get(exclusive).some(item => item === node.identifier.talent))) {
+            } else if (!origin || (!exclusiveNodeValues.nodes.get(exclusive).some(item => item === node.identifier.talent))) {
                 selections.push(node);
             }
 

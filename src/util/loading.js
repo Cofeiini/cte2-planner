@@ -88,10 +88,10 @@ export const handleLoadingImageAssets = async () => {
             const oneKind = json["one_kind"];
             if (oneKind) {
                 const exclusiveList = [node.identifier.talent];
-                if (exclusiveNodeValues.has(oneKind)) {
-                    exclusiveList.push(...exclusiveNodeValues.get(oneKind));
+                if (exclusiveNodeValues.nodes.has(oneKind)) {
+                    exclusiveList.push(...exclusiveNodeValues.nodes.get(oneKind));
                 }
-                exclusiveNodeValues.set(oneKind, exclusiveList);
+                exclusiveNodeValues.nodes.set(oneKind, exclusiveList);
             }
 
             if (requested.has(node.identifier.talent)) {
@@ -157,7 +157,7 @@ export const handleLoadingAssets = async () => {
         allNodes.push(...nodes);
     }
 
-    for (const [key, values] of exclusiveNodeValues) {
+    for (const [key, values] of exclusiveNodeValues.nodes) {
         talentExclusions.set(key, allNodes.filter(item => values.includes(item.identifier.talent)));
     }
 
@@ -173,6 +173,10 @@ export const handleLoadingAssets = async () => {
     let overrideData = {};
     await fetch(`data/${releaseInfo.version}/overrides.json`).then(response => response.json()).then(data => {
         overrideData = data;
+    });
+
+    Object.keys(descriptionData).filter(item => item.includes("mmorpg.one_of_a_kind")).forEach(key => {
+        exclusiveNodeValues.lang.set(key.split(".").at(-1), descriptionData[key]);
     });
 
     await updateProgress("Processing talent details...");

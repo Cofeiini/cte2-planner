@@ -230,14 +230,14 @@ export const findShortestRoute = (target) => {
 
     /** @type {string[]} */
     const excluded = [];
-    for (const values of exclusiveNodeValues.values()) {
+    for (const values of exclusiveNodeValues.nodes.values()) {
         if (selections.some(item => values.some(element => item.identifier.talent === element))) {
             excluded.push(...values);
         }
     }
 
     if (!origin) {
-        excluded.push(...exclusiveNodeValues.get(exclude));
+        excluded.push(...exclusiveNodeValues.nodes.get(exclude));
     }
 
     if (excluded.some(item => item === target.identifier.talent)) {

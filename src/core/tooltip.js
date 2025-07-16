@@ -4,6 +4,7 @@ import {
     ascendancyRemovePreview,
     ascendancySelections,
     ascendancyStartNodes,
+    exclusiveNodeValues,
     startingNode,
     talentAddPreview,
     talentRemovePreview,
@@ -106,6 +107,14 @@ export const handleTooltip = (talent) => {
         const description = stat["description"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }));
         formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }
+
+    for (const [key, values] of exclusiveNodeValues.nodes) {
+        if (values.some(item => talent.identifier.talent === item)) {
+            formatted.push(`<span style="color: ${colorMap.minecraft.get("a")};">Can only have one Perk of this type: ${exclusiveNodeValues.lang.get(key)}</span>`);
+            break;
+        }
+    }
+
     if (talent.type === "major") {
         formatted.push(`<span style="color: red;">Game Changer Talent</span>`);
     }

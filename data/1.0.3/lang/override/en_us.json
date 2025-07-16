@@ -1,4 +1,8 @@
 {
+  "mmorpg.one_of_a_kind.passive_spell": "Passive Skill",
+  "mmorpg.one_of_a_kind.blood_mage": "Blood Mage",
+  "mmorpg.one_of_a_kind.ascendancy": "Ascendancy",
+  "mmorpg.one_of_a_kind.random_spread": "Random Spread",
   "mmorpg.talent.gladiator_class": "Gladiator",
   "mmorpg.talent.juggernaut_class": "Juggernaut",
   "mmorpg.talent.gladiator_class_0": "Challenger",
