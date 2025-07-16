@@ -180,36 +180,6 @@ export const handleLoadingAssets = async () => {
     });
 
     await updateProgress("Processing talent details...");
-    const statData = new Map();
-    await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
-        for (const node of allNodes) {
-            for (const stat of node.stats) {
-                const identifier = stat["stat"];
-                const type = stat["type"].toLowerCase();
-                let json = structuredClone(data.find(item => (item.id === identifier) || (item.data?.id === identifier)));
-                if (!json) {
-                    json = {
-                        is_perc: node.type !== "special",
-                        format: ((parseFloat(stat["v1"]) === 1.0) && (type !== "flat")) || undefined,
-                    };
-                }
-                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more");
-                json["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/§\w/g, "");
-
-                if (overrideData[identifier]) {
-                    Object.assign(json, overrideData[identifier]);
-                }
-
-                let newData = new Map([[identifier, json]]);
-                if (statData.has(node.identifier.talent)) {
-                    newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
-                }
-                statData.set(node.identifier.talent, newData);
-            }
-        }
-    }));
-
-    await updateProgress("Processing talent information...");
     const statNodeList = allNodes.filter(item => item.type === "stat" || item.type === "special");
     for (const node of statNodeList) {
         node.name = descriptionData[`mmorpg.stat.${node.identifier.data}`];
@@ -229,34 +199,73 @@ export const handleLoadingAssets = async () => {
         }
     }
 
+    const statData = new Map();
+    await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
+        for (const node of allNodes) {
+            for (const stat of node.stats) {
+                const identifier = stat["stat"];
+                const type = stat["type"].toLowerCase();
+
+                stat["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
+                const hasPercent = stat["description"].match(/\[VAL1].*?%/) !== null;
+
+                let json = structuredClone(data.find(item => (item.id === identifier) || (item.data?.id === identifier)));
+                if (!json) {
+                    json = {
+                        is_perc: (type === "percent") || (type === "more"),
+                        format: ((Math.abs(parseFloat(stat["v1"])) > 0.0) && (type !== "flat")) || undefined,
+                    };
+                }
+                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more") || hasPercent;
+                json["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/§\w/g, "");
+
+                if (overrideData[identifier]) {
+                    Object.assign(json, overrideData[identifier]);
+                }
+
+                let newData = new Map([[identifier, json]]);
+                if (statData.has(node.identifier.talent)) {
+                    newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
+                }
+                statData.set(node.identifier.talent, newData);
+            }
+        }
+    }));
+
+    await updateProgress("Processing talent information...");
     for (const node of allNodes) {
-        const isStat = node.type === "stat" || node.type === "special" || node.type === "asc";
-        const isPerk = node.type === "start" || node.type === "major";
-
         const nodeData = statData.get(node.identifier.talent);
-        const moreStats = node.stats.filter(item => item.type.toLowerCase() === "more");
-        node.stats = node.stats.filter(item => item.type.toLowerCase() !== "more").concat(...moreStats);
 
-        for (let i = 0; i < node.stats.length; ++i) {
-            const item = node.stats.at(i);
-            const value = parseFloat(item["v1"]);
+        for (const stat of node.stats) {
+            const value = parseFloat(stat["v1"]);
+            const type = stat["type"].toLowerCase();
 
-            const info = nodeData.get(item["stat"]);
-            const isPercent = (info["data"]?.["perc"] ?? info["is_perc"]) || (item["type"].toLowerCase() === "percent");
+            const info = nodeData.get(stat["stat"]);
+            const isPercent = info["is_perc"];
             const isMinusGood = info["minus_is_good"] ?? false;
-            const isScaled = item["scale_to_lvl"] ?? false;
-            const isFormat = info["format"] ?? (isStat || (isPerk && (Math.abs(value) > 1)));
 
-            let description = descriptionData[`mmorpg.stat.${item["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
-            if (!description.includes("[VAL1]") && isFormat) {
-                const valueColor = (((value > 0) && !isMinusGood) || ((value < 0) && isMinusGood)) ? "§a" : "§c";
+            stat["is_long"] = info["is_long"] ?? false;
+            stat["scale_to_lvl"] = stat["scale_to_lvl"] ?? false;
+
+            let isFormat = info["format"] ?? ((type === "flat") || isPercent);
+            if (stat["is_long"]) {
+                isFormat = false;
+            }
+
+            let description = stat["description"];
+            if (isFormat && !description.includes("[VAL1]")) {
+                let valueColor = "§c";
+                if ((value > 0) && !isMinusGood) {
+                    valueColor = "§a";
+                } else if ((value < 0) && isMinusGood) {
+                    valueColor = "§a";
+                }
+
                 description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
             }
 
-            item["is_long"] = info["is_long"] ?? false;
-            item["scale_to_lvl"] = isScaled;
-            item["is_percent"] = isPercent;
-            item["description"] = description;
+            stat["is_percent"] = isPercent;
+            stat["description"] = description;
         }
 
         switch (node.type) {
