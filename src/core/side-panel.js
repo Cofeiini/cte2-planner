@@ -1,4 +1,4 @@
-import { controls } from "../data/constants.js";
+import { colorMap, controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
 import { ascendancySelections, talentExclusions, talentSelections, toggleNode } from "../type/talent-node.js";
 import { drawLinesAscendancy } from "../util/drawing.js";
@@ -172,6 +172,7 @@ export const handleSidePanel = () => {
             const title = document.createElement("div");
             title.classList.add("panel-stats-group-title");
             title.innerText = majorAscendancy.name;
+            title.style.color = colorMap.minecraft.get("6");
             statsContainer.append(title);
 
             for (const stat of majorAscendancy.value.values()) {
@@ -207,6 +208,7 @@ export const handleSidePanel = () => {
             const title = document.createElement("div");
             title.classList.add("panel-stats-group-title");
             title.innerText = gameChanger.name;
+            title.style.color = colorMap.minecraft.get("5");
             statsContainer.append(title);
 
             for (const stat of gameChanger.value.values()) {

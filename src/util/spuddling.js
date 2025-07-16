@@ -60,7 +60,7 @@ export const setUpStatContainer = (stat) => {
     container.classList.add("panel-group-item");
     container.style.color = "white";
     const description = stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }));
-    container.innerHTML = `<p style="margin: 0;">${generateDescriptionHTML(description)}</p>`;
+    container.innerHTML = `<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p>`;
 
     return container;
 };
