@@ -1,15 +1,14 @@
 import { BinaryHeap } from "../type/binary-heap.js";
 import {
     ascendancyGrid,
-    ascendancyNodes,
     ascendancySelections,
     ascendancyStartNodes,
     exclusiveNodeValues,
+    fullNodeList,
     startingNode,
     talentAddLeftovers,
     talentExclusions,
     talentGrid,
-    talentNodes,
     talentSelections,
     TOTAL_POINTS,
 } from "../type/talent-node.js";
@@ -142,12 +141,7 @@ export const findDistance = (start, end) => {
 };
 
 export const resetNodeHeuristics = () => {
-    const allNodes = [...talentNodes];
-    for (const nodes of ascendancyNodes.values()) {
-        allNodes.push(...nodes);
-    }
-
-    for (const talent of allNodes) {
+    for (const talent of fullNodeList) {
         talent.travel.source = undefined;
         talent.travel.closed = false;
         talent.travel.cost.total = Number.MAX_VALUE;

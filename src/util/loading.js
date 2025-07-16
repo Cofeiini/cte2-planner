@@ -6,6 +6,7 @@ import {
     ascendancyNodes,
     ascendancySelections,
     exclusiveNodeValues,
+    fullNodeList,
     talentExclusions,
     talentNodes,
     talentSelections,
@@ -63,12 +64,7 @@ export const handleLoadingImageAssets = async () => {
     await fetch(`data/${releaseInfo.version}/perks.json`).then(response => response.json()).then(data => {
         const requested = new Set();
 
-        const allNodes = [...talentNodes];
-        for (const nodes of ascendancyNodes.values()) {
-            allNodes.push(...nodes);
-        }
-
-        for (const node of allNodes) {
+        for (const node of fullNodeList) {
             let key = node.identifier.talent;
 
             const json = data.find(item => item.id === key);
@@ -149,16 +145,17 @@ export const handleLoadingAssets = async () => {
         generateAscendancyGrid(data);
     });
 
+    fullNodeList.length = 0;
+    fullNodeList.push(...talentNodes);
+    for (const nodes of ascendancyNodes.values()) {
+        fullNodeList.push(...nodes);
+    }
+
     await handleLoadingImageAssets();
 
     await updateProgress("Processing the talent nodes...");
-    const allNodes = [...talentNodes];
-    for (const nodes of ascendancyNodes.values()) {
-        allNodes.push(...nodes);
-    }
-
     for (const [key, values] of exclusiveNodeValues.nodes) {
-        talentExclusions.set(key, allNodes.filter(item => values.includes(item.identifier.talent)));
+        talentExclusions.set(key, fullNodeList.filter(item => values.includes(item.identifier.talent)));
     }
 
     await updateProgress("Processing talent descriptions...");
@@ -180,7 +177,7 @@ export const handleLoadingAssets = async () => {
     });
 
     await updateProgress("Processing talent details...");
-    const statNodeList = allNodes.filter(item => item.type === "stat" || item.type === "special");
+    const statNodeList = fullNodeList.filter(item => item.type === "stat" || item.type === "special");
     for (const node of statNodeList) {
         node.name = descriptionData[`mmorpg.stat.${node.identifier.data}`];
         if (!node.name) {
@@ -191,7 +188,7 @@ export const handleLoadingAssets = async () => {
         }
     }
 
-    const talentNodeList = allNodes.filter(item => item.type === "start" || item.type === "major" || item.type === "asc");
+    const talentNodeList = fullNodeList.filter(item => item.type === "start" || item.type === "major" || item.type === "asc");
     for (const node of talentNodeList) {
         node.name = descriptionData[`mmorpg.talent.${node.identifier.data}`];
         if (!node.name) {
@@ -201,7 +198,7 @@ export const handleLoadingAssets = async () => {
 
     const statData = new Map();
     await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
-        for (const node of allNodes) {
+        for (const node of fullNodeList) {
             for (const stat of node.stats) {
                 const identifier = stat["stat"];
                 const type = stat["type"].toLowerCase();
@@ -233,7 +230,7 @@ export const handleLoadingAssets = async () => {
     }));
 
     await updateProgress("Processing talent information...");
-    for (const node of allNodes) {
+    for (const node of fullNodeList) {
         const nodeData = statData.get(node.identifier.talent);
 
         for (const stat of node.stats) {

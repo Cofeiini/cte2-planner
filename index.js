@@ -2,7 +2,7 @@ import { handleAscendancyChange, handleDataExport, handleDataImport, handleSideP
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
 import { controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { ascendancyNodes, talentNodes, updateTargetTree } from "./src/type/talent-node.js";
+import { fullNodeList, updateTargetTree } from "./src/type/talent-node.js";
 import { talentTree, updateAscendancyContainer, updateAscendancyTreeContainer, updateTalentTree } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL, updateLineCanvas } from "./src/util/spuddling.js";
@@ -31,21 +31,16 @@ const handleMouseDrag = (event) => {
  * @param {InputEvent} event
  */
 const handleSearch = (event) => {
-    const allNodes = [...talentNodes];
-    for (const nodes of ascendancyNodes.values()) {
-        allNodes.push(...nodes);
-    }
-
     const filter = event.target.value.trim().toLowerCase();
     const altFilter = filter.replaceAll(" ", "_");
     if (filter.length === 0) {
-        for (const node of allNodes) {
+        for (const node of fullNodeList) {
             node.visual.classList.remove("filtered", "highlighted");
         }
         return;
     }
 
-    for (const node of allNodes) {
+    for (const node of fullNodeList) {
         node.visual.classList.add("filtered");
         node.visual.classList.remove("highlighted");
 
@@ -190,7 +185,7 @@ window.onload = async () => {
         infoTooltip.node.text.classList.add("hidden");
 
         const keywords = new Set();
-        for (const talent of talentNodes) {
+        for (const talent of fullNodeList) {
             for (const key of talent.keywords) {
                 keywords.add(key.replaceAll("_", " "));
             }

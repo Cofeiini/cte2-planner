@@ -15,6 +15,9 @@ export const talentNodes = [];
 export const ascendancyNodes = new Map([["none", []]]);
 
 /** @type {TalentNode[]} */
+export const fullNodeList = [];
+
+/** @type {TalentNode[]} */
 export const talentSelections = [];
 
 /** @type {TalentNode[]} */
