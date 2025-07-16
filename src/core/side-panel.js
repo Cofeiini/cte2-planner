@@ -1,6 +1,6 @@
 import { controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
-import { ascendancySelections, talentSelections, toggleNode } from "../type/talent-node.js";
+import { ascendancySelections, talentExclusions, talentSelections, toggleNode } from "../type/talent-node.js";
 import { drawLinesAscendancy } from "../util/drawing.js";
 import { ascendancyContainer, ascendancyTreeContainer } from "../util/generating.js";
 import { handleLoading } from "../util/loading.js";
@@ -349,6 +349,11 @@ export const handleAscendancyChange = (event) => {
         document.querySelector(`#${controls.ascendancy}_tree`).classList.add("hidden");
     }
     controls.ascendancy = event.target.value;
+
+    const mainNode = talentExclusions.get("ascendancy").find(item => item.identifier.talent === controls.ascendancy);
+    if (mainNode && !mainNode.selected) {
+        toggleNode(mainNode);
+    }
 
     handleAscendancyOptions();
     setUpURL();
