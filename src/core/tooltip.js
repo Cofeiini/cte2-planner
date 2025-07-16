@@ -54,25 +54,31 @@ export const handleTooltip = (talent) => {
         const previewNeighbors = selections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
         talentRemovePreview.length = 0;
         talentRemovePreview.push(...findDeadBranch(start, talent), ...previewNeighbors);
+        nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
         if (talent.parentTree !== "main") {
             ascendancyRemovePreview.length = 0;
             ascendancyRemovePreview.push(...talentRemovePreview);
 
             talentRemovePreview.length = 0;
+            nodeTotal = -(ascendancyRemovePreview.length - previewNeighbors.length);
         }
-        nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
     } else {
         talentAddPreview.length = 0;
         talentAddPreview.push(...findShortestRoute(talent));
+        nodeTotal = talentAddPreview.length;
+        if (talentAddPreview.length > 1) {
+            nodeTotal = talentAddPreview.length - 1;
+        }
+
         if (talent.parentTree !== "main") {
             ascendancyAddPreview.length = 0;
             ascendancyAddPreview.push(...talentAddPreview);
 
             talentAddPreview.length = 0;
-        }
-        nodeTotal = talentAddPreview.length;
-        if (talentAddPreview.length > 1) {
-            nodeTotal = talentAddPreview.length - 1;
+            nodeTotal = ascendancyAddPreview.length;
+            if (ascendancyAddPreview.length > 1) {
+                nodeTotal = ascendancyAddPreview.length - 1;
+            }
         }
     }
 
