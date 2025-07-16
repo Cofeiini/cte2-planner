@@ -1,9 +1,11 @@
 import { colorMap, controls, LINE_WIDTH } from "../data/constants.js";
 import {
+    ascendancyAddLeftovers,
     ascendancyAddPreview,
     ascendancyNodes,
     ascendancyRemovePreview,
     ascendancySelections,
+    talentAddLeftovers,
     talentAddPreview,
     talentExclusions,
     talentNodes,
@@ -122,6 +124,9 @@ export const drawLinesAscendancy = () => {
 
     context.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplex(context, ascendancyAddPreview, []);
+
+    context.strokeStyle = colorMap.custom.get("line_overflow");
+    drawLinesComplex(context, ascendancyAddLeftovers, []);
 };
 
 export const drawLinesRegular = () => {
@@ -152,6 +157,9 @@ export const drawLinesRegular = () => {
 
     context.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplex(context, talentAddPreview, []);
+
+    context.strokeStyle = colorMap.custom.get("line_overflow");
+    drawLinesComplex(context, talentAddLeftovers, []);
 
     drawLinesAscendancy();
 };

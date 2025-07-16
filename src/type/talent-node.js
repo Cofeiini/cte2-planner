@@ -30,6 +30,9 @@ export const talentAddPreview = [];
 export const talentAddLeftovers = [];
 
 /** @type {TalentNode[]} */
+export const ascendancyAddLeftovers = [];
+
+/** @type {TalentNode[]} */
 export const talentRemovePreview = [];
 
 /** @type {TalentNode[]} */

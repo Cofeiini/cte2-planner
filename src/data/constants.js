@@ -30,6 +30,7 @@ export const colorMap = {
         ["line_select", "#1A5A1A"],
         ["line_remove", "#9F1F1F"],
         ["line_add", "#1F1F9F"],
+        ["line_overflow", "#9F1F9F"],
     ]),
 };
 

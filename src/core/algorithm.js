@@ -6,10 +6,10 @@ import {
     exclusiveNodeValues,
     fullNodeList,
     startingNode,
-    talentAddLeftovers,
     talentExclusions,
     talentGrid,
     talentSelections,
+    TOTAL_ASCENDANCY_POINTS,
     TOTAL_POINTS,
 } from "../type/talent-node.js";
 
@@ -273,8 +273,10 @@ export const findShortestRoute = (target) => {
  */
 export const findRoutes = (targetNode) => {
     let selections = talentSelections;
+    let totalPoints = TOTAL_POINTS;
     if (targetNode.parentTree !== "main") {
         selections = ascendancySelections;
+        totalPoints = TOTAL_ASCENDANCY_POINTS;
     }
 
     /** @type {TalentNode[]} */
@@ -288,16 +290,13 @@ export const findRoutes = (targetNode) => {
     }
 
     const possiblePoints = selections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
-    if (possiblePoints > TOTAL_POINTS) {
-        if ((possiblePoints - TOTAL_POINTS) > shortest.length) {
+    if (possiblePoints > totalPoints) {
+        if ((possiblePoints - totalPoints) > shortest.length) {
             console.error("Actually too many points!");
             return;
         }
 
-        const realPath = shortest.reverse().slice(0, TOTAL_POINTS - possiblePoints);
-        talentAddLeftovers.length = 0;
-        talentAddLeftovers.push(...shortest.slice(TOTAL_POINTS - possiblePoints - 1)); // Offset by 1 to include the last selected node for forming a proper line segment
-        shortest = realPath;
+        shortest = shortest.reverse().slice(0, totalPoints - possiblePoints);
     }
 
     for (const node of shortest) {

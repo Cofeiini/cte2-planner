@@ -1,14 +1,18 @@
 import { colorMap } from "../data/constants.js";
 import {
+    ascendancyAddLeftovers,
     ascendancyAddPreview,
     ascendancyRemovePreview,
     ascendancySelections,
     ascendancyStartNodes,
     exclusiveNodeValues,
     startingNode,
+    talentAddLeftovers,
     talentAddPreview,
     talentRemovePreview,
     talentSelections,
+    TOTAL_ASCENDANCY_POINTS,
+    TOTAL_POINTS,
 } from "../type/talent-node.js";
 import { generateDescriptionHTML } from "../util/generating.js";
 import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorithm.js";
@@ -66,19 +70,34 @@ export const handleTooltip = (talent) => {
     } else {
         talentAddPreview.length = 0;
         talentAddPreview.push(...findShortestRoute(talent));
-        nodeTotal = talentAddPreview.length;
-        if (talentAddPreview.length > 1) {
-            nodeTotal = talentAddPreview.length - 1;
-        }
 
-        if (talent.parentTree !== "main") {
+        if (talent.parentTree === "main") {
+            nodeTotal = talentAddPreview.length;
+            if (talentAddPreview.length > 1) {
+                nodeTotal = talentAddPreview.length - 1;
+                talentAddLeftovers.length = 0;
+
+                const realPath = [...talentAddPreview].reverse();
+                const possiblePoints = talentSelections.length + (realPath.length - 1);
+                if (possiblePoints > TOTAL_POINTS) {
+                    talentAddLeftovers.push(...realPath.slice(TOTAL_POINTS - possiblePoints - 1));
+                }
+            }
+        } else {
             ascendancyAddPreview.length = 0;
             ascendancyAddPreview.push(...talentAddPreview);
-
             talentAddPreview.length = 0;
+
             nodeTotal = ascendancyAddPreview.length;
             if (ascendancyAddPreview.length > 1) {
                 nodeTotal = ascendancyAddPreview.length - 1;
+                ascendancyAddLeftovers.length = 0;
+
+                const realPath = [...ascendancyAddPreview].reverse();
+                const possiblePoints = ascendancySelections.length + (realPath.length - 1);
+                if (possiblePoints > TOTAL_ASCENDANCY_POINTS) {
+                    ascendancyAddLeftovers.push(...realPath.slice(TOTAL_ASCENDANCY_POINTS - possiblePoints - 1));
+                }
             }
         }
     }
