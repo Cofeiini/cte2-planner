@@ -250,7 +250,7 @@ export const findShortestRoute = (target) => {
         }
 
         const current = findDistance(start, target);
-        if (current < distant) {
+        if (current <= distant) {
             distant = current;
             routeList.push(algorithm(start, target));
         }
