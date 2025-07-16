@@ -1,6 +1,8 @@
 import { colorMap, controls, LINE_WIDTH } from "../data/constants.js";
 import {
+    ascendancyAddPreview,
     ascendancyNodes,
+    ascendancyRemovePreview,
     ascendancySelections,
     talentAddPreview,
     talentExclusions,
@@ -116,10 +118,10 @@ export const drawLinesAscendancy = () => {
     drawLinesComplex(context, ascendancySelections);
 
     context.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplex(context, talentRemovePreview, []);
+    drawLinesComplex(context, ascendancyRemovePreview, []);
 
     context.strokeStyle = colorMap.custom.get("line_add");
-    drawLinesComplex(context, talentAddPreview, []);
+    drawLinesComplex(context, ascendancyAddPreview, []);
 };
 
 export const drawLinesRegular = () => {

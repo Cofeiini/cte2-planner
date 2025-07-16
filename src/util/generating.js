@@ -3,8 +3,10 @@ import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { CELL_HALF, CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
 import {
+    ascendancyAddPreview,
     ascendancyGrid,
     ascendancyNodes,
+    ascendancyRemovePreview,
     ascendancySelections,
     exclusiveNodeValues,
     startingNode,
@@ -451,6 +453,8 @@ export const handleTalentEvents = (talent, container) => {
 
         talentAddPreview.length = 0;
         talentRemovePreview.length = 0;
+        ascendancyAddPreview.length = 0;
+        ascendancyRemovePreview.length = 0;
 
         clearTimeout(drawingTimer);
         if (controls.shouldRedraw) {
@@ -538,7 +542,12 @@ export const handleTalentEvents = (talent, container) => {
             handleTooltip(talent);
             if (talent.selected) {
                 talentAddPreview.length = 0;
-                talentAddPreview.push(...talentAddLeftovers);
+                ascendancyAddPreview.length = 0;
+                if (talent.parentTree === "main") {
+                    talentAddPreview.push(...talentAddLeftovers);
+                } else {
+                    ascendancyAddPreview.push(...talentAddLeftovers);
+                }
             } else {
                 talentRemovePreview.length = 0;
             }

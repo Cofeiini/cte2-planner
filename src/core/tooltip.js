@@ -1,5 +1,14 @@
 import { colorMap } from "../data/constants.js";
-import { ascendancySelections, ascendancyStartNodes, startingNode, talentAddPreview, talentRemovePreview, talentSelections } from "../type/talent-node.js";
+import {
+    ascendancyAddPreview,
+    ascendancyRemovePreview,
+    ascendancySelections,
+    ascendancyStartNodes,
+    startingNode,
+    talentAddPreview,
+    talentRemovePreview,
+    talentSelections,
+} from "../type/talent-node.js";
 import { generateDescriptionHTML } from "../util/generating.js";
 import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorithm.js";
 import { sidePanel } from "./side-panel.js";
@@ -45,10 +54,22 @@ export const handleTooltip = (talent) => {
         const previewNeighbors = selections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
         talentRemovePreview.length = 0;
         talentRemovePreview.push(...findDeadBranch(start, talent), ...previewNeighbors);
+        if (talent.parentTree !== "main") {
+            ascendancyRemovePreview.length = 0;
+            ascendancyRemovePreview.push(...talentRemovePreview);
+
+            talentRemovePreview.length = 0;
+        }
         nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
     } else {
         talentAddPreview.length = 0;
         talentAddPreview.push(...findShortestRoute(talent));
+        if (talent.parentTree !== "main") {
+            ascendancyAddPreview.length = 0;
+            ascendancyAddPreview.push(...talentAddPreview);
+
+            talentAddPreview.length = 0;
+        }
         nodeTotal = talentAddPreview.length;
         if (talentAddPreview.length > 1) {
             nodeTotal = talentAddPreview.length - 1;

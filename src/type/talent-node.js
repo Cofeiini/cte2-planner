@@ -29,6 +29,12 @@ export const talentAddLeftovers = [];
 /** @type {TalentNode[]} */
 export const talentRemovePreview = [];
 
+/** @type {TalentNode[]} */
+export const ascendancyAddPreview = [];
+
+/** @type {TalentNode[]} */
+export const ascendancyRemovePreview = [];
+
 /** @type {Map<string, TalentNode[]>} */
 export const talentExclusions = new Map();
 
