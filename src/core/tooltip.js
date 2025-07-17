@@ -51,57 +51,60 @@ export const handleTooltip = (talent) => {
     let nodeOverflow = 0;
     if (talent.selected) {
         let start = startingNode;
-        let selections = talentSelections;
+        let preview = talentRemovePreview;
         if (talent.parentTree !== "main") {
             start = ascendancyStartNodes.get(talent.parentTree);
-            selections = ascendancySelections;
+            preview = ascendancyRemovePreview;
         }
 
-        const previewNeighbors = selections.filter(item => talent.neighbors.some(element => item.identifier.number === element.identifier.number));
-        talentRemovePreview.length = 0;
-        talentRemovePreview.push(...findDeadBranch(start, talent), ...previewNeighbors);
-        nodeTotal = -(talentRemovePreview.length - previewNeighbors.length);
-        if (talent.parentTree !== "main") {
-            ascendancyRemovePreview.length = 0;
-            ascendancyRemovePreview.push(...talentRemovePreview);
+        preview.length = 0;
+        preview.push(...Array.from(new Set([...findDeadBranch(start, talent)])));
+        nodeTotal = -preview.length;
 
-            talentRemovePreview.length = 0;
-            nodeTotal = -(ascendancyRemovePreview.length - previewNeighbors.length);
+        for (const node of preview) {
+            node.visual.classList.add("preview-remove");
         }
     } else {
-        talentAddPreview.length = 0;
-        talentAddPreview.push(...findShortestRoute(talent));
+        const preview = findShortestRoute(talent);
+        const realPath = [...preview].reverse();
 
         if (talent.parentTree === "main") {
+            talentAddPreview.length = 0;
+            talentAddPreview.push(...preview);
+
             nodeTotal = talentAddPreview.length;
             if (talentAddPreview.length > 1) {
                 nodeTotal = talentAddPreview.length - 1;
                 talentAddLeftovers.length = 0;
 
-                const realPath = [...talentAddPreview].reverse();
                 const possiblePoints = talentSelections.length + (realPath.length - 1);
                 if (possiblePoints > TOTAL_POINTS) {
                     nodeOverflow = TOTAL_POINTS - possiblePoints;
-                    talentAddLeftovers.push(...realPath.slice(TOTAL_POINTS - possiblePoints - 1));
+                    talentAddLeftovers.push(...realPath.slice(nodeOverflow - 1));
+                    realPath.splice(nodeOverflow);
                 }
             }
         } else {
             ascendancyAddPreview.length = 0;
-            ascendancyAddPreview.push(...talentAddPreview);
-            talentAddPreview.length = 0;
+            ascendancyAddPreview.push(...preview);
 
             nodeTotal = ascendancyAddPreview.length;
             if (ascendancyAddPreview.length > 1) {
                 nodeTotal = ascendancyAddPreview.length - 1;
                 ascendancyAddLeftovers.length = 0;
 
-                const realPath = [...ascendancyAddPreview].reverse();
                 const possiblePoints = ascendancySelections.length + (realPath.length - 1);
                 if (possiblePoints > TOTAL_ASCENDANCY_POINTS) {
                     nodeOverflow = TOTAL_ASCENDANCY_POINTS - possiblePoints;
-                    ascendancyAddLeftovers.push(...realPath.slice(TOTAL_ASCENDANCY_POINTS - possiblePoints - 1));
+                    ascendancyAddLeftovers.push(...realPath.slice(nodeOverflow - 1));
+                    realPath.splice(nodeOverflow);
                 }
             }
+        }
+
+        realPath.splice(0, 1);
+        for (const node of realPath) {
+            node.visual.classList.add("preview-add");
         }
     }
 

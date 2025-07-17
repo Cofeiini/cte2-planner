@@ -1,5 +1,7 @@
 :root {
     --fade-time: 80ms;
+    --preview-add-color: #1F1F9F;
+    --preview-remove-color: #9F1F1F;
 }
 
 @font-face {
@@ -40,7 +42,22 @@ html, body {
 
 .highlighted {
     filter: drop-shadow(-0.25em 0 0 white) drop-shadow(0.25em 0 0 white) drop-shadow(0 0.25em 0 white) drop-shadow(0 -0.25em 0 white);
-    opacity: 1.0;
+}
+
+.highlighted img {
+    opacity: 1.0 !important;
+}
+
+.preview-add {
+    filter: drop-shadow(-0.1em 0 0 var(--preview-add-color)) drop-shadow(0.1em 0 0 var(--preview-add-color)) drop-shadow(0 0.1em 0 var(--preview-add-color)) drop-shadow(0 -0.1em 0 var(--preview-add-color));
+}
+
+.preview-remove {
+    filter: drop-shadow(-0.1em 0 0 var(--preview-remove-color)) drop-shadow(0.1em 0 0 var(--preview-remove-color)) drop-shadow(0 0.1em 0 var(--preview-remove-color)) drop-shadow(0 -0.1em 0 var(--preview-remove-color));
+}
+
+.preview-add img, .preview-remove img {
+    opacity: 1.0 !important;
 }
 
 .word {
@@ -232,7 +249,7 @@ html, body {
     background-color: #191821;
     contain: size paint layout;
     display: flex;
-    outline: white solid 4px;
+    outline: 4px solid white;
     position: absolute;
     transform-origin: 0 0;
     will-change: transform;
@@ -444,7 +461,7 @@ html, body {
     font-family: AshenCustom, sans-serif;
     font-size: 1.0em;
     height: 100%;
-    outline: white solid 1px;
+    outline: 1px solid white;
     position: relative;
     text-align: center;
     top: 0;

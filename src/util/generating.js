@@ -452,6 +452,10 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.container.classList.remove("visible");
         infoTooltip.container.classList.add("invisible");
 
+        document.querySelectorAll(".preview-add, .preview-remove").forEach(item => {
+            item.classList.remove("preview-add", "preview-remove");
+        });
+
         talentAddPreview.length = 0;
         talentRemovePreview.length = 0;
         ascendancyAddPreview.length = 0;
@@ -540,6 +544,10 @@ export const handleTalentEvents = (talent, container) => {
 
         if (controls.clickTarget === container) {
             controls.clickTarget = undefined;
+
+            document.querySelectorAll(".preview-add, .preview-remove").forEach(item => {
+                item.classList.remove("preview-add", "preview-remove");
+            });
 
             toggleNode(talent);
             handleTooltip(talent);
