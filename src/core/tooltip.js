@@ -58,12 +58,13 @@ export const handleTooltip = (talent) => {
         }
 
         preview.length = 0;
-        preview.push(...Array.from(new Set([...findDeadBranch(start, talent)])));
+        preview.push(...new Set([...findDeadBranch(start, talent)]));
         nodeTotal = -preview.length;
 
         for (const node of preview) {
             node.visual.classList.add("preview-remove");
         }
+        preview.push(...talent.neighbors.filter(item => item.selected));
     } else {
         const preview = findShortestRoute(talent);
         const realPath = [...preview].reverse();
