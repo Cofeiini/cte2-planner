@@ -1,4 +1,4 @@
-import { findDeadBranch, findRoutes } from "../core/algorithm.js";
+import { findDeadBranch } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
 import { collectStatInformation, setUpURL } from "../util/spuddling.js";
 
@@ -181,8 +181,10 @@ export const toggleNode = (node, isPreset = false) => {
 
         if (node.selected) {
             if (!isPreset && origin && selections.length > 0) {
-                findRoutes(node);
-            } else if (!origin || (!exclusiveNodeValues.nodes.get(exclusive).some(item => item === node.identifier.talent))) {
+                const allNodes = new Set([...selections, ...preview]);
+                selections.length = 0;
+                selections.push(...Array.from(allNodes));
+            } else if (!origin || !isClassNode) {
                 selections.push(node);
             }
 

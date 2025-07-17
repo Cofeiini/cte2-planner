@@ -9,8 +9,6 @@ import {
     talentExclusions,
     talentGrid,
     talentSelections,
-    TOTAL_ASCENDANCY_POINTS,
-    TOTAL_POINTS,
 } from "../type/talent-node.js";
 
 /**
@@ -266,45 +264,6 @@ export const findShortestRoute = (target) => {
     }
 
     return shortest;
-};
-
-/**
- * @param {TalentNode} targetNode
- */
-export const findRoutes = (targetNode) => {
-    let selections = talentSelections;
-    let totalPoints = TOTAL_POINTS;
-    if (targetNode.parentTree !== "main") {
-        selections = ascendancySelections;
-        totalPoints = TOTAL_ASCENDANCY_POINTS;
-    }
-
-    /** @type {TalentNode[]} */
-    let shortest = findShortestRoute(targetNode);
-
-    resetNodeHeuristics();
-
-    const allNodes = new Set();
-    for (const node of selections) {
-        allNodes.add(node);
-    }
-
-    const possiblePoints = selections.length + (shortest.length - 1); // Remember to offset by 1 because the array already has the starting node
-    if (possiblePoints > totalPoints) {
-        if ((possiblePoints - totalPoints) > shortest.length) {
-            console.error("Actually too many points!");
-            return;
-        }
-
-        shortest = shortest.reverse().slice(0, totalPoints - possiblePoints);
-    }
-
-    for (const node of shortest) {
-        allNodes.add(node);
-    }
-
-    selections.length = 0;
-    selections.push(...Array.from(allNodes));
 };
 
 /**
