@@ -117,6 +117,8 @@ export const findDeadBranch = (start, target) => {
  * @returns {number}
  */
 export const findDistance = (start, end) => {
+    const excluded = exclusiveNodeValues.nodes.get("start");
+
     const queue = [[start, 0]];
     const visited = new Set([start.identifier.number]);
 
@@ -130,6 +132,11 @@ export const findDistance = (start, end) => {
             if (visited.has(neighbor.identifier.number)) {
                 continue;
             }
+
+            if (excluded.some(item => neighbor.identifier.talent === item)) {
+                continue;
+            }
+
             visited.add(neighbor.identifier.number);
             queue.push([neighbor, distance + 1]);
         }
