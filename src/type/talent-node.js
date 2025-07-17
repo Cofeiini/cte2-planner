@@ -149,6 +149,7 @@ export const toggleNode = (node, isPreset = false) => {
     let exclusive = "start";
     let totalPoints = TOTAL_POINTS;
     let preview = talentAddPreview;
+    let leftovers = talentAddLeftovers;
 
     if (node.parentTree !== "main") {
         origin = ascendancyStartNodes.get(node.parentTree);
@@ -156,6 +157,7 @@ export const toggleNode = (node, isPreset = false) => {
         exclusive = "ascendancy";
         totalPoints = TOTAL_ASCENDANCY_POINTS;
         preview = ascendancyAddPreview;
+        leftovers = ascendancyAddLeftovers;
     }
 
     const isClassNode = exclusiveNodeValues.nodes.get(exclusive).includes(node.identifier.talent);
@@ -176,6 +178,11 @@ export const toggleNode = (node, isPreset = false) => {
 
     if (node.selected) {
         if ((selections.length + (preview.length - 1)) > totalPoints) {
+            if (((preview.length - 1) - (leftovers.length - 1)) > 0) {
+                const skippedNodes = leftovers.toSpliced(0, 1);
+                const addedNodes = preview.toSpliced(-1, 1).filter(item => !skippedNodes.some(element => element.identifier.number === item.identifier.number));
+                selections.push(...addedNodes);
+            }
             node.selected = false;
         }
 
