@@ -94,7 +94,9 @@ export class TalentNode {
     visual = undefined;
     selectable = false;
     selected = false;
-    update = undefined;
+    update = () => {
+        console.error("Non-overloaded talent update was called!");
+    };
     neighbors = [];
     parentTree = "main";
     travel = {
@@ -123,7 +125,9 @@ export class TalentNode {
         this.visual = undefined;
         this.selectable = (input.value.length > 1) && input.value !== "[CENTER]";
         this.selected = false;
-        this.update = undefined;
+        this.update = () => {
+            console.error("Default talent update was called!");
+        };
         this.neighbors = [];
         this.parentTree = input.parentTree;
         this.travel.source = undefined;
