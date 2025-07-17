@@ -87,19 +87,24 @@ export class TalentNode {
         talent: "",
         data: "",
     };
+    /** @type {string[]} */
     keywords = [];
     name = "";
     type = "stat";
+    /** @type {Object[]} */
     stats = [];
+    /** @type {HTMLDivElement} */
     visual = undefined;
     selectable = false;
     selected = false;
     update = () => {
         console.error("Non-overloaded talent update was called!");
     };
+    /** @type {TalentNode[]} */
     neighbors = [];
     parentTree = "main";
     travel = {
+        /** @type {TalentNode} */
         source: undefined,
         closed: false,
         visited: false,
@@ -174,36 +179,7 @@ export const toggleNode = (node, isPreset = false) => {
         }
     }
 
-    node.selected = !node.selected;
-
     if (node.selected) {
-        if ((selections.length + (preview.length - 1)) > totalPoints) {
-            if (((preview.length - 1) - (leftovers.length - 1)) > 0) {
-                const skippedNodes = leftovers.toSpliced(0, 1);
-                const addedNodes = preview.toSpliced(-1, 1).filter(item => !skippedNodes.some(element => element.identifier.number === item.identifier.number));
-                selections.push(...addedNodes);
-            }
-            node.selected = false;
-        }
-
-        if (node.selected) {
-            if (!isPreset && origin && selections.length > 0) {
-                const allNodes = new Set([...selections, ...preview]);
-                selections.length = 0;
-                selections.push(...Array.from(allNodes));
-            } else if (!origin || !isClassNode) {
-                selections.push(node);
-            }
-
-            if (!origin && isClassNode) {
-                if (node.parentTree === "main") {
-                    updateStartingNode(node);
-                } else {
-                    ascendancyStartNodes.set(node.parentTree, node);
-                }
-            }
-        }
-    } else {
         const deadBranch = findDeadBranch(origin, node);
 
         for (const talent of deadBranch) {
@@ -227,6 +203,28 @@ export const toggleNode = (node, isPreset = false) => {
                 updateStartingNode(undefined);
             } else {
                 ascendancyStartNodes.set(node.parentTree, undefined);
+            }
+        }
+    } else {
+        if ((selections.length + (preview.length - 1)) > totalPoints) {
+            if (((preview.length - 1) - (leftovers.length - 1)) > 0) {
+                selections.push(...preview.toSpliced(0, leftovers.length - 1).toSpliced(-1, 1));
+            }
+        } else {
+            if (!isPreset && origin && selections.length > 0) {
+                const allNodes = new Set([...selections, ...preview]);
+                selections.length = 0;
+                selections.push(...allNodes);
+            } else if (!origin || !isClassNode) {
+                selections.push(node);
+            }
+
+            if (!origin && isClassNode) {
+                if (node.parentTree === "main") {
+                    updateStartingNode(node);
+                } else {
+                    ascendancyStartNodes.set(node.parentTree, node);
+                }
             }
         }
     }

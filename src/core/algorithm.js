@@ -26,11 +26,6 @@ export const scaleValueToLevel = (level, value) => {
  * @param {Set<TalentNode>} collected
  */
 export const searchNodes = (node, paths, collected) => {
-    let selections = talentSelections;
-    if (node.parentTree !== "main") {
-        selections = ascendancySelections;
-    }
-
     const visited = new Set();
 
     const search = (current) => {
@@ -42,7 +37,7 @@ export const searchNodes = (node, paths, collected) => {
                 continue;
             }
 
-            if (!selections.some(item => item.identifier.number === neighbor.identifier.number)) {
+            if (!neighbor.selected) {
                 continue;
             }
 
@@ -64,11 +59,6 @@ export const searchNodes = (node, paths, collected) => {
  * @param {TalentNode[][]} allPaths
  */
 export const findPaths = (start, end, currentPath, allPaths) => {
-    let selections = talentSelections;
-    if (start.parentTree !== "main") {
-        selections = ascendancySelections;
-    }
-
     const node = currentPath.at(-1);
     if (node.identifier.number === end.identifier.number) {
         allPaths.push(currentPath);
@@ -80,7 +70,7 @@ export const findPaths = (start, end, currentPath, allPaths) => {
             continue;
         }
 
-        if (!selections.some(item => item.identifier.number === neighbor.identifier.number)) {
+        if (!neighbor.selected) {
             continue;
         }
 
