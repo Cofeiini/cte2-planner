@@ -192,10 +192,9 @@ export const toggleNode = (node, isPreset = false) => {
 
         for (const talent of deadBranch) {
             talent.update();
-        }
-
-        for (const neighbor of node.neighbors) {
-            neighbor.update();
+            for (const neighbor of talent.neighbors) {
+                neighbor.update();
+            }
         }
 
         if (origin?.identifier.number === node.identifier.number) {
