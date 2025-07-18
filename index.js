@@ -110,6 +110,16 @@ const handleEvents = () => {
         return false;
     };
 
+    viewport.onmouseenter = (event) => {
+        if (event.buttons !== 0) {
+            return;
+        }
+
+        controls.panning = false;
+        container.style.cursor = null;
+        container.removeEventListener("mousemove", handleMouseDrag);
+    };
+
     viewport.onmousemove = (event) => {
         infoTooltip.main.style.width = "max-content";
         const bounds = viewport.getBoundingClientRect();
