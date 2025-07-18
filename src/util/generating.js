@@ -24,7 +24,7 @@ import {
     TOTAL_POINTS,
     updateTargetTree,
 } from "../type/talent-node.js";
-import { drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
+import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
 import { handleViewport, setUpIcon, updateAscendancyButton } from "./spuddling.js";
 
 export const viewport = {
@@ -419,6 +419,18 @@ export const generateAscendancyGrid = (data) => {
  * @param {HTMLDivElement} container
  */
 export const handleTalentEvents = (talent, container) => {
+    let draw = drawLinesRegular;
+    let addPreview = talentAddPreview;
+    let leftovers = talentAddLeftovers;
+    let removePreview = talentRemovePreview;
+
+    if (talent?.parentTree !== "main") {
+        draw = drawLinesAscendancy;
+        addPreview = ascendancyAddPreview;
+        leftovers = ascendancyAddLeftovers;
+        removePreview = ascendancyRemovePreview;
+    }
+
     container.onmouseenter = () => {
         controls.hovering = true;
 
@@ -440,8 +452,7 @@ export const handleTalentEvents = (talent, container) => {
         clearTimeout(drawingTimer);
         drawingTimer = setTimeout(() => {
             controls.shouldRedraw = true;
-
-            drawLinesRegular();
+            draw();
         }, 10);
     };
 
@@ -456,18 +467,15 @@ export const handleTalentEvents = (talent, container) => {
             item.classList.remove("preview-add", "preview-remove");
         });
 
-        talentAddPreview.length = 0;
-        talentRemovePreview.length = 0;
-        ascendancyAddPreview.length = 0;
-        ascendancyRemovePreview.length = 0;
-        talentAddLeftovers.length = 0;
-        ascendancyAddLeftovers.length = 0;
+        addPreview.clear();
+        removePreview.clear();
+        leftovers.clear();
 
         clearTimeout(drawingTimer);
         if (controls.shouldRedraw) {
             drawingTimer = setTimeout(() => {
                 controls.shouldRedraw = false;
-                drawLinesRegular();
+                draw();
             }, 10);
         }
     };
@@ -551,19 +559,14 @@ export const handleTalentEvents = (talent, container) => {
 
             toggleNode(talent);
             handleTooltip(talent);
-            if (talent.selected) {
-                talentAddPreview.length = 0;
-                ascendancyAddPreview.length = 0;
-                if (talent.parentTree === "main") {
-                    talentAddPreview.push(...talentAddLeftovers);
-                } else {
-                    ascendancyAddPreview.push(...ascendancyAddLeftovers);
-                }
-            } else {
-                talentRemovePreview.length = 0;
-                ascendancyRemovePreview.length = 0;
+
+            removePreview.clear();
+            addPreview.clear();
+            for (const [node, values] of leftovers) {
+                addPreview.set(node, values);
             }
-            drawLinesRegular();
+
+            draw();
         }
     };
 };

@@ -57,49 +57,51 @@ export const handleTooltip = (talent) => {
             preview = ascendancyRemovePreview;
         }
 
-        preview.length = 0;
-        preview.push(...new Set([...findDeadBranch(start, talent)]));
-        nodeTotal = -preview.length;
+        const droppedNodes = new Set([...findDeadBranch(start, talent)]);
+        preview.clear();
+        for (const node of droppedNodes) {
+            preview.set(node, new Set(node.neighbors.filter(item => droppedNodes.has(item)).map(item => item.identifier.number)));
+        }
+        nodeTotal = -preview.size;
 
-        for (const node of preview) {
+        for (const node of preview.keys()) {
             node.visual.classList.add("preview-remove");
         }
-        preview.push(...talent.neighbors.filter(item => item.selected));
+
+        preview.set(talent, new Set(talent.neighbors.filter(item => item.selected).map(item => item.identifier.number)));
     } else {
-        const preview = findShortestRoute(talent);
-        const realPath = [...preview].reverse();
+        let selectionsLength = talentSelections.length;
+        let preview = talentAddPreview;
+        let leftovers = talentAddLeftovers;
+        let totalPoints = TOTAL_POINTS;
 
-        if (talent.parentTree === "main") {
-            talentAddPreview.length = 0;
-            talentAddPreview.push(...preview);
+        if (talent.parentTree !== "main") {
+            selectionsLength = ascendancySelections.length;
+            preview = ascendancyAddPreview;
+            leftovers = ascendancyAddLeftovers;
+            totalPoints = TOTAL_ASCENDANCY_POINTS;
+        }
 
-            nodeTotal = talentAddPreview.length;
-            if (talentAddPreview.length > 1) {
-                nodeTotal = talentAddPreview.length - 1;
-                talentAddLeftovers.length = 0;
+        const addedNodes = new Set(findShortestRoute(talent));
+        const realPath = [...addedNodes].reverse();
 
-                const possiblePoints = talentSelections.length + (realPath.length - 1);
-                if (possiblePoints > TOTAL_POINTS) {
-                    nodeOverflow = TOTAL_POINTS - possiblePoints;
-                    talentAddLeftovers.push(...realPath.slice(nodeOverflow - 1));
-                    realPath.splice(nodeOverflow);
+        preview.clear();
+        for (const node of addedNodes) {
+            preview.set(node, new Set(node.neighbors.filter(item => addedNodes.has(item)).map(item => item.identifier.number)));
+        }
+
+        nodeTotal = preview.size;
+        if (preview.size > 1) {
+            nodeTotal = preview.size - 1;
+            leftovers.clear();
+
+            const possiblePoints = selectionsLength + (realPath.length - 1);
+            if (possiblePoints > totalPoints) {
+                nodeOverflow = totalPoints - possiblePoints;
+                for (const node of realPath.slice(nodeOverflow - 1).slice(1)) {
+                    leftovers.set(node, new Set(node.neighbors.filter(item => addedNodes.has(item)).map(item => item.identifier.number)));
                 }
-            }
-        } else {
-            ascendancyAddPreview.length = 0;
-            ascendancyAddPreview.push(...preview);
-
-            nodeTotal = ascendancyAddPreview.length;
-            if (ascendancyAddPreview.length > 1) {
-                nodeTotal = ascendancyAddPreview.length - 1;
-                ascendancyAddLeftovers.length = 0;
-
-                const possiblePoints = ascendancySelections.length + (realPath.length - 1);
-                if (possiblePoints > TOTAL_ASCENDANCY_POINTS) {
-                    nodeOverflow = TOTAL_ASCENDANCY_POINTS - possiblePoints;
-                    ascendancyAddLeftovers.push(...realPath.slice(nodeOverflow - 1));
-                    realPath.splice(nodeOverflow);
-                }
+                realPath.splice(nodeOverflow);
             }
         }
 
@@ -116,11 +118,11 @@ export const handleTooltip = (talent) => {
         color = colorMap.minecraft.get("6");
     }
 
-    let nodeColor = colorMap.minecraft.get("f");
+    let countColor = colorMap.minecraft.get("f");
     if (nodeTotal > 0) {
-        nodeColor = colorMap.minecraft.get("a");
+        countColor = colorMap.minecraft.get("a");
     } else if (nodeTotal < 0) {
-        nodeColor = colorMap.minecraft.get("c");
+        countColor = colorMap.minecraft.get("c");
     }
 
     let overflowText = "";
@@ -130,7 +132,7 @@ export const handleTooltip = (talent) => {
 
     infoTooltip.name.style.color = color;
     infoTooltip.name.innerText = talent.name;
-    infoTooltip.node.count.innerHTML = `<span style="color: ${nodeColor}">${nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" })}</span>${overflowText}`;
+    infoTooltip.node.count.innerHTML = `<span style="color: ${countColor}">${nodeTotal.toLocaleString("en", { signDisplay: "exceptZero" })}</span>${overflowText}`;
     infoTooltip.node.text.innerText = `Node${(Math.abs(nodeTotal) === 1) ? "" : "s"}`;
 
     const level = parseInt(sidePanel.character.level.value);
@@ -154,7 +156,7 @@ export const handleTooltip = (talent) => {
     }
 
     for (const [key, values] of exclusiveNodeValues.nodes) {
-        if (values.some(item => talent.identifier.talent === item)) {
+        if (values.includes(talent.identifier.talent)) {
             formatted.push(`<span style="color: ${colorMap.minecraft.get("a")};">Can only have one Perk of this type: ${exclusiveNodeValues.lang.get(key)}</span>`);
             break;
         }

@@ -39,20 +39,36 @@ export const drawLinesSimple = (context, collection, excluded = []) => {
 /**
  * @param {CanvasRenderingContext2D} context
  * @param {TalentNode[]} collection
- * @param {TalentNode[] | undefined} optional
  */
-export const drawLinesComplex = (context, collection, optional = undefined) => {
+const drawLinesComplex = (context, collection) => {
     context.beginPath();
     for (const leaf of collection) {
         for (const neighbor of leaf.neighbors) {
-            if (optional) {
-                if (optional.some(item => item.identifier.number === neighbor.identifier.number)) {
-                    continue;
-                }
-                optional.push(neighbor);
+            if (neighbor.selected) {
+                context.moveTo(leaf.center.x, leaf.center.y);
+                context.lineTo(neighbor.center.x, neighbor.center.y);
             }
+        }
+    }
+    context.closePath();
+    context.stroke();
+};
 
-            if (collection.some(item => item.identifier.number === neighbor.identifier.number)) {
+/**
+ * @param {CanvasRenderingContext2D} context
+ * @param {Map<TalentNode, Set<number>>} collection
+ * @param {Set<number>} optional
+ */
+const drawLinesComplexOptional = (context, collection, optional) => {
+    context.beginPath();
+    for (const [leaf, dataset] of collection) {
+        for (const neighbor of leaf.neighbors) {
+            if (optional.has(neighbor.identifier.number)) {
+                continue;
+            }
+            optional.add(neighbor.identifier.number);
+
+            if (dataset.has(neighbor.identifier.number)) {
                 context.moveTo(leaf.center.x, leaf.center.y);
                 context.lineTo(neighbor.center.x, neighbor.center.y);
             }
@@ -120,13 +136,13 @@ export const drawLinesAscendancy = () => {
     drawLinesComplex(context, ascendancySelections);
 
     context.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplex(context, ascendancyRemovePreview, []);
+    drawLinesComplexOptional(context, ascendancyRemovePreview, new Set());
 
     context.strokeStyle = colorMap.custom.get("line_add");
-    drawLinesComplex(context, ascendancyAddPreview, []);
+    drawLinesComplexOptional(context, ascendancyAddPreview, new Set([...ascendancyAddLeftovers.keys().map(item => item.identifier.number)]));
 
     context.strokeStyle = colorMap.custom.get("line_overflow");
-    drawLinesComplex(context, ascendancyAddLeftovers, []);
+    drawLinesComplexOptional(context, ascendancyAddLeftovers, new Set());
 };
 
 export const drawLinesRegular = () => {
@@ -153,13 +169,11 @@ export const drawLinesRegular = () => {
     drawLinesComplex(context, talentSelections);
 
     context.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplex(context, talentRemovePreview, []);
+    drawLinesComplexOptional(context, talentRemovePreview, new Set());
 
     context.strokeStyle = colorMap.custom.get("line_add");
-    drawLinesComplex(context, talentAddPreview, []);
+    drawLinesComplexOptional(context, talentAddPreview, new Set([...talentAddLeftovers.keys().map(item => item.identifier.number)]));
 
     context.strokeStyle = colorMap.custom.get("line_overflow");
-    drawLinesComplex(context, talentAddLeftovers, []);
-
-    drawLinesAscendancy();
+    drawLinesComplexOptional(context, talentAddLeftovers, new Set());
 };

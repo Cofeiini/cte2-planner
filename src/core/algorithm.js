@@ -123,7 +123,7 @@ export const findDistance = (start, end) => {
                 continue;
             }
 
-            if (excluded.some(item => neighbor.identifier.talent === item)) {
+            if (excluded.includes(neighbor.identifier.talent)) {
                 continue;
             }
 
@@ -266,7 +266,7 @@ export const findShortestRoute = (target) => {
 /**
  * @param {TalentNode} current
  * @param {TalentNode[]} route
- * @returns {talentNodes[]}
+ * @returns {TalentNode[]}
  */
 export const generatePath = (current, route) => {
     const path = [];
@@ -320,7 +320,7 @@ export const generatePath = (current, route) => {
  * @param {string} ascendancy
  * @param {TalentNode} current
  * @param {TalentNode[]} route
- * @returns {talentNodes[]}
+ * @returns {TalentNode[]}
  */
 export const generateAscendancyPath = (ascendancy, current, route) => {
     const grid = ascendancyGrid.get(ascendancy);

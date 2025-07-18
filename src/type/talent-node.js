@@ -23,23 +23,23 @@ export const talentSelections = [];
 /** @type {TalentNode[]} */
 export const ascendancySelections = [];
 
-/** @type {TalentNode[]} */
-export const talentAddPreview = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const talentAddPreview = new Map();
 
-/** @type {TalentNode[]} */
-export const talentAddLeftovers = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const talentAddLeftovers = new Map();
 
-/** @type {TalentNode[]} */
-export const ascendancyAddLeftovers = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const ascendancyAddLeftovers = new Map();
 
-/** @type {TalentNode[]} */
-export const talentRemovePreview = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const talentRemovePreview = new Map();
 
-/** @type {TalentNode[]} */
-export const ascendancyAddPreview = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const ascendancyAddPreview = new Map();
 
-/** @type {TalentNode[]} */
-export const ascendancyRemovePreview = [];
+/** @type {Map<TalentNode, Set<number>>} */
+export const ascendancyRemovePreview = new Map();
 
 /** @type {Map<string, TalentNode[]>} */
 export const talentExclusions = new Map();
@@ -165,8 +165,8 @@ export const toggleNode = (node, isPreset = false) => {
         leftovers = ascendancyAddLeftovers;
     }
 
-    const isClassNode = exclusiveNodeValues.nodes.get(exclusive).includes(node.identifier.talent);
-    if (!origin && !isClassNode) {
+    const isStartingNode = exclusiveNodeValues.nodes.get(exclusive).includes(node.identifier.talent);
+    if (!origin && !isStartingNode) {
         return;
     }
 
@@ -204,26 +204,25 @@ export const toggleNode = (node, isPreset = false) => {
                 ascendancyStartNodes.set(node.parentTree, undefined);
             }
         }
+    } else if ((selections.length + (preview.size - 1)) > totalPoints) {
+        if (((preview.size - 1) - (leftovers.size - 1)) > 0) {
+            const skippedNodes = Array.from(leftovers.keys());
+            selections.push(...Array.from(preview.keys()).filter(item => !item.selected).filter(item => !skippedNodes.some(element => element.identifier.number === item.identifier.number)));
+        }
     } else {
-        if ((selections.length + (preview.length - 1)) > totalPoints) {
-            if (((preview.length - 1) - (leftovers.length - 1)) > 0) {
-                selections.push(...preview.toSpliced(0, leftovers.length - 1).toSpliced(-1, 1));
-            }
-        } else {
-            if (!isPreset && origin && selections.length > 0) {
-                const allNodes = new Set([...selections, ...preview]);
-                selections.length = 0;
-                selections.push(...allNodes);
-            } else if (!origin || !isClassNode) {
-                selections.push(node);
-            }
+        if (!isPreset && origin && selections.length > 0) {
+            const allNodes = new Set([...selections, ...preview.keys()]);
+            selections.length = 0;
+            selections.push(...allNodes);
+        } else if (!origin || !isStartingNode) {
+            selections.push(node);
+        }
 
-            if (!origin && isClassNode) {
-                if (node.parentTree === "main") {
-                    updateStartingNode(node);
-                } else {
-                    ascendancyStartNodes.set(node.parentTree, node);
-                }
+        if (!origin && isStartingNode) {
+            if (node.parentTree === "main") {
+                updateStartingNode(node);
+            } else {
+                ascendancyStartNodes.set(node.parentTree, node);
             }
         }
     }
