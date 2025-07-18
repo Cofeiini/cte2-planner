@@ -96,6 +96,7 @@ export class TalentNode {
     /** @type {HTMLDivElement} */
     visual = undefined;
     selectable = false;
+    exclusive = false;
     selected = false;
     update = () => {
         console.error("Non-overloaded talent update was called!");
@@ -129,6 +130,7 @@ export class TalentNode {
         this.stats = [];
         this.visual = undefined;
         this.selectable = (input.value.length > 1) && input.value !== "[CENTER]";
+        this.exclusive = false;
         this.selected = false;
         this.update = () => {
             console.error("Default talent update was called!");
@@ -174,7 +176,7 @@ export const toggleNode = (node, isPreset = false) => {
 
     if (!node.selected) {
         for (const values of exclusiveNodeValues.nodes.values()) {
-            const existingSelection = selections.find(item => values.includes(item.identifier.talent));
+            const existingSelection = selections.find(item => item.exclusive && values.includes(item.identifier.talent));
             if (existingSelection && values.includes(node.identifier.talent)) {
                 return;
             }
@@ -243,7 +245,7 @@ export const toggleNode = (node, isPreset = false) => {
     if (!isPreset) {
         excluded.length = 0;
         for (const values of talentExclusions.values()) {
-            if (selections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+            if (selections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
                 excluded.push(...values);
             }
         }

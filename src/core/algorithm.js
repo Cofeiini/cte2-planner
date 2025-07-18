@@ -123,7 +123,7 @@ export const findDistance = (start, end) => {
                 continue;
             }
 
-            if (excluded.includes(neighbor.identifier.talent)) {
+            if (neighbor.exclusive && excluded.includes(neighbor.identifier.talent)) {
                 continue;
             }
 
@@ -220,7 +220,7 @@ export const findShortestRoute = (target) => {
     /** @type {string[]} */
     const excluded = [];
     for (const values of exclusiveNodeValues.nodes.values()) {
-        if (selections.some(item => values.some(element => item.identifier.talent === element))) {
+        if (selections.some(item => item.exclusive && values.includes(item.identifier.talent))) {
             excluded.push(...values);
         }
     }
@@ -229,7 +229,7 @@ export const findShortestRoute = (target) => {
         excluded.push(...exclusiveNodeValues.nodes.get(exclude));
     }
 
-    if (excluded.some(item => item === target.identifier.talent)) {
+    if (excluded.includes(target.identifier.talent)) {
         if (origin) {
             return [];
         }

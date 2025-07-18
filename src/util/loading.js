@@ -85,11 +85,8 @@ export const handleLoadingImageAssets = async () => {
 
             const oneKind = json["one_kind"];
             if (oneKind) {
-                const exclusiveList = [node.identifier.talent];
-                if (exclusiveNodeValues.nodes.has(oneKind)) {
-                    exclusiveList.push(...exclusiveNodeValues.nodes.get(oneKind));
-                }
-                exclusiveNodeValues.nodes.set(oneKind, exclusiveList);
+                node.exclusive = true;
+                exclusiveNodeValues.nodes.set(oneKind, [node.identifier.talent, ...(exclusiveNodeValues.nodes.get(oneKind) ?? [])]);
             }
 
             if (requested.has(node.identifier.talent)) {
@@ -406,7 +403,7 @@ export const handleLoading = async () => {
 
         excludedTalentNodes.length = 0;
         for (const values of talentExclusions.values()) {
-            if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+            if (talentSelections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
                 excludedTalentNodes.push(...values);
             }
         }
@@ -420,7 +417,7 @@ export const handleLoading = async () => {
 
         excludedAscendancyNodes.length = 0;
         for (const values of talentExclusions.values()) {
-            if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+            if (ascendancySelections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
                 excludedAscendancyNodes.push(...values);
             }
         }

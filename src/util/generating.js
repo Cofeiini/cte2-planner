@@ -643,7 +643,7 @@ const generateTalentNode = (talent) => {
         let isExcluded = false;
         if (!talent.selected) {
             for (const values of exclusiveNodeValues.nodes.values()) {
-                const existingSelection = selections.some(item => values.includes(item.identifier.talent));
+                const existingSelection = selections.some(item => item.exclusive && values.includes(item.identifier.talent));
                 if (existingSelection && values.includes(talent.identifier.talent)) {
                     isExcluded = true;
                     break;

@@ -155,10 +155,12 @@ export const handleTooltip = (talent) => {
         formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }
 
-    for (const [key, values] of exclusiveNodeValues.nodes) {
-        if (values.includes(talent.identifier.talent)) {
-            formatted.push(`<span style="color: ${colorMap.minecraft.get("a")};">Can only have one Perk of this type: ${exclusiveNodeValues.lang.get(key)}</span>`);
-            break;
+    if (talent.exclusive) {
+        for (const [key, values] of exclusiveNodeValues.nodes) {
+            if (values.includes(talent.identifier.talent)) {
+                formatted.push(`<span style="color: ${colorMap.minecraft.get("a")};">Can only have one Perk of this type: ${exclusiveNodeValues.lang.get(key)}</span>`);
+                break;
+            }
         }
     }
 
