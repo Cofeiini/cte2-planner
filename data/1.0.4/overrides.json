@@ -1,0 +1,247 @@
+{
+  "accuracy_per_perc_of_dexterity": {
+    "is_long": true
+  },
+  "ailment_damage": {
+    "is_perc": true
+  },
+  "armor_per_perc_of_dodge": {
+    "is_long": true
+  },
+  "attack_speed_per_perc_of_accuracy": {
+    "is_long": true
+  },
+  "aura_effect": {
+    "is_perc": true
+  },
+  "bleed_chance": {
+    "is_perc": true
+  },
+  "bleed_damage": {
+    "is_perc": true
+  },
+  "bleed_duration": {
+    "is_perc": true
+  },
+  "bleed_receive_chance": {
+    "is_perc": true,
+    "minus_is_good": true
+  },
+  "block_chance": {
+    "is_perc": true
+  },
+  "blood_per_perc_of_health": {
+    "is_long": true
+  },
+  "blood_user": {
+    "is_long": true
+  },
+  "burn_chance": {
+    "is_perc": true
+  },
+  "burn_damage": {
+    "is_perc": true
+  },
+  "burn_duration": {
+    "is_perc": true
+  },
+  "burn_receive_chance": {
+    "is_perc": true,
+    "minus_is_good": true
+  },
+  "burn_resistance": {
+    "is_perc": true
+  },
+  "chaos_penetration": {
+    "is_perc": true
+  },
+  "chaos_resist": {
+    "is_perc": true
+  },
+  "critical_hit_per_perc_of_strength": {
+    "is_long": true
+  },
+  "dodge_per_perc_of_magic_shield": {
+    "is_long": true
+  },
+  "electrify_chance": {
+    "is_perc": true
+  },
+  "electrify_damage": {
+    "is_perc": true
+  },
+  "electrify_proc_chance": {
+    "is_perc": true
+  },
+  "electrify_receive_chance": {
+    "is_perc": true,
+    "minus_is_good": true
+  },
+  "electrify_resistance": {
+    "is_perc": true
+  },
+  "elemental_penetration": {
+    "is_perc": true
+  },
+  "elemental_resist": {
+    "is_perc": true
+  },
+  "energy_per_perc_of_mana": {
+    "is_long": true
+  },
+  "fire_penetration": {
+    "is_perc": true
+  },
+  "fire_resist": {
+    "is_perc": true
+  },
+  "freeze_chance": {
+    "is_perc": true
+  },
+  "freeze_damage": {
+    "is_perc": true
+  },
+  "freeze_proc_chance": {
+    "is_perc": true
+  },
+  "freeze_receive_chance": {
+    "is_perc": true,
+    "minus_is_good": true
+  },
+  "freeze_resistance": {
+    "is_perc": true
+  },
+  "golem_spell_chance": {
+    "is_perc": true
+  },
+  "health_per_perc_of_intelligence": {
+    "is_long": true
+  },
+  "health_per_sec": {
+    "is_perc": true
+  },
+  "health_regen_per_perc_of_ms_regen": {
+    "is_long": true
+  },
+  "hp_resto_to_blood": {
+    "is_long": true
+  },
+  "int_dmg_per_5_strength": {
+    "is_long": true
+  },
+  "lightning_penetration": {
+    "is_perc": true
+  },
+  "lightning_resist": {
+    "is_perc": true
+  },
+  "lightning_resist_per_1_fire_resist": {
+    "is_long": true
+  },
+  "magic_shield_heal": {
+    "is_perc": true
+  },
+  "magic_shield_per_perc_of_dodge": {
+    "is_long": true
+  },
+  "magic_shield_per_perc_of_mana": {
+    "is_long": true
+  },
+  "mana_per_perc_of_armor": {
+    "is_long": true
+  },
+  "mana_per_perc_of_dodge": {
+    "is_long": true
+  },
+  "mana_per_perc_of_health": {
+    "is_long": true
+  },
+  "mana_per_sec": {
+    "is_perc": true
+  },
+  "mana_shield": {
+    "is_perc": true
+  },
+  "max_elemental_resist": {
+    "is_perc": true
+  },
+  "max_fire_resist": {
+    "is_perc": true
+  },
+  "max_lightning_resist": {
+    "is_perc": true
+  },
+  "max_lightning_resist_per_1_max_fire_resist": {
+    "is_long": true
+  },
+  "max_water_resist": {
+    "is_perc": true
+  },
+  "max_water_resist_per_1_max_fire_resist": {
+    "is_long": true
+  },
+  "ms_regen_per_perc_of_health_regen": {
+    "is_long": true
+  },
+  "phys_taken_as_fire": {
+    "is_perc": true
+  },
+  "phys_to_chaos": {
+    "is_perc": true
+  },
+  "phys_to_fire": {
+    "is_perc": true
+  },
+  "phys_to_lightning": {
+    "is_perc": true
+  },
+  "phys_to_water": {
+    "is_perc": true
+  },
+  "physical_resist": {
+    "is_perc": true
+  },
+  "physical_weapon_damage_per_perc_of_energy": {
+    "is_long": true
+  },
+  "physical_weapon_damage_per_perc_of_mana": {
+    "is_long": true
+  },
+  "poison_chance": {
+    "is_perc": true
+  },
+  "poison_damage": {
+    "is_perc": true
+  },
+  "poison_duration": {
+    "is_perc": true
+  },
+  "poison_receive_chance": {
+    "is_perc": true,
+    "minus_is_good": true
+  },
+  "poison_resistance": {
+    "is_perc": true
+  },
+  "projectile_damage_per_5_strength": {
+    "is_long": true
+  },
+  "skill_damage_per_move_speed": {
+    "is_long": true
+  },
+  "spell_damage_per_perc_of_increase_healing": {
+    "is_long": true
+  },
+  "summon_health": {
+    "is_perc": true
+  },
+  "water_penetration": {
+    "is_perc": true
+  },
+  "water_resist": {
+    "is_perc": true
+  },
+  "water_resist_per_1_fire_resist": {
+    "is_long": true
+  }
+}
