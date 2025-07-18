@@ -557,13 +557,11 @@ export const handleTalentEvents = (talent, container) => {
             });
 
             toggleNode(talent);
-            handleTooltip(talent);
 
             removePreview.clear();
             addPreview.clear();
-            for (const [node, values] of leftovers) {
-                addPreview.set(node, values);
-            }
+
+            handleTooltip(talent);
 
             draw();
         }
