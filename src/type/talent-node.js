@@ -1,4 +1,3 @@
-import { findDeadBranch } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
 import { collectStatInformation, setUpURL } from "../util/spuddling.js";
 
@@ -155,6 +154,7 @@ export const toggleNode = (node, isPreset = false) => {
     let selections = talentSelections;
     let excluded = excludedTalentNodes;
     let preview = talentAddPreview;
+    let removePreview = talentRemovePreview;
     let leftovers = talentAddLeftovers;
     let oneKind = "start";
     let totalPoints = TOTAL_POINTS;
@@ -164,6 +164,7 @@ export const toggleNode = (node, isPreset = false) => {
         selections = ascendancySelections;
         excluded = excludedAscendancyNodes;
         preview = ascendancyAddPreview;
+        removePreview = ascendancyRemovePreview;
         leftovers = ascendancyAddLeftovers;
         oneKind = "ascendancy";
         totalPoints = TOTAL_ASCENDANCY_POINTS;
@@ -184,9 +185,7 @@ export const toggleNode = (node, isPreset = false) => {
     }
 
     if (node.selected) {
-        const deadBranch = findDeadBranch(origin, node);
-
-        for (const talent of deadBranch) {
+        for (const talent of removePreview.keys()) {
             talent.selected = false;
             talent.update();
 
