@@ -172,7 +172,10 @@ export const handleSidePanel = () => {
             const title = document.createElement("div");
             title.classList.add("panel-stats-group-title");
             title.innerText = majorAscendancy.name;
-            title.style.color = colorMap.minecraft.get("6");
+            title.style.color = colorMap.minecraft.get("5");
+            if (majorAscendancy.type === "asc") {
+                title.style.color = colorMap.minecraft.get("6");
+            }
             statsContainer.append(title);
 
             for (const stat of majorAscendancy.value.values()) {
