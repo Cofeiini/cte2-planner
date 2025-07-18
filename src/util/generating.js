@@ -22,7 +22,6 @@ import {
     toggleNode,
     TOTAL_ASCENDANCY_POINTS,
     TOTAL_POINTS,
-    updateTargetTree,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
 import { handleViewport, setUpIcon, updateAscendancyButton } from "./spuddling.js";
@@ -115,6 +114,7 @@ export const generateCanvas = () => {
     controls.x = (centerNode.center.x * -controls.zoom) + (container.width * 0.5);
     controls.y = (centerNode.center.y * -controls.zoom) + (container.height * 0.5);
 
+    /** @type {CustomLineCanvas} */
     const canvas = document.querySelector("#line-canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
@@ -127,6 +127,7 @@ export const generateCanvas = () => {
 };
 
 export const generateAscendancyCanvas = () => {
+    /** @type {CustomAscendancyCanvas} */
     const canvas = document.querySelector("#ascendancy-canvas");
     canvas.offscreenCanvasMap = new Map();
 
@@ -438,8 +439,6 @@ export const handleTalentEvents = (talent, container) => {
             container.classList.add("panning");
             return;
         }
-
-        updateTargetTree(talent.parentTree);
 
         infoTooltip.node.count.classList.remove("hidden");
         infoTooltip.node.text.classList.remove("hidden");

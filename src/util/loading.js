@@ -5,6 +5,8 @@ import { RELEASES } from "../releases.js";
 import {
     ascendancyNodes,
     ascendancySelections,
+    excludedAscendancyNodes,
+    excludedTalentNodes,
     exclusiveNodeValues,
     fullNodeList,
     talentExclusions,
@@ -401,12 +403,26 @@ export const handleLoading = async () => {
         for (const id of presetInfo.talents) {
             toggleNode(talentNodes.find(item => item.identifier.number === id), true);
         }
+
+        excludedTalentNodes.length = 0;
+        for (const values of talentExclusions.values()) {
+            if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+                excludedTalentNodes.push(...values);
+            }
+        }
     }
 
     if (presetInfo.ascendancy.selection !== "none") {
         toggleNode(talentExclusions.get("ascendancy").find(item => item.identifier.talent === presetInfo.ascendancy.selection), true);
         for (const id of presetInfo.ascendancy.talents) {
             toggleNode(ascendancyNodes.get(presetInfo.ascendancy.selection).find(item => item.identifier.number === id), true);
+        }
+
+        excludedAscendancyNodes.length = 0;
+        for (const values of talentExclusions.values()) {
+            if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+                excludedAscendancyNodes.push(...values);
+            }
         }
     }
 

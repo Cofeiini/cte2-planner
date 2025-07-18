@@ -3,13 +3,8 @@ import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, to
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
 import { ascendancySelections, ascendancyStartNodes, startingNode, talentSelections } from "../type/talent-node.js";
+import { lineCanvas } from "./drawing.js";
 import { ascendancyContainer, generateDescriptionHTML, talentTree, viewport } from "./generating.js";
-
-/** @type {HTMLCanvasElement} */
-let lineCanvas = undefined;
-export const updateLineCanvas = (element) => {
-    lineCanvas = element;
-};
 
 /** @type {HTMLDivElement} */
 let ascendancyButton = undefined;

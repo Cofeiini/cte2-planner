@@ -2,10 +2,11 @@ import { handleAscendancyChange, handleDataExport, handleDataImport, handleSideP
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
 import { controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { fullNodeList, updateTargetTree } from "./src/type/talent-node.js";
-import { talentTree, updateAscendancyContainer, updateAscendancyTreeContainer, updateTalentTree } from "./src/util/generating.js";
+import { fullNodeList } from "./src/type/talent-node.js";
+import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
+import { updateAscendancyContainer, updateAscendancyTreeContainer, updateTalentTree } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
-import { handleViewport, setUpURL, updateLineCanvas } from "./src/util/spuddling.js";
+import { handleViewport, setUpURL } from "./src/util/spuddling.js";
 
 /**
  * @param {MouseEvent} event
@@ -121,6 +122,10 @@ const handleEvents = () => {
     };
 
     viewport.onmousemove = (event) => {
+        if (infoTooltip.container.classList.contains("invisible")) {
+            return;
+        }
+
         infoTooltip.main.style.width = "max-content";
         const bounds = viewport.getBoundingClientRect();
         const contentBounds = infoTooltip.main.getBoundingClientRect();
@@ -140,11 +145,12 @@ const handleEvents = () => {
 };
 
 window.onload = async () => {
-    updateLineCanvas(document.querySelector("#line-canvas"));
     updateTalentTree(document.querySelector("#talent-tree"));
     updateAscendancyContainer(document.querySelector("#ascendancy-container"));
     updateAscendancyTreeContainer(document.querySelector("#ascendancy-tree-container"));
-    updateTargetTree(talentTree);
+
+    updateLineCanvas(document.querySelector("#line-canvas"));
+    updateAscendancyCanvas(document.querySelector("#ascendancy-canvas"));
 
     infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");

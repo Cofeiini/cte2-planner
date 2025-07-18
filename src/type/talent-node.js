@@ -15,6 +15,12 @@ export const talentNodes = [];
 export const ascendancyNodes = new Map([["none", []]]);
 
 /** @type {TalentNode[]} */
+export const excludedTalentNodes = [];
+
+/** @type {TalentNode[]} */
+export const excludedAscendancyNodes = [];
+
+/** @type {TalentNode[]} */
 export const fullNodeList = [];
 
 /** @type {TalentNode[]} */
@@ -58,12 +64,6 @@ export const updateStartingNode = (node) => {
 
 /** @type {Map<string, TalentNode>} */
 export const ascendancyStartNodes = new Map();
-
-/** @type {HTMLDivElement} */
-export let targetTree = undefined;
-export const updateTargetTree = (element) => {
-    targetTree = element;
-};
 
 export let TOTAL_POINTS = 0;
 export const updatePoints = (value) => {
@@ -151,21 +151,23 @@ export class TalentNode {
 export const toggleNode = (node, isPreset = false) => {
     let origin = startingNode;
     let selections = talentSelections;
-    let exclusive = "start";
-    let totalPoints = TOTAL_POINTS;
+    let excluded = excludedTalentNodes;
     let preview = talentAddPreview;
     let leftovers = talentAddLeftovers;
+    let oneKind = "start";
+    let totalPoints = TOTAL_POINTS;
 
     if (node.parentTree !== "main") {
         origin = ascendancyStartNodes.get(node.parentTree);
         selections = ascendancySelections;
-        exclusive = "ascendancy";
-        totalPoints = TOTAL_ASCENDANCY_POINTS;
+        excluded = excludedAscendancyNodes;
         preview = ascendancyAddPreview;
         leftovers = ascendancyAddLeftovers;
+        oneKind = "ascendancy";
+        totalPoints = TOTAL_ASCENDANCY_POINTS;
     }
 
-    const isStartingNode = exclusiveNodeValues.nodes.get(exclusive).includes(node.identifier.talent);
+    const isStartingNode = exclusiveNodeValues.nodes.get(oneKind).includes(node.identifier.talent);
     if (!origin && !isStartingNode) {
         return;
     }
@@ -184,18 +186,16 @@ export const toggleNode = (node, isPreset = false) => {
 
         for (const talent of deadBranch) {
             talent.selected = false;
+            talent.update();
+
+            for (const neighbor of talent.neighbors) {
+                neighbor.update();
+            }
         }
 
         const temp = selections.filter(item => item.selected);
         selections.length = 0;
         selections.push(...temp);
-
-        for (const talent of deadBranch) {
-            talent.update();
-            for (const neighbor of talent.neighbors) {
-                neighbor.update();
-            }
-        }
 
         if (origin?.identifier.number === node.identifier.number) {
             if (node.parentTree === "main") {
@@ -241,6 +241,13 @@ export const toggleNode = (node, isPreset = false) => {
     handleSidePanel();
 
     if (!isPreset) {
+        excluded.length = 0;
+        for (const values of talentExclusions.values()) {
+            if (selections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
+                excluded.push(...values);
+            }
+        }
+
         setUpURL();
     }
 

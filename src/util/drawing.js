@@ -5,15 +5,44 @@ import {
     ascendancyNodes,
     ascendancyRemovePreview,
     ascendancySelections,
+    excludedAscendancyNodes,
+    excludedTalentNodes,
     talentAddLeftovers,
     talentAddPreview,
-    talentExclusions,
     talentNodes,
     talentRemovePreview,
     talentSelections,
     TOTAL_ASCENDANCY_POINTS,
     TOTAL_POINTS,
 } from "../type/talent-node.js";
+
+/**
+ * @typedef {HTMLCanvasElement} CustomLineCanvas
+ * @property {HTMLCanvasElement} offscreenCanvas
+ */
+/** @type {CustomLineCanvas} */
+export let lineCanvas = undefined;
+/** @type {CanvasRenderingContext2D} */
+let lineCanvasContext = undefined;
+export const updateLineCanvas = (element) => {
+    lineCanvas = element;
+    lineCanvasContext = lineCanvas.getContext("2d", { alpha: false });
+    lineCanvasContext.imageSmoothingEnabled = false;
+};
+
+/**
+ * @typedef {HTMLCanvasElement} CustomAscendancyCanvas
+ * @property {Map<string, HTMLCanvasElement>} offscreenCanvasMap
+ */
+/** @type {CustomAscendancyCanvas} */
+export let ascendancyCanvas = undefined;
+/** @type {CanvasRenderingContext2D} */
+let ascendancyCanvasContext = undefined;
+export const updateAscendancyCanvas = (element) => {
+    ascendancyCanvas = element;
+    ascendancyCanvasContext = ascendancyCanvas.getContext("2d", { alpha: false });
+    ascendancyCanvasContext.imageSmoothingEnabled = false;
+};
 
 /**
  * @param {CanvasRenderingContext2D} context
@@ -79,12 +108,11 @@ const drawLinesComplexOptional = (context, collection, optional) => {
 };
 
 export const drawLinesInitial = () => {
-    const canvas = document.querySelector("#line-canvas").offscreenCanvas;
-    const context = canvas.getContext("2d", { alpha: false });
+    const context = lineCanvas.offscreenCanvas.getContext("2d", { alpha: false });
     context.imageSmoothingEnabled = false;
 
     context.fillStyle = colorMap.custom.get("background");
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, lineCanvas.offscreenCanvas.width, lineCanvas.offscreenCanvas.height);
 
     context.strokeStyle = colorMap.custom.get("line");
     context.lineWidth = LINE_WIDTH;
@@ -93,87 +121,66 @@ export const drawLinesInitial = () => {
 };
 
 export const drawLinesAscendancyInitial = () => {
-    for (const [ascendancy, subCanvas] of document.querySelector("#ascendancy-canvas").offscreenCanvasMap) {
-        const subContext = subCanvas.getContext("2d", { alpha: false });
-        subContext.imageSmoothingEnabled = false;
+    for (const [ascendancy, subCanvas] of ascendancyCanvas.offscreenCanvasMap) {
+        const context = subCanvas.getContext("2d", { alpha: false });
+        context.imageSmoothingEnabled = false;
 
-        subContext.fillStyle = colorMap.custom.get("background");
-        subContext.fillRect(0, 0, subCanvas.width, subCanvas.height);
+        context.fillStyle = colorMap.custom.get("background");
+        context.fillRect(0, 0, subCanvas.width, subCanvas.height);
 
-        subContext.strokeStyle = colorMap.custom.get("line");
-        subContext.lineWidth = LINE_WIDTH;
-        drawLinesSimple(subContext, ascendancyNodes.get(ascendancy));
-        subContext.stroke();
+        context.strokeStyle = colorMap.custom.get("line");
+        context.lineWidth = LINE_WIDTH;
+        drawLinesSimple(context, ascendancyNodes.get(ascendancy));
+        context.stroke();
     }
 };
 
 export const drawLinesAscendancy = () => {
-    const canvas = document.querySelector("#ascendancy-canvas");
-    const context = canvas.getContext("2d", { alpha: false });
-    context.imageSmoothingEnabled = false;
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (!controls.ascendancy || controls.ascendancy === "none") {
+    if (!controls.ascendancy || (controls.ascendancy === "none")) {
         return;
     }
 
-    context.drawImage(canvas.offscreenCanvasMap.get(controls.ascendancy), 0, 0);
+    ascendancyCanvasContext.drawImage(ascendancyCanvas.offscreenCanvasMap.get(controls.ascendancy), 0, 0);
 
-    context.lineWidth = LINE_WIDTH;
+    ascendancyCanvasContext.lineWidth = LINE_WIDTH;
 
     if (ascendancySelections.length < TOTAL_ASCENDANCY_POINTS) {
-        context.strokeStyle = colorMap.custom.get("line_connect");
-        const excluded = [];
-        for (const values of talentExclusions.values()) {
-            if (ascendancySelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
-                excluded.push(...values);
-            }
-        }
-        drawLinesSimple(context, ascendancySelections, excluded);
+        ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_connect");
+        drawLinesSimple(ascendancyCanvasContext, ascendancySelections, excludedAscendancyNodes);
     }
 
-    context.strokeStyle = colorMap.custom.get("line_select");
-    drawLinesComplex(context, ascendancySelections);
+    ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_select");
+    drawLinesComplex(ascendancyCanvasContext, ascendancySelections);
 
-    context.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplexOptional(context, ascendancyRemovePreview, new Set());
+    ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_remove");
+    drawLinesComplexOptional(ascendancyCanvasContext, ascendancyRemovePreview, new Set());
 
-    context.strokeStyle = colorMap.custom.get("line_add");
-    drawLinesComplexOptional(context, ascendancyAddPreview, new Set([...ascendancyAddLeftovers.keys().map(item => item.identifier.number)]));
+    ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_add");
+    drawLinesComplexOptional(ascendancyCanvasContext, ascendancyAddPreview, new Set([...ascendancyAddLeftovers.keys().map(item => item.identifier.number)]));
 
-    context.strokeStyle = colorMap.custom.get("line_overflow");
-    drawLinesComplexOptional(context, ascendancyAddLeftovers, new Set());
+    ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_overflow");
+    drawLinesComplexOptional(ascendancyCanvasContext, ascendancyAddLeftovers, new Set());
 };
 
 export const drawLinesRegular = () => {
-    const canvas = document.querySelector("#line-canvas");
-    const context = canvas.getContext("2d", { alpha: false });
-    context.imageSmoothingEnabled = false;
+    lineCanvasContext.drawImage(lineCanvas.offscreenCanvas, 0, 0);
 
-    context.drawImage(canvas.offscreenCanvas, 0, 0);
-
-    context.lineWidth = LINE_WIDTH;
+    lineCanvasContext.lineWidth = LINE_WIDTH;
 
     if (talentSelections.length < TOTAL_POINTS) {
-        context.strokeStyle = colorMap.custom.get("line_connect");
-        const excluded = [];
-        for (const values of talentExclusions.values()) {
-            if (talentSelections.some(item => values.some(element => item.identifier.number === element.identifier.number))) {
-                excluded.push(...values);
-            }
-        }
-        drawLinesSimple(context, talentSelections, excluded);
+        lineCanvasContext.strokeStyle = colorMap.custom.get("line_connect");
+        drawLinesSimple(lineCanvasContext, talentSelections, excludedTalentNodes);
     }
 
-    context.strokeStyle = colorMap.custom.get("line_select");
-    drawLinesComplex(context, talentSelections);
+    lineCanvasContext.strokeStyle = colorMap.custom.get("line_select");
+    drawLinesComplex(lineCanvasContext, talentSelections);
 
-    context.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplexOptional(context, talentRemovePreview, new Set());
+    lineCanvasContext.strokeStyle = colorMap.custom.get("line_remove");
+    drawLinesComplexOptional(lineCanvasContext, talentRemovePreview, new Set());
 
-    context.strokeStyle = colorMap.custom.get("line_add");
-    drawLinesComplexOptional(context, talentAddPreview, new Set([...talentAddLeftovers.keys().map(item => item.identifier.number)]));
+    lineCanvasContext.strokeStyle = colorMap.custom.get("line_add");
+    drawLinesComplexOptional(lineCanvasContext, talentAddPreview, new Set([...talentAddLeftovers.keys().map(item => item.identifier.number)]));
 
-    context.strokeStyle = colorMap.custom.get("line_overflow");
-    drawLinesComplexOptional(context, talentAddLeftovers, new Set());
+    lineCanvasContext.strokeStyle = colorMap.custom.get("line_overflow");
+    drawLinesComplexOptional(lineCanvasContext, talentAddLeftovers, new Set());
 };
