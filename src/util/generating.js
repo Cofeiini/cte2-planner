@@ -83,7 +83,7 @@ export const generateDescriptionHTML = (description) => {
         results.push(elements.join("\u00A0"));
     }
 
-    return results.flat().join("");
+    return results.flat(Infinity).join("");
 };
 
 export const generateCanvas = () => {

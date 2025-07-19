@@ -5,6 +5,7 @@ import { drawLinesAscendancy } from "../util/drawing.js";
 import { ascendancyContainer, ascendancyTreeContainer } from "../util/generating.js";
 import { handleLoading } from "../util/loading.js";
 import { handleViewport, resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
+import { scaleValueToLevel } from "./algorithm.js";
 
 export const sidePanel = {
     allocated: {
@@ -101,17 +102,36 @@ export const handleSidePanel = () => {
         return;
     }
 
-    const totalStatList = [];
-    for (const map of totalStats.values()) {
+    const level = parseInt(sidePanel.character.level.value);
+
+    /** @type {Map<boolean, Map<string, Object>>} */
+    const totalStatList = new Map();
+    for (const [id, map] of totalStats) {
         for (const stat of map.values()) {
-            totalStatList.push(stat);
+            const isPercent = stat["is_percent"];
+
+            let total = 0.0;
+            if (stat["scale_to_lvl"]) {
+                total = stat["values"].reduce((accumulated, item) => accumulated + scaleValueToLevel(level, item), 0.0);
+            } else {
+                total = stat["values"].reduce((accumulated, item) => accumulated + item, 0.0);
+            }
+
+            /** @type {Map<string, Object>} */
+            const valueMap = totalStatList.get(isPercent) ?? new Map();
+            valueMap.set(id, {
+                values: [total, ...(valueMap.get(id)?.values ?? [])],
+                description: stat["description"],
+            });
+
+            totalStatList.set(isPercent, valueMap);
         }
     }
 
     const attributeContainer = document.createElement("div");
     attributeContainer.classList.add("panel-group-item-container");
     attributeContainer.classList.add("hidden");
-    const totalStatAttributes = totalStatList.filter(item => !item["is_percent"]);
+    const totalStatAttributes = Array.from(totalStatList.get(false)?.values() ?? []);
     if (totalStatAttributes.length > 0) {
         attributeContainer.classList.remove("hidden");
 
@@ -130,7 +150,7 @@ export const handleSidePanel = () => {
 
     const statContainer = document.createElement("div");
     statContainer.classList.add("panel-group-item-container", "hidden");
-    const totalStatValues = totalStatList.filter(item => item["is_percent"]);
+    const totalStatValues = Array.from(totalStatList.get(true)?.values() ?? []);
     if (totalStatValues.length > 0) {
         statContainer.classList.remove("hidden");
 

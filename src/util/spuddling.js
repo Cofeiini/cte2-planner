@@ -1,4 +1,3 @@
-import { scaleValueToLevel } from "../core/algorithm.js";
 import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
@@ -40,21 +39,18 @@ export const resetMessageBox = () => {
 
 /**
  * @param {Object} stat
- * @param {string} stat.description
- * @param {number[]} stat.values
  * @returns {HTMLDivElement}
  */
 export const setUpStatContainer = (stat) => {
-    let total = stat.values.reduce((accumulated, item) => accumulated + item, 0);
-    if (stat["scale_to_lvl"]) {
-        const level = parseInt(sidePanel.character.level.value);
-        total = stat.values.reduce((accumulated, item) => accumulated + scaleValueToLevel(level, item), 0);
-    }
+    /** @type {number} */
+    const total = stat["values"].reduce((accumulated, item) => accumulated + item, 0.0);
+
+    /** @type {string} */
+    const description = stat["description"].replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }));
 
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
     container.style.color = "white";
-    const description = stat.description.replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }));
     container.innerHTML = `<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p>`;
 
     return container;
@@ -157,16 +153,9 @@ export const collectStatInformation = () => {
         const gameChangerStats = new Map();
         for (const stat of talent.stats) {
             const key = stat["stat"];
-            const type = stat["type"].toLowerCase();
-
-            const valueList = [parseFloat(stat["v1"])];
-            if (gameChangerStats.has(key)) {
-                valueList.push(...gameChangerStats.get(key).values);
-            }
-
             gameChangerStats.set(key, {
-                type: type,
-                values: valueList,
+                type: stat["type"].toLowerCase(),
+                values: [parseFloat(stat["v1"]), ...(gameChangerStats.get(key)?.values ?? [])],
                 description: stat["description"],
                 is_percent: stat["is_percent"],
                 scale_to_lvl: stat["scale_to_lvl"],
@@ -185,15 +174,9 @@ export const collectStatInformation = () => {
         const ascendancyStats = new Map();
         for (const stat of talent.stats) {
             const key = stat["stat"];
-
-            const valueList = [parseFloat(stat["v1"])];
-            if (ascendancyStats.has(key)) {
-                valueList.push(...ascendancyStats.get(key).values);
-            }
-
             ascendancyStats.set(key, {
                 type: stat["type"].toLowerCase(),
-                values: valueList,
+                values: [parseFloat(stat["v1"]), ...(ascendancyStats.get(key)?.values ?? [])],
                 description: stat["description"],
                 is_percent: stat["is_percent"],
                 scale_to_lvl: stat["scale_to_lvl"],
@@ -214,31 +197,16 @@ export const collectStatInformation = () => {
             const key = stat["stat"];
             const type = stat["type"].toLowerCase();
 
-            const valueList = [parseFloat(stat["v1"])];
-
-            const valueMap = new Map();
+            /** @type {Map<string, Object>} */
+            const valueMap = totalStats.get(key) ?? new Map();
             valueMap.set(type, {
-                values: valueList,
+                values: [parseFloat(stat["v1"]), ...(valueMap.get(type)?.values ?? [])],
                 description: stat["description"],
                 is_percent: stat["is_percent"],
                 scale_to_lvl: stat["scale_to_lvl"],
             });
 
-            if (!totalStats.has(key)) {
-                totalStats.set(key, valueMap);
-                continue;
-            }
-
-            if (totalStats.get(key).has(type)) {
-                valueList.push(...totalStats.get(key).get(type).values);
-            }
-
-            totalStats.get(key).set(type, {
-                values: valueList,
-                description: stat["description"],
-                is_percent: stat["is_percent"],
-                scale_to_lvl: stat["scale_to_lvl"],
-            });
+            totalStats.set(key, valueMap);
         }
     }
 };
