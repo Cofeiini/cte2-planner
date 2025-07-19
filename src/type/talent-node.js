@@ -1,3 +1,4 @@
+import { findDeadBranch } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
 import { collectStatInformation, setUpURL } from "../util/spuddling.js";
 
@@ -185,9 +186,12 @@ export const toggleNode = (node, isPreset = false) => {
     }
 
     if (node.selected) {
-        node.selected = false;
+        let removed = removePreview.keys();
+        if (removePreview.size === 0) {
+            removed = findDeadBranch(origin, node);
+        }
 
-        for (const talent of removePreview.keys()) {
+        for (const talent of removed) {
             talent.selected = false;
             talent.update();
 
