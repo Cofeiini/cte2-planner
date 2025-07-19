@@ -185,6 +185,8 @@ export const toggleNode = (node, isPreset = false) => {
     }
 
     if (node.selected) {
+        node.selected = false;
+
         for (const talent of removePreview.keys()) {
             talent.selected = false;
             talent.update();
