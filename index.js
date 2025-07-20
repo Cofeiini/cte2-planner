@@ -86,6 +86,7 @@ const handleEvents = () => {
         container.style.cursor = "grabbing";
         container.addEventListener("mousemove", handleMouseDrag);
         document.querySelector("#ascendancy-menu").classList.add("hidden");
+        document.querySelector("#talent-search").blur();
     };
 
     container.onmouseup = (event) => {
