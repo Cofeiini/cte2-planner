@@ -233,12 +233,10 @@ export const handleLoadingAssets = async () => {
         const nodeData = statData.get(node.identifier.talent);
 
         for (const stat of node.stats) {
-            const value = parseFloat(stat["v1"]);
             const type = stat["type"].toLowerCase();
 
             const info = nodeData.get(stat["stat"]);
             const isPercent = info["is_perc"];
-            const isMinusGood = info["minus_is_good"] ?? false;
 
             stat["is_long"] = info["is_long"] ?? false;
             stat["scale_to_lvl"] = stat["scale_to_lvl"] ?? false;
@@ -250,18 +248,12 @@ export const handleLoadingAssets = async () => {
 
             let description = stat["description"];
             if (isFormat && !description.includes("[VAL1]")) {
-                let valueColor = "§c";
-                if ((value > 0) && !isMinusGood) {
-                    valueColor = "§a";
-                } else if ((value < 0) && isMinusGood) {
-                    valueColor = "§a";
-                }
-
-                description = `${valueColor}[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
+                description = `[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
             }
 
             stat["is_percent"] = isPercent;
             stat["description"] = description;
+            stat["minus_is_good"] = info["minus_is_good"] ?? false;
         }
 
         switch (node.type) {

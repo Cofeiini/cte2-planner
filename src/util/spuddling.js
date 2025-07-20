@@ -1,7 +1,8 @@
+import { scaleValueToLevel } from "../core/algorithm.js";
 import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
-import { ascendancySelections, ascendancyStartNodes, startingNode, talentSelections } from "../type/talent-node.js";
+import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentSelections } from "../type/talent-node.js";
 import { lineCanvas } from "./drawing.js";
 import { ascendancyContainer, generateDescriptionHTML, talentTree, viewport } from "./generating.js";
 
@@ -42,11 +43,37 @@ export const resetMessageBox = () => {
  * @returns {HTMLDivElement}
  */
 export const setUpStatContainer = (stat) => {
-    /** @type {number} */
-    const total = stat["values"].reduce((accumulated, item) => accumulated + item, 0.0);
+    let flat = 0.0;
+    let percent = 0.0;
+    let more = 1.0;
+    for (const value of stat["values"]) {
+        if (value["type"] === "percent") {
+            percent += value["v1"];
+            continue;
+        }
+
+        if (value["type"] === "more") {
+            more *= 1 + (value["v1"] * 0.01);
+            continue;
+        }
+
+        flat += value["v1"];
+    }
+
+    const base = 100.0;
+    const final = (base + flat) * (1 + (percent * 0.01)) * more;
+    const total = ((final - base) / base) * 100.0;
+
+    const isMinusGood = stat["minus_is_good"];
+    let valueColor = "§c";
+    if ((total > 0) && !isMinusGood) {
+        valueColor = "§a";
+    } else if ((total < 0) && isMinusGood) {
+        valueColor = "§a";
+    }
 
     /** @type {string} */
-    const description = stat["description"].replace("[VAL1]", total.toLocaleString("en", { signDisplay: "exceptZero" }));
+    const description = stat["description"].replace("[VAL1]", `${valueColor}${total.toLocaleString("en", { signDisplay: "exceptZero" })}`);
 
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
@@ -145,41 +172,67 @@ export const setUpURL = (json = undefined) => {
 };
 
 export const collectStatInformation = () => {
+    const level = parseInt(sidePanel.character.level.value);
+
+    const processValue = (stat) => {
+        const value = {
+            v1: parseFloat(stat["v1"]),
+            type: stat["type"].toLowerCase(),
+        };
+
+        if (stat["scale_to_lvl"]) {
+            value["v1"] = scaleValueToLevel(level, value["v1"]);
+        }
+
+        return value;
+    };
+
+    const appendTotalStats = (stat) => {
+        const key = stat["stat"];
+        const type = stat["type"].toLowerCase();
+
+        /** @type {Map<string, Object>} */
+        const valueMap = totalStats.get(key) ?? new Map();
+        valueMap.set(type, {
+            values: [processValue(stat), ...(valueMap.get(type)?.values ?? [])],
+            description: stat["description"],
+            is_percent: stat["is_percent"],
+            scale_to_lvl: stat["scale_to_lvl"],
+            minus_is_good: stat["minus_is_good"],
+        });
+
+        totalStats.set(key, valueMap);
+    };
+
+    const allStats = new Set(fullNodeList.filter(item => (item.type !== "major")).map(item => item.stats.map(stat => stat["stat"])).flat(Infinity));
     const allNodes = [...talentSelections, ...ascendancySelections];
 
-    totalGameChangers.clear();
-    const majorSelections = allNodes.filter(item => item.type === "major" && item.parentTree === "main");
-    for (const talent of majorSelections) {
-        const gameChangerStats = new Map();
+    totalStats.clear();
+    const regularSelections = allNodes.filter(item => (item.type !== "major"));
+    for (const talent of regularSelections) {
         for (const stat of talent.stats) {
-            const key = stat["stat"];
-            gameChangerStats.set(key, {
-                type: stat["type"].toLowerCase(),
-                values: [parseFloat(stat["v1"]), ...(gameChangerStats.get(key)?.values ?? [])],
-                description: stat["description"],
-                is_percent: stat["is_percent"],
-                scale_to_lvl: stat["scale_to_lvl"],
-            });
+            appendTotalStats(stat);
         }
-        totalGameChangers.set(talent.identifier.talent, {
-            id: talent.identifier.talent,
-            name: talent.name,
-            value: gameChangerStats,
-        });
     }
 
     totalAscendancy.clear();
-    const majorAscendancy = allNodes.filter(item => (item.type === "major" || item.type === "asc") && item.parentTree !== "main");
+    const majorAscendancy = allNodes.filter(item => ((item.type === "major") || (item.type === "asc")) && (item.parentTree !== "main"));
     for (const talent of majorAscendancy) {
         const ascendancyStats = new Map();
         for (const stat of talent.stats) {
             const key = stat["stat"];
+
+            if (allStats.has(key)) {
+                appendTotalStats(stat);
+            }
+
             ascendancyStats.set(key, {
                 type: stat["type"].toLowerCase(),
-                values: [parseFloat(stat["v1"]), ...(ascendancyStats.get(key)?.values ?? [])],
+                values: [processValue(stat), ...(ascendancyStats.get(key)?.values ?? [])],
                 description: stat["description"],
                 is_percent: stat["is_percent"],
                 scale_to_lvl: stat["scale_to_lvl"],
+                minus_is_good: stat["minus_is_good"],
             });
         }
         totalAscendancy.set(talent.identifier.talent, {
@@ -190,23 +243,30 @@ export const collectStatInformation = () => {
         });
     }
 
-    totalStats.clear();
-    const regularSelections = allNodes.filter(item => item.type !== "major");
-    for (const talent of regularSelections) {
+    totalGameChangers.clear();
+    const majorSelections = allNodes.filter(item => (item.type === "major") && (item.parentTree === "main"));
+    for (const talent of majorSelections) {
+        const gameChangerStats = new Map();
         for (const stat of talent.stats) {
             const key = stat["stat"];
-            const type = stat["type"].toLowerCase();
 
-            /** @type {Map<string, Object>} */
-            const valueMap = totalStats.get(key) ?? new Map();
-            valueMap.set(type, {
-                values: [parseFloat(stat["v1"]), ...(valueMap.get(type)?.values ?? [])],
+            if (allStats.has(key)) {
+                appendTotalStats(stat);
+            }
+
+            gameChangerStats.set(key, {
+                type: stat["type"].toLowerCase(),
+                values: [processValue(stat), ...(gameChangerStats.get(key)?.values ?? [])],
                 description: stat["description"],
                 is_percent: stat["is_percent"],
                 scale_to_lvl: stat["scale_to_lvl"],
+                minus_is_good: stat["minus_is_good"],
             });
-
-            totalStats.set(key, valueMap);
         }
+        totalGameChangers.set(talent.identifier.talent, {
+            id: talent.identifier.talent,
+            name: talent.name,
+            value: gameChangerStats,
+        });
     }
 };

@@ -5,7 +5,6 @@ import { drawLinesAscendancy } from "../util/drawing.js";
 import { ascendancyContainer, ascendancyTreeContainer } from "../util/generating.js";
 import { handleLoading } from "../util/loading.js";
 import { handleViewport, resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
-import { scaleValueToLevel } from "./algorithm.js";
 
 export const sidePanel = {
     allocated: {
@@ -102,25 +101,16 @@ export const handleSidePanel = () => {
         return;
     }
 
-    const level = parseInt(sidePanel.character.level.value);
-
     /** @type {Map<boolean, Map<string, Object>>} */
     const totalStatList = new Map();
     for (const [id, map] of totalStats) {
         for (const stat of map.values()) {
             const isPercent = stat["is_percent"];
 
-            let total = 0.0;
-            if (stat["scale_to_lvl"]) {
-                total = stat["values"].reduce((accumulated, item) => accumulated + scaleValueToLevel(level, item), 0.0);
-            } else {
-                total = stat["values"].reduce((accumulated, item) => accumulated + item, 0.0);
-            }
-
             /** @type {Map<string, Object>} */
             const valueMap = totalStatList.get(isPercent) ?? new Map();
             valueMap.set(id, {
-                values: [total, ...(valueMap.get(id)?.values ?? [])],
+                values: [...stat["values"], ...(valueMap.get(id)?.values ?? [])],
                 description: stat["description"],
             });
 
@@ -143,7 +133,7 @@ export const handleSidePanel = () => {
         for (const stat of totalStatAttributes) {
             attributeItems.push(setUpStatContainer(stat));
         }
-        attributeItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+        attributeItems.sort((a, b) => parseFloat(a.innerText.match(/[-\d.]+/)[0]) - parseFloat(b.innerText.match(/[-\d.]+/)[0]));
 
         attributeContainer.replaceChildren(attributesTitle, ...attributeItems);
     }
@@ -162,7 +152,7 @@ export const handleSidePanel = () => {
         for (const stat of totalStatValues) {
             statItems.push(setUpStatContainer(stat));
         }
-        statItems.sort((a, b) => parseFloat(a.innerText.match(/[\d.]+/)[0]) - parseFloat(b.innerText.match(/[\d.]+/)[0]));
+        statItems.sort((a, b) => parseFloat(a.innerText.match(/[-\d.]+/)[0]) - parseFloat(b.innerText.match(/[-\d.]+/)[0]));
 
         statContainer.replaceChildren(statsTitle, ...statItems);
     }

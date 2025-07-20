@@ -151,7 +151,16 @@ export const handleTooltip = (talent) => {
             value = Math.trunc(value);
         }
 
-        const description = stat["description"].replace("[VAL1]", value.toLocaleString("en", { signDisplay: "exceptZero" }));
+        const isMinusGood = stat["minus_is_good"];
+        let valueColor = "§c";
+        if ((value > 0) && !isMinusGood) {
+            valueColor = "§a";
+        } else if ((value < 0) && isMinusGood) {
+            valueColor = "§a";
+        }
+
+        /** @type {string} */
+        const description = stat["description"].replace("[VAL1]", `${valueColor}${value.toLocaleString("en", { signDisplay: "exceptZero" })}`);
         formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }
 
