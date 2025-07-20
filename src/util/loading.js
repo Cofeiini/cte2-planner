@@ -239,7 +239,7 @@ export const handleLoadingAssets = async () => {
             const isPercent = info["is_perc"];
 
             stat["is_long"] = info["is_long"] ?? false;
-            stat["scale_to_lvl"] = stat["scale_to_lvl"] ?? false;
+            stat["scale_to_lvl"] = ((stat["scale_to_lvl"] ?? false) && ((info["scaling"] ?? "normal").toLowerCase() !== "none"));
 
             let isFormat = info["format"] ?? ((type === "flat") || isPercent);
             if (stat["is_long"]) {
