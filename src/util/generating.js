@@ -674,6 +674,7 @@ export const generateTree = () => {
     const selector = document.querySelector("#ascendancy-select");
     for (const option of selector.children) {
         const item = document.createElement("div");
+        item.style.userSelect = "none";
         item.innerText = option.innerText;
         item.onmousedown = (event) => {
             if (event.button !== 0) {
@@ -801,6 +802,8 @@ export const generateTree = () => {
     };
 
     ascendancyButton.onmouseup = (event) => {
+        event.preventDefault();
+
         if (event.button !== 0) {
             return;
         }
