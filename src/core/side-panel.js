@@ -113,6 +113,7 @@ export const handleSidePanel = () => {
                 values: [...stat["values"], ...(valueMap.get(id)?.values ?? [])],
                 description: stat["description"],
                 is_percent: isPercent,
+                minus_is_good: stat["minus_is_good"],
             });
 
             totalStatList.set(isPercent, valueMap);
@@ -134,7 +135,7 @@ export const handleSidePanel = () => {
         for (const stat of totalStatAttributes) {
             attributeItems.push(setUpStatContainer(stat));
         }
-        attributeItems.sort((a, b) => parseFloat(a.innerText.match(/[-\d.]+/)[0]) - parseFloat(b.innerText.match(/[-\d.]+/)[0]));
+        attributeItems.sort((a, b) => (parseFloat(a.innerText.match(/[-\d.]+/)[0]) * parseFloat(a.dataset.sign)) - (parseFloat(b.innerText.match(/[-\d.]+/)[0]) * parseFloat(b.dataset.sign)));
 
         attributeContainer.replaceChildren(attributesTitle, ...attributeItems);
     }
@@ -153,7 +154,7 @@ export const handleSidePanel = () => {
         for (const stat of totalStatValues) {
             statItems.push(setUpStatContainer(stat));
         }
-        statItems.sort((a, b) => parseFloat(a.innerText.match(/[-\d.]+/)[0]) - parseFloat(b.innerText.match(/[-\d.]+/)[0]));
+        statItems.sort((a, b) => (parseFloat(a.innerText.match(/[-\d.]+/)[0]) * parseFloat(a.dataset.sign)) - (parseFloat(b.innerText.match(/[-\d.]+/)[0]) * parseFloat(b.dataset.sign)));
 
         statContainer.replaceChildren(statsTitle, ...statItems);
     }

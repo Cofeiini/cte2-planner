@@ -89,6 +89,7 @@ export const setUpStatContainer = (stat) => {
     container.classList.add("panel-group-item");
     container.style.color = "white";
     container.innerHTML = `<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p>`;
+    container.dataset.sign = isMinusGood ? "-1.0" : "1.0";
 
     return container;
 };
