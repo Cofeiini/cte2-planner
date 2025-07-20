@@ -248,9 +248,10 @@ export const handleLoadingAssets = async () => {
 
             let description = stat["description"];
             if (isFormat && !description.includes("[VAL1]")) {
-                description = `[VAL1]${isPercent ? "%" : ""}§7 ${description}`;
+                description = `[VAL1]§7 ${description}`;
             }
 
+            stat["type"] = type;
             stat["is_percent"] = isPercent;
             stat["description"] = description;
             stat["minus_is_good"] = info["minus_is_good"] ?? false;

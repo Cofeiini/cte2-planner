@@ -66,6 +66,10 @@ html, body {
     min-width: fit-content;
 }
 
+.word + .word {
+    margin-left: 0.25em;
+}
+
 .custom-button {
     align-items: center;
     background-color: darkslategray;

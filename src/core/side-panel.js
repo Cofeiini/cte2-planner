@@ -112,6 +112,7 @@ export const handleSidePanel = () => {
             valueMap.set(id, {
                 values: [...stat["values"], ...(valueMap.get(id)?.values ?? [])],
                 description: stat["description"],
+                is_percent: isPercent,
             });
 
             totalStatList.set(isPercent, valueMap);

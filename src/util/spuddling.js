@@ -72,8 +72,18 @@ export const setUpStatContainer = (stat) => {
         valueColor = "§a";
     }
 
+    const percentText = stat["is_percent"] ? "%" : "";
+
+    let moreText = "";
+    if (stat["type"] === "more") {
+        moreText = "§cLess";
+        if (total > 0) {
+            moreText = "§aMore";
+        }
+    }
+
     /** @type {string} */
-    const description = stat["description"].replace("[VAL1]", `${valueColor}${total.toLocaleString("en", { signDisplay: "exceptZero" })}`);
+    const description = stat["description"].replace(/\[VAL1]%?/, `${valueColor}${total.toLocaleString("en", { signDisplay: "exceptZero" })}${percentText}${moreText}`);
 
     const container = document.createElement("div");
     container.classList.add("panel-group-item");
@@ -194,6 +204,7 @@ export const collectStatInformation = () => {
         /** @type {Map<string, Object>} */
         const valueMap = totalStats.get(key) ?? new Map();
         valueMap.set(type, {
+            type: type,
             values: [processValue(stat), ...(valueMap.get(type)?.values ?? [])],
             description: stat["description"],
             is_percent: stat["is_percent"],

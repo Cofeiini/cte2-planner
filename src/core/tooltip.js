@@ -159,8 +159,18 @@ export const handleTooltip = (talent) => {
             valueColor = "§a";
         }
 
+        const percentText = stat["is_percent"] ? "%" : "";
+
+        let moreText = "";
+        if (stat["type"] === "more") {
+            moreText = "§cLess";
+            if (value > 0) {
+                moreText = "§aMore";
+            }
+        }
+
         /** @type {string} */
-        const description = stat["description"].replace("[VAL1]", `${valueColor}${value.toLocaleString("en", { signDisplay: "exceptZero" })}`);
+        const description = stat["description"].replace(/\[VAL1]%?/, `${valueColor}${value.toLocaleString("en", { signDisplay: "exceptZero" })}${percentText}${moreText}`);
         formatted.push(`<div style="display: flex;">${bullet}<p style="display: inline-block; margin: 0;">${generateDescriptionHTML(description)}</p></div>`);
     }
 

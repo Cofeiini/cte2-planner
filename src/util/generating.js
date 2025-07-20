@@ -76,11 +76,11 @@ export const generateDescriptionHTML = (description) => {
         }
 
         const elements = [];
-        const words = part.split(/\s/);
+        const words = part.split(/\s/).filter(element => element);
         for (const word of words) {
             elements.push(`<span class="word" style="color: ${color};">${word}</span>`);
         }
-        results.push(elements.join("\u00A0"));
+        results.push(elements.join(""));
     }
 
     return results.flat(Infinity).join("");
