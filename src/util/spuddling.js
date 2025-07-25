@@ -3,32 +3,11 @@ import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, to
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
 import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentSelections } from "../type/talent-node.js";
-import { lineCanvas } from "./drawing.js";
-import { ascendancyContainer, generateDescriptionHTML, talentTree, viewport } from "./generating.js";
-
-/** @type {HTMLDivElement} */
-let ascendancyButton = undefined;
-export const updateAscendancyButton = (element) => {
-    ascendancyButton = element;
-};
+import { canvasContainer, generateDescriptionHTML, talentContainer } from "./generating.js";
 
 export const handleViewport = () => {
-    [
-        lineCanvas,
-        talentTree,
-    ].forEach(item => {
-        item.style.transform = `scale(${controls.zoom})`;
-        item.style.left = `${controls.x}px`;
-        item.style.top = `${controls.y}px`;
-    });
-
-    ascendancyButton.style.transform = `scale(calc(${controls.zoom} * ${parseFloat(ascendancyButton.getAttribute("base-scale"))}))`;
-    ascendancyButton.style.left = `${controls.x + (viewport.center.x * controls.zoom)}px`;
-    ascendancyButton.style.top = `${controls.y + (viewport.center.y * controls.zoom)}px`;
-
-    ascendancyContainer.style.transform = `scale(${controls.zoom})`;
-    ascendancyContainer.style.left = `${controls.x + ((viewport.center.x - Math.floor(ascendancyContainer.offsetWidth * 0.5)) * controls.zoom)}px`;
-    ascendancyContainer.style.top = `${controls.y + ((viewport.center.y - ascendancyContainer.offsetHeight) * controls.zoom)}px`;
+    canvasContainer.style.transform = `scale(${controls.zoom})`;
+    talentContainer.scroll(controls.x, controls.y);
 };
 
 export const resetMessageBox = () => {

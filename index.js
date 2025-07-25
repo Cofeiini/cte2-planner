@@ -4,7 +4,15 @@ import { controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
 import { fullNodeList } from "./src/type/talent-node.js";
 import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
-import { updateAscendancyContainer, updateAscendancyTreeContainer, updateTalentTree } from "./src/util/generating.js";
+import {
+    canvasContainer,
+    talentContainer,
+    updateAscendancyContainer,
+    updateAscendancyTreeContainer,
+    updateCanvasContainer,
+    updateTalentContainer,
+    updateTalentTree,
+} from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL } from "./src/util/spuddling.js";
 
@@ -21,9 +29,12 @@ const handleMouseDrag = (event) => {
         }
     }
 
+    const canvasBounds = canvasContainer.getBoundingClientRect();
+    const talentBounds = talentContainer.getBoundingClientRect();
+
     controls.panning = true;
-    controls.x = controls.x + event.movementX;
-    controls.y = controls.y + event.movementY;
+    controls.x = Math.min(Math.max(controls.x - event.movementX, 0), canvasBounds.width - talentBounds.width);
+    controls.y = Math.min(Math.max(controls.y - event.movementY, 0), canvasBounds.height - talentBounds.height);
 
     handleViewport();
 };
@@ -58,38 +69,47 @@ const handleSearch = (event) => {
 };
 
 const handleEvents = () => {
-    const container = document.querySelector("#talent-container");
-
-    container.onwheel = (event) => {
+    talentContainer.onwheel = (event) => {
         event.preventDefault();
 
         const oldZoom = controls.zoom;
         const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
         controls.zoom = Math.min(Math.max(controls.zoom * change, 0.2), 3.0);
 
-        const zoomRatio = controls.zoom / oldZoom;
-        controls.x = event.clientX - ((event.clientX - controls.x) * zoomRatio);
-        controls.y = event.clientY - ((event.clientY - controls.y) * zoomRatio);
+        const canvasBounds = canvasContainer.getBoundingClientRect();
+        const talentBounds = talentContainer.getBoundingClientRect();
+
+        const offset = {
+            x: event.clientX - talentBounds.left,
+            y: event.clientY - talentBounds.top,
+        };
+        const target = {
+            x: (controls.x + offset.x) / oldZoom,
+            y: (controls.y + offset.y) / oldZoom,
+        };
+
+        controls.x = Math.min(Math.max((target.x * controls.zoom) - offset.x, 0), canvasBounds.width - talentBounds.width);
+        controls.y = Math.min(Math.max((target.y * controls.zoom) - offset.y, 0), canvasBounds.height - talentBounds.height);
 
         if (controls.zoom !== oldZoom) {
             handleViewport();
         }
     };
 
-    container.onmousedown = (event) => {
+    talentContainer.onmousedown = (event) => {
         event.preventDefault();
 
         if (event.button !== 0) {
             return;
         }
 
-        container.style.cursor = "grabbing";
-        container.addEventListener("mousemove", handleMouseDrag);
+        talentContainer.style.cursor = "grabbing";
+        talentContainer.addEventListener("mousemove", handleMouseDrag);
         document.querySelector("#ascendancy-menu").classList.add("hidden");
         document.querySelector("#talent-search").blur();
     };
 
-    container.onmouseup = (event) => {
+    talentContainer.onmouseup = (event) => {
         event.preventDefault();
 
         if (event.button !== 0) {
@@ -97,38 +117,49 @@ const handleEvents = () => {
         }
 
         controls.panning = false;
-        container.style.cursor = null;
+        talentContainer.style.cursor = null;
         if (controls.hovering) {
             infoTooltip.container.classList.add("visible");
             infoTooltip.container.classList.remove("invisible");
         }
 
-        container.removeEventListener("mousemove", handleMouseDrag);
+        talentContainer.removeEventListener("mousemove", handleMouseDrag);
     };
 
-    const viewport = document.querySelector("#viewport-container");
-
-    viewport.oncontextmenu = () => {
+    const viewportContainer = document.querySelector("#viewport-container");
+    viewportContainer.oncontextmenu = () => {
         return false;
     };
 
-    viewport.onmouseenter = (event) => {
+    viewportContainer.onmouseenter = (event) => {
         if (event.buttons !== 0) {
             return;
         }
 
         controls.panning = false;
-        container.style.cursor = null;
-        container.removeEventListener("mousemove", handleMouseDrag);
+        talentContainer.style.cursor = null;
+        talentContainer.removeEventListener("mousemove", handleMouseDrag);
     };
 
-    viewport.onmousemove = (event) => {
+    let previousHover = undefined;
+    viewportContainer.onmousemove = (event) => {
+        const hover = event.target.closest(".talent-node");
+        if (hover !== previousHover) {
+            if (previousHover) {
+                previousHover.classList.remove("hover");
+            }
+            if (hover) {
+                hover.classList.add("hover");
+            }
+            previousHover = hover;
+        }
+
         if (infoTooltip.container.classList.contains("invisible")) {
             return;
         }
 
         infoTooltip.main.style.width = "max-content";
-        const bounds = viewport.getBoundingClientRect();
+        const bounds = viewportContainer.getBoundingClientRect();
         const contentBounds = infoTooltip.main.getBoundingClientRect();
         infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
         infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.bottom - contentBounds.height - tooltipOffsets.edge)}px`;
@@ -149,6 +180,8 @@ window.onload = async () => {
     updateTalentTree(document.querySelector("#talent-tree"));
     updateAscendancyContainer(document.querySelector("#ascendancy-container"));
     updateAscendancyTreeContainer(document.querySelector("#ascendancy-tree-container"));
+    updateCanvasContainer(document.querySelector("#canvas-container"));
+    updateTalentContainer(document.querySelector("#talent-container"));
 
     updateLineCanvas(document.querySelector("#line-canvas"));
     updateAscendancyCanvas(document.querySelector("#ascendancy-canvas"));

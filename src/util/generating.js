@@ -24,7 +24,7 @@ import {
     TOTAL_POINTS,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
-import { handleViewport, setUpIcon, updateAscendancyButton } from "./spuddling.js";
+import { handleViewport, setUpIcon } from "./spuddling.js";
 
 export const viewport = {
     width: 0,
@@ -57,6 +57,18 @@ export const updateAscendancyContainer = (element) => {
 export let ascendancyTreeContainer = undefined;
 export const updateAscendancyTreeContainer = (element) => {
     ascendancyTreeContainer = element;
+};
+
+/** @type {HTMLDivElement} */
+export let canvasContainer = undefined;
+export const updateCanvasContainer = (element) => {
+    canvasContainer = element;
+};
+
+/** @type {HTMLDivElement} */
+export let talentContainer = undefined;
+export const updateTalentContainer = (element) => {
+    talentContainer = element;
 };
 
 let drawingTimer = undefined;
@@ -92,11 +104,16 @@ export const generateCanvas = () => {
 
     talentTree.style.height = `${viewport.height}px`;
     talentTree.style.width = `${viewport.width}px`;
+    talentTree.style.left = "50%";
+    talentTree.style.top = "50%";
+
+    canvasContainer.style.width = `${viewport.width * 2.0}px`;
+    canvasContainer.style.height = `${viewport.height * 2.0}px`;
 
     let centerNode = {
         center: {
-            x: (viewport.width * -0.5) - viewport.offset.left,
-            y: (viewport.height * -0.5) - viewport.offset.top,
+            x: (viewport.width * 0.5),
+            y: (viewport.height * 0.5),
         },
     };
     for (const branch of talentGrid) {
@@ -108,16 +125,20 @@ export const generateCanvas = () => {
         }
     }
 
-    viewport.center = centerNode.center;
+    viewport.center.x = (viewport.width * 0.5) + centerNode.center.x;
+    viewport.center.y = (viewport.height * 0.5) + centerNode.center.y;
 
     const container = document.querySelector("#talent-container").getBoundingClientRect();
-    controls.x = (centerNode.center.x * -controls.zoom) + (container.width * 0.5);
-    controls.y = (centerNode.center.y * -controls.zoom) + (container.height * 0.5);
+    controls.x = viewport.center.x - (container.width * 0.5);
+    controls.y = viewport.center.y - (container.height * 0.5);
 
     /** @type {CustomLineCanvas} */
     const canvas = document.querySelector("#line-canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
+    canvas.style.left = "50%";
+    canvas.style.top = "50%";
+    canvas.style.transform = "translate(-50%, -50%)";
 
     canvas.offscreenCanvas = document.createElement("canvas");
     canvas.offscreenCanvas.width = viewport.width;
@@ -154,8 +175,11 @@ export const generateAscendancyCanvas = () => {
         }
     }
 
+    const topBarHeight = 44;
     ascendancyContainer.style.width = `${bounds.width}px`;
-    ascendancyContainer.style.height = `${bounds.height + 44}px`;
+    ascendancyContainer.style.height = `${bounds.height + topBarHeight}px`;
+    ascendancyContainer.style.left = `${((viewport.center.x - Math.floor(bounds.width * 0.5)))}px`;
+    ascendancyContainer.style.top = `${((viewport.center.y - (bounds.height + topBarHeight)))}px`;
 
     canvas.width = bounds.width;
     canvas.height = bounds.height;
@@ -436,7 +460,6 @@ export const handleTalentEvents = (talent, container) => {
         controls.hovering = true;
 
         if (controls.panning) {
-            container.classList.add("panning");
             return;
         }
 
@@ -457,7 +480,6 @@ export const handleTalentEvents = (talent, container) => {
 
     container.onmouseleave = () => {
         controls.hovering = false;
-        container.classList.remove("panning");
 
         infoTooltip.container.classList.remove("visible");
         infoTooltip.container.classList.add("invisible");
@@ -545,7 +567,6 @@ export const handleTalentEvents = (talent, container) => {
         }
 
         if (controls.panning) {
-            container.classList.remove("panning");
             return;
         }
 
@@ -666,7 +687,7 @@ const generateTalentNode = (talent) => {
     return container;
 };
 
-export const generateTree = () => {
+export const generateAscendancyMenu = () => {
     const isActive = controls.ascendancy !== "none";
 
     const menu = document.querySelector("#ascendancy-menu");
@@ -690,7 +711,6 @@ export const generateTree = () => {
     const ascendancyButton = document.querySelector("#ascendancy-button");
     ascendancyButton.replaceChildren();
     ascendancyButton.classList.add("talent-node");
-    ascendancyButton.setAttribute("base-scale", "1.0");
     ascendancyButton.style.left = `${viewport.center.x}px`;
     ascendancyButton.style.top = `${viewport.center.y}px`;
 
@@ -747,22 +767,14 @@ export const generateTree = () => {
         controls.hovering = true;
 
         if (controls.panning) {
-            ascendancyButton.classList.add("panning");
             return;
         }
-
-        ascendancyButton.setAttribute("base-scale", "1.5");
-        ascendancyButton.style.transform = `scale(${controls.zoom * 1.5})`;
 
         handleSimpleTooltip();
     };
 
     ascendancyButton.onmouseleave = () => {
         controls.hovering = false;
-
-        ascendancyButton.classList.remove("panning");
-        ascendancyButton.setAttribute("base-scale", "1.0");
-        ascendancyButton.style.transform = `scale(${controls.zoom})`;
 
         infoTooltip.container.classList.remove("visible");
         infoTooltip.container.classList.add("invisible");
@@ -776,8 +788,8 @@ export const generateTree = () => {
                 const bounds = document.querySelector("#viewport-container").getBoundingClientRect();
                 const menuBounds = menu.getBoundingClientRect();
 
-                menu.style.left = `${Math.floor(event.clientX)}px`;
-                menu.style.top = `${Math.min(Math.floor(event.clientY), bounds.height - menuBounds.height - 3)}px`;
+                menu.style.left = `${controls.x + event.clientX}px`;
+                menu.style.top = `${Math.min(controls.y + event.clientY, controls.y + bounds.height - menuBounds.height - 3)}px`;
             }
             return;
         }
@@ -809,7 +821,6 @@ export const generateTree = () => {
         }
 
         if (controls.panning) {
-            ascendancyButton.classList.remove("panning");
             return;
         }
 
@@ -825,9 +836,9 @@ export const generateTree = () => {
             handleViewport();
         }
     };
+};
 
-    updateAscendancyButton(ascendancyButton);
-
+export const generateTree = () => {
     talentTree.replaceChildren();
 
     for (const talent of talentNodes) {

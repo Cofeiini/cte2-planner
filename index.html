@@ -19,20 +19,22 @@
 <div id="content-container">
     <div id="viewport-container">
         <div id="talent-container">
-            <canvas id="line-canvas" style="position: absolute; transform-origin: 0 0;"></canvas>
-            <div id="talent-tree"></div>
-            <div class="hidden" id="ascendancy-container">
-                <canvas id="ascendancy-canvas" style="position: absolute; transform-origin: 0 0; bottom: 0; left: 50%; transform: translateX(-50%)"></canvas>
-                <div id="ascendancy-tree-container"></div>
-                <div id="ascendancy-bar">
-                    <div id="ascendancy-points-container">Points:
-                        <div id="ascendancy-points"></div>
+            <div id="canvas-container">
+                <canvas id="line-canvas" style="position: absolute; transform-origin: center;"></canvas>
+                <div id="talent-tree"></div>
+                <div class="hidden" id="ascendancy-container">
+                    <canvas id="ascendancy-canvas" style="position: absolute; transform-origin: top left; bottom: 0; left: 50%; transform: translateX(-50%)"></canvas>
+                    <div id="ascendancy-tree-container"></div>
+                    <div id="ascendancy-bar">
+                        <div id="ascendancy-points-container">Points:
+                            <div id="ascendancy-points"></div>
+                        </div>
                     </div>
                 </div>
+                <div class="talent-node" id="ascendancy-button">
+                </div>
+                <div class="hidden" id="ascendancy-menu"></div>
             </div>
-            <div class="talent-node" id="ascendancy-button">
-            </div>
-            <div class="hidden" id="ascendancy-menu"></div>
         </div>
         <div id="top-bar">
             <div id="points-container">Points:

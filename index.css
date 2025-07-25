@@ -26,14 +26,12 @@ html, body {
     opacity: 0.0;
     transition: visibility 0ms var(--fade-time), opacity var(--fade-time) linear;
     visibility: hidden;
-    will-change: opacity;
 }
 
 .visible {
     opacity: 1.0;
     transition: opacity var(--fade-time) linear;
     visibility: visible;
-    will-change: opacity;
 }
 
 .filtered {
@@ -212,7 +210,7 @@ html, body {
     opacity: 1.0;
 }
 
-.talent-node:not(.panning):hover {
+.talent-node.hover {
     cursor: pointer;
     transform: scale(1.5);
 }
@@ -232,12 +230,21 @@ html, body {
     width: 100%;
 }
 
+#canvas-container {
+    box-shadow: white 0 0 3.0em 0.25em inset;
+    display: flex;
+    position: absolute;
+    transform-origin: top left;
+}
+
 #talent-container {
     background-color: #191821;
     contain: size layout;
     display: flex;
     height: 100%;
+    overflow: scroll;
     position: absolute;
+    scrollbar-width: none;
     width: 100%;
 }
 
@@ -245,8 +252,8 @@ html, body {
     contain: size layout;
     display: flex;
     position: absolute;
-    transform-origin: 0 0;
-    will-change: transform;
+    transform: translate(-50%, -50%);
+    transform-origin: center;
 }
 
 #ascendancy-container {
@@ -300,6 +307,7 @@ html, body {
     display: flex;
     filter: drop-shadow(-1px -1px white) drop-shadow(1px -1px white) drop-shadow(1px 1px white) drop-shadow(-1px 1px white);
     left: 100%;
+    pointer-events: none;
     position: absolute;
     top: 100%;
     will-change: transform;

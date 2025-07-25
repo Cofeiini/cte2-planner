@@ -1,4 +1,12 @@
-import { handleAscendancyOptions, handleVersionOptions, presetInfo, releaseInfo, sidePanel, updatePresetInfo, updateReleaseInfo } from "../core/side-panel.js";
+import {
+    handleAscendancyOptions,
+    handleVersionOptions,
+    presetInfo,
+    releaseInfo,
+    sidePanel,
+    updatePresetInfo,
+    updateReleaseInfo,
+} from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls, welcomeMessages } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
@@ -19,7 +27,7 @@ import {
     updatePoints,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
-import { generateAscendancyGrid, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
+import { generateAscendancyGrid, generateAscendancyMenu, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
 import { handleViewport } from "./spuddling.js";
 
 const updateProgress = async (text) => {
@@ -376,6 +384,7 @@ export const handleLoading = async () => {
     await updateProgress("Generating the node trees...");
     generateTree();
     generateAscendancyTree();
+    generateAscendancyMenu();
 
     document.querySelector("#ascendancy-select").value = controls.ascendancy;
     handleAscendancyOptions();
