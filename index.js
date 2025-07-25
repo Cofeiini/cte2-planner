@@ -6,10 +6,12 @@ import { fullNodeList } from "./src/type/talent-node.js";
 import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
 import {
     canvasContainer,
+    fittedZoom,
     talentContainer,
     updateAscendancyContainer,
     updateAscendancyTreeContainer,
     updateCanvasContainer,
+    updateFittedZoom,
     updateTalentContainer,
     updateTalentTree,
 } from "./src/util/generating.js";
@@ -74,7 +76,7 @@ const handleEvents = () => {
 
         const oldZoom = controls.zoom;
         const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
-        controls.zoom = Math.min(Math.max(controls.zoom * change, 0.2), 3.0);
+        controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), 3.0);
 
         const canvasBounds = canvasContainer.getBoundingClientRect();
         const talentBounds = talentContainer.getBoundingClientRect();
@@ -174,6 +176,12 @@ const handleEvents = () => {
             infoTooltip.main.style.width = `max(${target}px, min(33vw, ${padding}px))`;
         }
     };
+};
+
+window.onresize = () => {
+    updateFittedZoom();
+    controls.zoom = Math.min(Math.max(controls.zoom, fittedZoom), 3.0);
+    handleViewport();
 };
 
 window.onload = async () => {

@@ -61,6 +61,8 @@ export const updateAscendancyTreeContainer = (element) => {
 
 /** @type {HTMLDivElement} */
 export let canvasContainer = undefined;
+/** @type {DOMRect} */
+let canvasContainerBounds = undefined;
 export const updateCanvasContainer = (element) => {
     canvasContainer = element;
 };
@@ -69,6 +71,12 @@ export const updateCanvasContainer = (element) => {
 export let talentContainer = undefined;
 export const updateTalentContainer = (element) => {
     talentContainer = element;
+};
+
+export let fittedZoom = 1.0;
+export const updateFittedZoom = () => {
+    const viewportBounds = document.querySelector("#viewport-container").getBoundingClientRect();
+    fittedZoom = Math.max(viewportBounds.width / canvasContainerBounds.width, viewportBounds.height / canvasContainerBounds.height);
 };
 
 let drawingTimer = undefined;
@@ -109,6 +117,9 @@ export const generateCanvas = () => {
 
     canvasContainer.style.width = `${viewport.width * 2.0}px`;
     canvasContainer.style.height = `${viewport.height * 2.0}px`;
+    canvasContainerBounds = canvasContainer.getBoundingClientRect();
+
+    updateFittedZoom();
 
     let centerNode = {
         center: {
