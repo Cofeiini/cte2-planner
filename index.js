@@ -1,22 +1,105 @@
 import { handleAscendancyChange, handleDataExport, handleDataImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
-import { controls } from "./src/data/constants.js";
+import { CELL_SIZE, controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { fullNodeList } from "./src/type/talent-node.js";
+import { ascendancyGrid, fullNodeList, talentGrid } from "./src/type/talent-node.js";
 import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
 import {
+    ascendancyButton,
+    ascendancyTreeContainer,
     canvasContainer,
     fittedZoom,
     talentContainer,
+    updateAscendancyButton,
     updateAscendancyContainer,
     updateAscendancyTreeContainer,
     updateCanvasContainer,
     updateFittedZoom,
     updateTalentContainer,
     updateTalentTree,
+    viewport,
 } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL } from "./src/util/spuddling.js";
+
+/** @type {TalentNode} */
+let previousFocus = undefined;
+
+/** @param {MouseEvent} event */
+const handleNodeFocus = (event) => {
+    const zoomedCell = CELL_SIZE * controls.zoom;
+
+    const viewportOffset = {
+        x: viewport.offset.left * zoomedCell,
+        y: viewport.offset.top * zoomedCell,
+    };
+
+    let currentTree = event.target.closest("#talent-tree");
+    let currentContainer = canvasContainer;
+    let grid = talentGrid;
+    if (!currentTree) {
+        viewportOffset.x = 0;
+        viewportOffset.y = 0;
+
+        currentTree = event.target.closest(".ascendancy-tree");
+        currentContainer = ascendancyTreeContainer;
+        grid = ascendancyGrid.get(controls.ascendancy);
+    }
+
+    ascendancyButton.classList.remove("focused");
+    if (!currentTree) {
+        ascendancyButton.classList.add("focused");
+        return;
+    }
+
+    const canvasBounds = currentContainer.getBoundingClientRect();
+    const treeBounds = currentTree.getBoundingClientRect();
+    const layer = {
+        x: (event.clientX - canvasBounds.left) - ((canvasBounds.width - treeBounds.width) * 0.5) + viewportOffset.x,
+        y: (event.clientY - canvasBounds.top) - ((canvasBounds.height - treeBounds.height) * 0.5) + viewportOffset.y,
+    };
+    const cell = {
+        x: Math.floor(layer.x / zoomedCell),
+        y: Math.floor(layer.y / zoomedCell),
+    };
+
+    /** @type {TalentNode} */
+    let focus = undefined;
+    let closest = Number.MAX_VALUE;
+    for (let row = cell.y - 1; row <= cell.y + 1; ++row) {
+        for (let col = cell.x - 1; col <= cell.x + 1; ++col) {
+            const item = grid.at(row)?.at(col);
+            if (!item?.selectable) {
+                continue;
+            }
+
+            const center = {
+                x: (col + 0.5) * zoomedCell,
+                y: (row + 0.5) * zoomedCell,
+            };
+            const delta = {
+                x: layer.x - center.x,
+                y: layer.y - center.y,
+            };
+
+            const distance = Math.pow(delta.x, 2) + Math.pow(delta.y, 2);
+            if ((distance <= Math.pow(zoomedCell, 2)) && (distance < closest)) {
+                closest = distance;
+                focus = item;
+            }
+        }
+    }
+
+    if (focus?.identifier?.number !== previousFocus?.identifier?.number) {
+        if (previousFocus?.selectable) {
+            previousFocus.visual.classList.remove("focused");
+        }
+        if (focus?.selectable) {
+            focus.visual.classList.add("focused");
+        }
+        previousFocus = focus;
+    }
+};
 
 /**
  * @param {MouseEvent} event
@@ -143,18 +226,12 @@ const handleEvents = () => {
         talentContainer.removeEventListener("mousemove", handleMouseDrag);
     };
 
-    let previousHover = undefined;
     viewportContainer.onmousemove = (event) => {
-        const hover = event.target.closest(".talent-node");
-        if (hover !== previousHover) {
-            if (previousHover) {
-                previousHover.classList.remove("hover");
-            }
-            if (hover) {
-                hover.classList.add("hover");
-            }
-            previousHover = hover;
+        if (controls.panning) {
+            return;
         }
+
+        handleNodeFocus(event);
 
         if (infoTooltip.container.classList.contains("invisible")) {
             return;
@@ -193,6 +270,8 @@ window.onload = async () => {
 
     updateLineCanvas(document.querySelector("#line-canvas"));
     updateAscendancyCanvas(document.querySelector("#ascendancy-canvas"));
+
+    updateAscendancyButton(document.querySelector("#ascendancy-button"));
 
     infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");

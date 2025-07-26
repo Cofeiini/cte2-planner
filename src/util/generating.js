@@ -79,6 +79,16 @@ export const updateFittedZoom = () => {
     fittedZoom = Math.max(viewportBounds.width / canvasContainerBounds.width, viewportBounds.height / canvasContainerBounds.height);
 };
 
+/**
+ * @typedef {HTMLDivElement} CustomAscendancyButton
+ * @property {function} refresh
+ */
+/** @type {CustomAscendancyButton} */
+export let ascendancyButton = undefined;
+export const updateAscendancyButton = (element) => {
+    ascendancyButton = element;
+};
+
 let drawingTimer = undefined;
 
 /**
@@ -608,7 +618,6 @@ const generateTalentNode = (talent) => {
 
     const indicator = document.createElement("img");
     indicator.loading = "lazy";
-    indicator.classList.add("talent-node-indicator");
     indicator.src = indicatorAssets.get("no");
     indicator.width = 40;
     indicator.height = 40;
@@ -617,7 +626,6 @@ const generateTalentNode = (talent) => {
 
     const border = document.createElement("img");
     border.loading = "lazy";
-    border.classList.add("talent-node-border");
     border.src = borderAssets.get(`${talent.type}_off`);
     switch (talent.type) {
         case "stat": {
@@ -647,6 +655,8 @@ const generateTalentNode = (talent) => {
         }
     }
     setUpIcon(border);
+    container.style.width = `${border.width}px`;
+    container.style.height = `${border.height}px`;
     container.append(border);
 
     const icon = document.createElement("img");
@@ -719,15 +729,14 @@ export const generateAscendancyMenu = () => {
         menu.append(item);
     }
 
-    const ascendancyButton = document.querySelector("#ascendancy-button");
     ascendancyButton.replaceChildren();
     ascendancyButton.classList.add("talent-node");
+    ascendancyButton.style.pointerEvents = "auto";
     ascendancyButton.style.left = `${viewport.center.x}px`;
     ascendancyButton.style.top = `${viewport.center.y}px`;
 
     const indicator = document.createElement("img");
     indicator.loading = "lazy";
-    indicator.classList.add("talent-node-indicator");
     indicator.src = indicatorAssets.get(isActive ? "yes" : "can");
     indicator.width = 40;
     indicator.height = 40;
@@ -736,11 +745,12 @@ export const generateAscendancyMenu = () => {
 
     const border = document.createElement("img");
     border.loading = "lazy";
-    border.classList.add("talent-node-border");
     border.src = borderAssets.get(`asc_${isActive ? "on" : "off"}`);
     border.width = 64;
     border.height = 64;
     setUpIcon(border);
+    ascendancyButton.style.width = `${border.width}px`;
+    ascendancyButton.style.height = `${border.height}px`;
     ascendancyButton.append(border);
 
     const icon = document.createElement("img");

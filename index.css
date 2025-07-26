@@ -189,15 +189,22 @@ html, body {
 }
 
 .talent-node {
-    contain: size layout;
+    contain: size paint layout;
     display: flex;
     image-rendering: pixelated;
+    pointer-events: none;
     position: absolute;
+    transform: translate(-50%, -50%);
     user-select: none;
 }
 
+.talent-node.focused {
+    pointer-events: auto;
+}
+
 .talent-node img {
-    contain: size paint layout;
+    image-rendering: pixelated;
+    pointer-events: none;
 }
 
 .talent-node img:not(.talent-node-icon) {
@@ -210,20 +217,20 @@ html, body {
     opacity: 1.0;
 }
 
-.talent-node.hover {
+.talent-node:hover {
     cursor: pointer;
-    transform: scale(1.5);
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1.5);
 }
 
 #content-container {
     background-color: black;
-    contain: size layout;
+    contain: size paint layout;
     display: flex;
     height: 100%;
 }
 
 #viewport-container {
-    contain: size layout;
     display: flex;
     height: 100%;
     position: relative;
@@ -239,7 +246,6 @@ html, body {
 
 #talent-container {
     background-color: #191821;
-    contain: size layout;
     display: flex;
     height: 100%;
     overflow: scroll;
@@ -249,7 +255,6 @@ html, body {
 }
 
 #talent-tree {
-    contain: size layout;
     display: flex;
     position: absolute;
     transform: translate(-50%, -50%);
@@ -258,9 +263,9 @@ html, body {
 
 #ascendancy-container {
     background-color: #191821;
-    contain: size paint layout;
     display: flex;
     outline: 4px solid white;
+    pointer-events: none;
     position: absolute;
     transform-origin: 0 0;
     will-change: transform;
@@ -270,13 +275,13 @@ html, body {
     bottom: 0;
     display: flex;
     left: 50%;
+    pointer-events: auto;
     position: absolute;
     transform: translateX(-50%);
     transform-origin: 0 0;
 }
 
 .ascendancy-tree {
-    contain: size layout;
     height: 100%;
     width: 100%;
 }
@@ -317,7 +322,6 @@ html, body {
     background-color: #101010;
     border-radius: 0.5em;
     color: #AAAAAA;
-    contain: layout;
     display: flex;
     flex-direction: column;
     font-size: 1.0em;
@@ -426,7 +430,6 @@ html, body {
 
 #points-container {
     color: yellow;
-    contain: size layout;
     display: flex;
     font-size: 1.25em;
     gap: 0.25em;
@@ -440,7 +443,6 @@ html, body {
 
 #ascendancy-points-container {
     color: yellow;
-    contain: size layout;
     display: flex;
     font-size: 1.25em;
     gap: 0.25em;
@@ -456,7 +458,6 @@ html, body {
     align-items: center;
     background-color: black;
     border: 1px solid white;
-    contain: size layout;
     display: flex;
     height: 2em;
     left: calc(50% + 1.0em);
