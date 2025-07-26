@@ -89,6 +89,12 @@ export const updateAscendancyButton = (element) => {
     ascendancyButton = element;
 };
 
+/** @type {HTMLDivElement} */
+export let ascendancyMenu = undefined;
+export const updateAscendancyMenu = (element) => {
+    ascendancyMenu = element;
+};
+
 let drawingTimer = undefined;
 
 /**
@@ -711,8 +717,7 @@ const generateTalentNode = (talent) => {
 export const generateAscendancyMenu = () => {
     const isActive = controls.ascendancy !== "none";
 
-    const menu = document.querySelector("#ascendancy-menu");
-    menu.replaceChildren();
+    ascendancyMenu.replaceChildren();
     const selector = document.querySelector("#ascendancy-select");
     for (const option of selector.children) {
         const item = document.createElement("div");
@@ -725,8 +730,9 @@ export const generateAscendancyMenu = () => {
 
             selector.value = option.value;
             selector.dispatchEvent(new Event("change"));
+            ascendancyMenu.classList.add("hidden");
         };
-        menu.append(item);
+        ascendancyMenu.append(item);
     }
 
     ascendancyButton.replaceChildren();
@@ -804,13 +810,13 @@ export const generateAscendancyMenu = () => {
     ascendancyButton.onmousedown = (event) => {
         if (event.button !== 0) {
             if (event.button === 2) {
-                menu.classList.remove("hidden");
+                ascendancyMenu.classList.remove("hidden");
 
-                const bounds = document.querySelector("#viewport-container").getBoundingClientRect();
-                const menuBounds = menu.getBoundingClientRect();
+                const bounds = talentContainer.getBoundingClientRect();
+                const menuBounds = ascendancyMenu.getBoundingClientRect();
 
-                menu.style.left = `${controls.x + event.clientX}px`;
-                menu.style.top = `${Math.min(controls.y + event.clientY, controls.y + bounds.height - menuBounds.height - 3)}px`;
+                ascendancyMenu.style.left = `${event.clientX}px`;
+                ascendancyMenu.style.top = `${Math.min(event.clientY, bounds.height - menuBounds.height - 3)}px`;
             }
             return;
         }

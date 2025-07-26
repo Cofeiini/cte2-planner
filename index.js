@@ -6,12 +6,14 @@ import { ascendancyGrid, fullNodeList, talentGrid } from "./src/type/talent-node
 import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
 import {
     ascendancyButton,
+    ascendancyMenu,
     ascendancyTreeContainer,
     canvasContainer,
     fittedZoom,
     talentContainer,
     updateAscendancyButton,
     updateAscendancyContainer,
+    updateAscendancyMenu,
     updateAscendancyTreeContainer,
     updateCanvasContainer,
     updateFittedZoom,
@@ -177,6 +179,7 @@ const handleEvents = () => {
         controls.y = Math.min(Math.max((target.y * controls.zoom) - offset.y, 0), canvasBounds.height - talentBounds.height);
 
         if (controls.zoom !== oldZoom) {
+            ascendancyMenu.classList.add("hidden");
             handleViewport();
         }
     };
@@ -272,6 +275,7 @@ window.onload = async () => {
     updateAscendancyCanvas(document.querySelector("#ascendancy-canvas"));
 
     updateAscendancyButton(document.querySelector("#ascendancy-button"));
+    updateAscendancyMenu(document.querySelector("#ascendancy-menu"));
 
     infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");
