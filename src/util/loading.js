@@ -303,13 +303,13 @@ export const handleLoadingAssets = async () => {
 };
 
 export const handleLoading = async () => {
+    const loading = document.querySelector("#loading");
+    loading.classList.add("visible");
+
     const title = document.querySelector("#loading-title");
     title.classList.remove("hidden");
 
     await updateProgress("Preparing...");
-
-    const loading = document.querySelector("#loading");
-    loading.classList.remove("invisible");
 
     try {
         updatePresetInfo(JSON.parse(atob(new URLSearchParams(location.search).get("preset"))));
@@ -447,5 +447,5 @@ export const handleLoading = async () => {
     }
     await updateProgress(welcomeMessages.at(index));
 
-    loading.classList.add("invisible");
+    loading.classList.remove("visible");
 };

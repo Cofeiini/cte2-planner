@@ -77,17 +77,26 @@ export const updateTalentContainer = (element) => {
     talentContainer = element;
 };
 
-/** @type {{containers: {viewport: DOMRect, canvas: DOMRect, talent: DOMRect, ascendancy: DOMRect}, trees: {talent: DOMRect, ascendancy: Map<string, DOMRect>}}} */
 export const boundingRects = {
     containers: {
+        /** @type {DOMRect}*/
         viewport: undefined,
+        /** @type {DOMRect}*/
         canvas: undefined,
+        /** @type {DOMRect}*/
         talent: undefined,
+        /** @type {DOMRect}*/
         ascendancy: undefined,
     },
     trees: {
+        /** @type {DOMRect}*/
         talent: undefined,
+        /** @type {Map<string, DOMRect>}*/
         ascendancy: new Map(),
+    },
+    tooltip: {
+        /** @type {DOMRect}*/
+        main: undefined,
     },
 };
 export const refreshBoundingRects = () => {
@@ -532,7 +541,6 @@ export const handleTalentEvents = (talent, container) => {
         controls.hovering = false;
 
         infoTooltip.container.classList.remove("visible");
-        infoTooltip.container.classList.add("invisible");
 
         const previewNodes = [
             ...talentTree.querySelectorAll(".preview-add, .preview-remove"),
@@ -552,12 +560,11 @@ export const handleTalentEvents = (talent, container) => {
     container.onmousemove = (event) => {
         if (controls.panning) {
             infoTooltip.container.classList.remove("visible");
-            infoTooltip.container.classList.add("invisible");
             return;
         }
 
         const containerBounds = infoTooltip.container.getBoundingClientRect();
-        const contentBounds = infoTooltip.main.getBoundingClientRect();
+        const contentBounds = boundingRects.tooltip.main;
 
         const origin = {
             x: Math.floor(event.clientX - containerBounds.left),
@@ -815,7 +822,6 @@ export const generateAscendancyMenu = () => {
             `<p style="color: red; margin: 0;">${controls.ascendancy === "none" ? "Choose an Ascendancy first" : `${isHidden ? "Show" : "Hide"} the Ascendancy menu`}</p>`,
         ].join("");
 
-        infoTooltip.container.classList.remove("invisible");
         infoTooltip.container.classList.add("visible");
     };
 
@@ -833,7 +839,6 @@ export const generateAscendancyMenu = () => {
         controls.hovering = false;
 
         infoTooltip.container.classList.remove("visible");
-        infoTooltip.container.classList.add("invisible");
     };
 
     ascendancyButton.onmousedown = (event) => {

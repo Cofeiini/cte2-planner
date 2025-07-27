@@ -188,6 +188,5 @@ export const handleTooltip = (talent) => {
     }
     infoTooltip.stats.innerHTML = formatted.join("");
 
-    infoTooltip.container.classList.remove("invisible");
     infoTooltip.container.classList.add("visible");
 };

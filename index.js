@@ -216,7 +216,6 @@ const handleEvents = () => {
         talentContainer.style.cursor = null;
         if (controls.hovering) {
             infoTooltip.container.classList.add("visible");
-            infoTooltip.container.classList.remove("invisible");
         }
 
         talentContainer.removeEventListener("mousemove", handleMouseDrag);
@@ -250,6 +249,7 @@ const handleEvents = () => {
         infoTooltip.main.style.width = "max-content";
         const bounds = boundingRects.containers.viewport;
         const contentBounds = infoTooltip.main.getBoundingClientRect();
+        boundingRects.tooltip.main = contentBounds;
         infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
         infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.bottom - contentBounds.height - tooltipOffsets.edge)}px`;
 
@@ -345,12 +345,10 @@ window.onload = async () => {
             `<ul style="margin: 0;">${Array.from(keywords).sort().map(item => `<li style="color: darkorange;">${item}</li>`).join("")}</ul>`,
         ].join("");
 
-        infoTooltip.container.classList.remove("invisible");
         infoTooltip.container.classList.add("visible");
     };
     searchInfo.onmouseleave = () => {
         infoTooltip.container.classList.remove("visible");
-        infoTooltip.container.classList.add("invisible");
     };
 
     handleEvents();

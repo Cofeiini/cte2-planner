@@ -22,16 +22,13 @@ html, body {
     display: none !important;
 }
 
-.invisible {
-    opacity: 0.0;
-    transition: visibility 0ms var(--fade-time), opacity var(--fade-time) linear;
-    visibility: hidden;
-}
-
 .visible {
-    opacity: 1.0;
-    transition: opacity 0ms linear;
-    visibility: visible;
+    display: flex !important;
+    opacity: 1.0 !important;
+
+    @starting-style {
+        opacity: 0.0 !important;
+    }
 }
 
 .filtered {
@@ -309,13 +306,15 @@ html, body {
 }
 
 #tooltip-container {
-    display: flex;
+    display: none;
     filter: drop-shadow(-1px -1px white) drop-shadow(1px -1px white) drop-shadow(1px 1px white) drop-shadow(-1px 1px white);
-    left: 100%;
+    opacity: 0.0;
     pointer-events: none;
     position: absolute;
-    top: 100%;
-    will-change: transform;
+    transition-behavior: allow-discrete;
+    transition-duration: var(--fade-time);
+    transition-property: display, opacity;
+    will-change: transform, opacity, contents;
 }
 
 #info-tooltip {
@@ -512,14 +511,18 @@ html, body {
     align-items: center;
     background-color: black;
     color: white;
-    display: flex;
+    display: none;
     flex-direction: column;
     font-size: 5em;
     height: 100%;
     justify-content: center;
     left: 0;
+    opacity: 0.0;
     position: absolute;
     top: 0;
+    transition-behavior: allow-discrete;
+    transition-duration: var(--fade-time);
+    transition-property: display, overlay, opacity;
     width: 100%;
     z-index: 2;
 }
