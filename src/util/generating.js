@@ -127,8 +127,6 @@ export const updateAscendancyMenu = (element) => {
     ascendancyMenu = element;
 };
 
-let drawingTimer = undefined;
-
 /**
  * @param {string} description
  * @returns {string}
@@ -527,11 +525,7 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.arrow.style.top = `${tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)}px`;
         infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(225deg)`;
 
-        clearTimeout(drawingTimer);
-        drawingTimer = setTimeout(() => {
-            controls.shouldRedraw = true;
-            draw();
-        }, 10);
+        draw();
     };
 
     container.onmouseleave = () => {
@@ -552,13 +546,7 @@ export const handleTalentEvents = (talent, container) => {
         removePreview.clear();
         leftovers.clear();
 
-        clearTimeout(drawingTimer);
-        if (controls.shouldRedraw) {
-            drawingTimer = setTimeout(() => {
-                controls.shouldRedraw = false;
-                draw();
-            }, 10);
-        }
+        draw();
     };
 
     container.onmousemove = (event) => {

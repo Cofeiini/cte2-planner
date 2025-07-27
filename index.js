@@ -243,7 +243,7 @@ const handleEvents = () => {
 
         handleNodeFocus(event);
 
-        if (infoTooltip.container.classList.contains("invisible")) {
+        if (!previousFocus) {
             return;
         }
 

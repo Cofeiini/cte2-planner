@@ -1,5 +1,5 @@
 :root {
-    --fade-time: 80ms;
+    --fade-time: 100ms;
     --preview-add-color: #1F1F9F;
     --preview-remove-color: #9F1F1F;
 }
@@ -30,7 +30,7 @@ html, body {
 
 .visible {
     opacity: 1.0;
-    transition: opacity var(--fade-time) linear;
+    transition: opacity 0ms linear;
     visibility: visible;
 }
 
