@@ -78,7 +78,7 @@ export const handleAscendancyOptions = () => {
         ascendancyTreeContainer.style.width = `${canvas.width}px`;
         ascendancyTreeContainer.style.height = `${canvas.height}px`;
 
-        document.querySelector(`#${controls.ascendancy}_tree`).classList.remove("hidden");
+        ascendancyTreeContainer.querySelector(`#${controls.ascendancy}_tree`).classList.remove("hidden");
         drawLinesAscendancy();
 
         ascendancyContainer.classList.remove("hidden");
@@ -363,7 +363,10 @@ export const handleAscendancyChange = (event) => {
             }
         }
 
-        document.querySelector(`#${controls.ascendancy}_tree`).classList.add("hidden");
+        const trees = ascendancyTreeContainer.querySelectorAll(".ascendancy-tree");
+        for (const tree of trees) {
+            tree.classList.add("hidden");
+        }
     }
     controls.ascendancy = event.target.value;
 
