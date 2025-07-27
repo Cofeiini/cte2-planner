@@ -19,9 +19,8 @@ export const resetMessageBox = () => {
 
 /**
  * @param {Object} stat
- * @returns {HTMLDivElement}
  */
-export const setUpStatContainer = (stat) => {
+export const calculateStatTotal = (stat) => {
     let flat = 0.0;
     let percent = 0.0;
     let more = 1.0;
@@ -41,7 +40,18 @@ export const setUpStatContainer = (stat) => {
 
     const base = 100.0;
     const final = (base + flat) * (1 + (percent * 0.01)) * more;
-    const total = ((final - base) / base) * 100.0;
+    return ((final - base) / base) * 100.0;
+};
+
+/**
+ * @param {Object} stat
+ * @returns {HTMLDivElement}
+ */
+export const setUpStatContainer = (stat) => {
+    let total = stat["total"];
+    if (total === undefined) {
+        total = calculateStatTotal(stat);
+    }
 
     const isMinusGood = stat["minus_is_good"];
     let valueColor = "§c";
@@ -237,6 +247,7 @@ export const collectStatInformation = () => {
     totalGameChangers.clear();
     const majorSelections = allNodes.filter(item => (item.type === "major") && (item.parentTree === "main"));
     for (const talent of majorSelections) {
+        /** @type {Map<string, Object>} */
         const gameChangerStats = new Map();
         for (const stat of talent.stats) {
             const key = stat["stat"];
@@ -246,6 +257,7 @@ export const collectStatInformation = () => {
             }
 
             gameChangerStats.set(key, {
+                id: key,
                 type: stat["type"].toLowerCase(),
                 values: [processValue(stat), ...(gameChangerStats.get(key)?.values ?? [])],
                 description: stat["description"],

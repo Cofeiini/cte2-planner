@@ -57,7 +57,7 @@ export const handleTooltip = (talent) => {
             preview = ascendancyRemovePreview;
         }
 
-        const droppedNodes = new Set([...findDeadBranch(start, talent)]);
+        const droppedNodes = new Set(findDeadBranch(start, talent));
         preview.clear();
         for (const node of droppedNodes) {
             preview.set(node, new Set(node.neighbors.filter(item => droppedNodes.has(item)).map(item => item.identifier.number)));

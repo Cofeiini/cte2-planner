@@ -2,7 +2,7 @@ import { colorMap, controls } from "../data/constants.js";
 import { RELEASES } from "../releases.js";
 import { ascendancySelections, talentExclusions, talentSelections, toggleNode } from "../type/talent-node.js";
 import { drawLinesAscendancy } from "../util/drawing.js";
-import { ascendancyContainer, ascendancyTreeContainer } from "../util/generating.js";
+import { ascendancyContainer, ascendancyTreeContainer, boundingRects } from "../util/generating.js";
 import { handleLoading } from "../util/loading.js";
 import { handleViewport, resetMessageBox, setUpSeparator, setUpStatContainer, setUpStatIcon, setUpURL } from "../util/spuddling.js";
 
@@ -46,6 +46,12 @@ export const updateAscendancyInfo = (ascendancy) => {
     ascendancyInfo = ascendancy;
 };
 
+/** @type {Map<string, HTMLDivElement>} */
+const ascendancyCache = new Map();
+
+/** @type {Map<string, HTMLDivElement>} */
+const gameChangerCache = new Map();
+
 /**
  * @param {HTMLSelectElement} select
  */
@@ -78,10 +84,14 @@ export const handleAscendancyOptions = () => {
         ascendancyTreeContainer.style.width = `${canvas.width}px`;
         ascendancyTreeContainer.style.height = `${canvas.height}px`;
 
-        ascendancyTreeContainer.querySelector(`#${controls.ascendancy}_tree`).classList.remove("hidden");
+        const tree = ascendancyTreeContainer.querySelector(`#${controls.ascendancy}_tree`);
+        tree.classList.remove("hidden");
         drawLinesAscendancy();
 
         ascendancyContainer.classList.remove("hidden");
+
+        boundingRects.trees.ascendancy.set(controls.ascendancy, tree.getBoundingClientRect());
+        boundingRects.containers.ascendancy = ascendancyTreeContainer.getBoundingClientRect();
     }
 
     document.querySelector("#ascendancy-button").refresh();
@@ -110,6 +120,7 @@ export const handleSidePanel = () => {
             /** @type {Map<string, Object>} */
             const valueMap = totalStatList.get(isPercent) ?? new Map();
             valueMap.set(id, {
+                id: id,
                 values: [...stat["values"], ...(valueMap.get(id)?.values ?? [])],
                 description: stat["description"],
                 is_percent: isPercent,
@@ -174,26 +185,30 @@ export const handleSidePanel = () => {
         const from = ascendancyList.findIndex(item => item.type === "asc");
         ascendancyList.splice(0, 0, ascendancyList.splice(from, 1).at(0));
         for (const majorAscendancy of ascendancyList) {
-            const itemContainer = document.createElement("div");
-            itemContainer.classList.add("panel-stats-group");
-            itemContainer.append(setUpStatIcon(majorAscendancy.id, majorAscendancy.type));
+            let itemContainer = ascendancyCache.get(majorAscendancy.id);
+            if (!itemContainer) {
+                itemContainer = document.createElement("div");
+                itemContainer.classList.add("panel-stats-group");
+                itemContainer.append(setUpStatIcon(majorAscendancy.id, majorAscendancy.type));
 
-            const statsContainer = document.createElement("div");
-            statsContainer.classList.add("panel-stats-container-group");
+                const statsContainer = document.createElement("div");
+                statsContainer.classList.add("panel-stats-container-group");
 
-            const title = document.createElement("div");
-            title.classList.add("panel-stats-group-title");
-            title.innerText = majorAscendancy.name;
-            title.style.color = colorMap.minecraft.get("5");
-            if (majorAscendancy.type === "asc") {
-                title.style.color = colorMap.minecraft.get("6");
+                const title = document.createElement("div");
+                title.classList.add("panel-stats-group-title");
+                title.innerText = majorAscendancy.name;
+                title.style.color = colorMap.minecraft.get("5");
+                if (majorAscendancy.type === "asc") {
+                    title.style.color = colorMap.minecraft.get("6");
+                }
+                statsContainer.append(title);
+
+                for (const stat of majorAscendancy.value.values()) {
+                    statsContainer.append(setUpStatContainer(stat));
+                }
+                itemContainer.append(statsContainer);
+                ascendancyCache.set(majorAscendancy.id, itemContainer);
             }
-            statsContainer.append(title);
-
-            for (const stat of majorAscendancy.value.values()) {
-                statsContainer.append(setUpStatContainer(stat));
-            }
-            itemContainer.append(statsContainer);
             ascendancyItems.push(itemContainer);
             ascendancyItems.push(setUpSeparator());
         }
@@ -213,23 +228,28 @@ export const handleSidePanel = () => {
         const gameChangerItems = [];
         const gameChangerList = [...totalGameChangers.values()].sort((a, b) => a.name.localeCompare(b.name));
         for (const gameChanger of gameChangerList) {
-            const itemContainer = document.createElement("div");
-            itemContainer.classList.add("panel-stats-group");
-            itemContainer.append(setUpStatIcon(gameChanger.id));
+            let itemContainer = gameChangerCache.get(gameChanger.id);
+            if (!itemContainer) {
+                itemContainer = document.createElement("div");
+                itemContainer.classList.add("panel-stats-group");
+                itemContainer.append(setUpStatIcon(gameChanger.id));
 
-            const statsContainer = document.createElement("div");
-            statsContainer.classList.add("panel-stats-container-group");
+                const statsContainer = document.createElement("div");
+                statsContainer.classList.add("panel-stats-container-group");
 
-            const title = document.createElement("div");
-            title.classList.add("panel-stats-group-title");
-            title.innerText = gameChanger.name;
-            title.style.color = colorMap.minecraft.get("5");
-            statsContainer.append(title);
+                const title = document.createElement("div");
+                title.classList.add("panel-stats-group-title");
+                title.innerText = gameChanger.name;
+                title.style.color = colorMap.minecraft.get("5");
+                statsContainer.append(title);
 
-            for (const stat of gameChanger.value.values()) {
-                statsContainer.append(setUpStatContainer(stat));
+                for (const stat of gameChanger.value.values()) {
+                    statsContainer.append(setUpStatContainer(stat));
+                }
+
+                itemContainer.append(statsContainer);
+                gameChangerCache.set(gameChanger.id, itemContainer);
             }
-            itemContainer.append(statsContainer);
             gameChangerItems.push(itemContainer);
             gameChangerItems.push(setUpSeparator());
         }

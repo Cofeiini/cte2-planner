@@ -185,8 +185,9 @@ export const toggleNode = (node, isPreset = false) => {
         }
     }
 
+    const selectedCount = selections.length;
     if (node.selected) {
-        let removed = removePreview.keys();
+        let removed = Array.from(removePreview.keys());
         if (removePreview.size === 0) {
             removed = findDeadBranch(origin, node);
         }
@@ -211,18 +212,28 @@ export const toggleNode = (node, isPreset = false) => {
                 ascendancyStartNodes.set(node.parentTree, undefined);
             }
         }
-    } else if ((selections.length + (preview.size - 1)) > totalPoints) {
-        if (((preview.size - 1) - (leftovers.size - 1)) > 0) {
-            const skippedNodes = Array.from(leftovers.keys());
-            selections.push(...Array.from(preview.keys()).filter(item => !item.selected).filter(item => !skippedNodes.some(element => element.identifier.number === item.identifier.number)));
-        }
     } else {
-        if (!isPreset && origin && selections.length > 0) {
-            const allNodes = new Set([...selections, ...preview.keys()]);
+        let addedNodes = Array.from(preview.keys()).filter(item => !item.selected);
+        if (leftovers.size > 0) {
+            addedNodes = new Set(addedNodes).difference(new Set(leftovers.keys()));
+        }
+
+        if (isPreset || (addedNodes.length === 0)) {
+            addedNodes = [node];
+            selections.push(node);
+        } else {
+            const allNodes = new Set([...selections, ...addedNodes]);
             selections.length = 0;
             selections.push(...allNodes);
-        } else if (!origin || !isStartingNode) {
-            selections.push(node);
+        }
+
+        for (const talent of addedNodes) {
+            talent.selected = true;
+            talent.update();
+
+            for (const neighbor of talent.neighbors) {
+                neighbor.update();
+            }
         }
 
         if (!origin && isStartingNode) {
@@ -234,28 +245,28 @@ export const toggleNode = (node, isPreset = false) => {
         }
     }
 
-    for (const talent of selections) {
-        talent.selected = true;
-        talent.update();
-
-        for (const neighbor of talent.neighbors) {
-            neighbor.update();
-        }
-    }
-
-    collectStatInformation();
-
-    handleSidePanel();
-
-    if (!isPreset) {
-        excluded.length = 0;
-        for (const values of talentExclusions.values()) {
-            if (selections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
-                excluded.push(...values);
+    if (selections.length !== selectedCount) {
+        if ((selections.length >= totalPoints) || (selectedCount >= totalPoints)) {
+            /** @type {Set<TalentNode>} */
+            const updatable = new Set(selections.map(item => item.neighbors.filter(neighbor => !neighbor.selected)).flat(Infinity));
+            for (const talent of updatable) {
+                talent.update();
             }
         }
 
-        setUpURL();
+        if (!isPreset) {
+            collectStatInformation();
+            handleSidePanel();
+
+            excluded.length = 0;
+            for (const values of talentExclusions.values()) {
+                if (selections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
+                    excluded.push(...values);
+                }
+            }
+
+            setUpURL();
+        }
     }
 
     document.querySelector("#talent-points").innerText = `${TOTAL_POINTS - talentSelections.length}`;

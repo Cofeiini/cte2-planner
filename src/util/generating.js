@@ -48,6 +48,12 @@ export const updateTalentTree = (element) => {
 };
 
 /** @type {HTMLDivElement} */
+export let viewportContainer = undefined;
+export const updateViewportContainer = (element) => {
+    viewportContainer = element;
+};
+
+/** @type {HTMLDivElement} */
 export let ascendancyContainer = undefined;
 export const updateAscendancyContainer = (element) => {
     ascendancyContainer = element;
@@ -61,8 +67,6 @@ export const updateAscendancyTreeContainer = (element) => {
 
 /** @type {HTMLDivElement} */
 export let canvasContainer = undefined;
-/** @type {DOMRect} */
-let canvasContainerBounds = undefined;
 export const updateCanvasContainer = (element) => {
     canvasContainer = element;
 };
@@ -73,9 +77,37 @@ export const updateTalentContainer = (element) => {
     talentContainer = element;
 };
 
+/** @type {{containers: {viewport: DOMRect, canvas: DOMRect, talent: DOMRect, ascendancy: DOMRect}, trees: {talent: DOMRect, ascendancy: Map<string, DOMRect>}}} */
+export const boundingRects = {
+    containers: {
+        viewport: undefined,
+        canvas: undefined,
+        talent: undefined,
+        ascendancy: undefined,
+    },
+    trees: {
+        talent: undefined,
+        ascendancy: new Map(),
+    },
+};
+export const refreshBoundingRects = () => {
+    boundingRects.containers.canvas = canvasContainer.getBoundingClientRect();
+    boundingRects.containers.talent = talentContainer.getBoundingClientRect();
+    boundingRects.containers.viewport = viewportContainer.getBoundingClientRect();
+    boundingRects.containers.ascendancy = ascendancyTreeContainer.getBoundingClientRect();
+
+    boundingRects.trees.talent = talentTree.getBoundingClientRect();
+    const ascendancyOptions = new Set(talentExclusions.get("ascendancy").map(item => item.identifier.talent));
+    for (const ascendancy of ascendancyOptions) {
+        boundingRects.trees.ascendancy.set(ascendancy, ascendancyTreeContainer.querySelector(`#${ascendancy}_tree`).getBoundingClientRect());
+    }
+};
+
 export let fittedZoom = 1.0;
 export const updateFittedZoom = () => {
-    const viewportBounds = document.querySelector("#viewport-container").getBoundingClientRect();
+    refreshBoundingRects();
+    const viewportBounds = boundingRects.containers.viewport;
+    const canvasContainerBounds = boundingRects.containers.canvas;
     fittedZoom = Math.max(viewportBounds.width / canvasContainerBounds.width, viewportBounds.height / canvasContainerBounds.height);
 };
 
@@ -133,9 +165,6 @@ export const generateCanvas = () => {
 
     canvasContainer.style.width = `${viewport.width * 2.0}px`;
     canvasContainer.style.height = `${viewport.height * 2.0}px`;
-    canvasContainerBounds = canvasContainer.getBoundingClientRect();
-
-    updateFittedZoom();
 
     let centerNode = {
         center: {
@@ -155,7 +184,7 @@ export const generateCanvas = () => {
     viewport.center.x = (viewport.width * 0.5) + centerNode.center.x;
     viewport.center.y = (viewport.height * 0.5) + centerNode.center.y;
 
-    const container = document.querySelector("#talent-container").getBoundingClientRect();
+    const container = talentContainer.getBoundingClientRect();
     controls.x = viewport.center.x - (container.width * 0.5);
     controls.y = viewport.center.y - (container.height * 0.5);
 
@@ -511,9 +540,13 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.container.classList.remove("visible");
         infoTooltip.container.classList.add("invisible");
 
-        document.querySelectorAll(".preview-add, .preview-remove").forEach(item => {
+        const previewNodes = [
+            ...talentTree.querySelectorAll(".preview-add, .preview-remove"),
+            ...ascendancyTreeContainer.querySelector(".ascendancy-tree:not(.hidden)")?.querySelectorAll(".preview-add, .preview-remove") ?? [],
+        ];
+        for (const item of previewNodes) {
             item.classList.remove("preview-add", "preview-remove");
-        });
+        }
 
         addPreview.clear();
         removePreview.clear();
@@ -686,8 +719,12 @@ const generateTalentNode = (talent) => {
 
         container.classList.remove("active");
 
-        let isExcluded = false;
-        if (!talent.selected) {
+        let assetId = "no";
+        if (talent.selected) {
+            assetId = "yes";
+            container.classList.add("active");
+        } else {
+            let isExcluded = false;
             for (const values of exclusiveNodeValues.nodes.values()) {
                 const existingSelection = selections.some(item => item.exclusive && values.includes(item.identifier.talent));
                 if (existingSelection && values.includes(talent.identifier.talent)) {
@@ -695,18 +732,21 @@ const generateTalentNode = (talent) => {
                     break;
                 }
             }
+
+            if (!isExcluded && talent.neighbors.some(item => item.selected) && (selections.length < totalPoints)) {
+                assetId = "can";
+            }
         }
 
-        let assetId = "no";
-        if (talent.selected) {
-            assetId = "yes";
-            container.classList.add("active");
-        } else if (!isExcluded && talent.neighbors.some(item => item.selected) && (selections.length < totalPoints)) {
-            assetId = "can";
+        const borderSource = borderAssets.get(`${talent.type}_${talent.selected ? "on" : "off"}`);
+        if (border.src !== borderSource) {
+            border.src = borderSource;
         }
 
-        border.src = borderAssets.get(`${talent.type}_${talent.selected ? "on" : "off"}`);
-        indicator.src = indicatorAssets.get(assetId);
+        const indicatorSource = indicatorAssets.get(assetId);
+        if (indicator.src !== indicatorSource) {
+            indicator.src = indicatorSource;
+        }
     };
 
     talent.visual = container;
@@ -730,6 +770,7 @@ export const generateAscendancyMenu = () => {
 
             selector.value = option.value;
             selector.dispatchEvent(new Event("change"));
+
             ascendancyMenu.classList.add("hidden");
         };
         ascendancyMenu.append(item);
@@ -812,7 +853,7 @@ export const generateAscendancyMenu = () => {
             if (event.button === 2) {
                 ascendancyMenu.classList.remove("hidden");
 
-                const bounds = talentContainer.getBoundingClientRect();
+                const bounds = boundingRects.containers.talent;
                 const menuBounds = ascendancyMenu.getBoundingClientRect();
 
                 ascendancyMenu.style.left = `${event.clientX}px`;

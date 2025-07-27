@@ -7,9 +7,9 @@ import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js"
 import {
     ascendancyButton,
     ascendancyMenu,
-    ascendancyTreeContainer,
-    canvasContainer,
+    boundingRects,
     fittedZoom,
+    refreshBoundingRects,
     talentContainer,
     updateAscendancyButton,
     updateAscendancyContainer,
@@ -19,7 +19,9 @@ import {
     updateFittedZoom,
     updateTalentContainer,
     updateTalentTree,
+    updateViewportContainer,
     viewport,
+    viewportContainer,
 } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL } from "./src/util/spuddling.js";
@@ -36,26 +38,26 @@ const handleNodeFocus = (event) => {
         y: viewport.offset.top * zoomedCell,
     };
 
-    let currentTree = event.target.closest("#talent-tree");
-    let currentContainer = canvasContainer;
+    let currentTarget = event.target.closest("#talent-tree");
+    let treeBounds = boundingRects.trees.talent;
+    let canvasBounds = boundingRects.containers.canvas;
     let grid = talentGrid;
-    if (!currentTree) {
+    if (!currentTarget) {
         viewportOffset.x = 0;
         viewportOffset.y = 0;
 
-        currentTree = event.target.closest(".ascendancy-tree");
-        currentContainer = ascendancyTreeContainer;
+        currentTarget = event.target.closest(".ascendancy-tree");
+        treeBounds = boundingRects.trees.ascendancy.get(controls.ascendancy);
+        canvasBounds = boundingRects.containers.ascendancy;
         grid = ascendancyGrid.get(controls.ascendancy);
     }
 
     ascendancyButton.classList.remove("focused");
-    if (!currentTree) {
+    if (!currentTarget) {
         ascendancyButton.classList.add("focused");
         return;
     }
 
-    const canvasBounds = currentContainer.getBoundingClientRect();
-    const treeBounds = currentTree.getBoundingClientRect();
     const layer = {
         x: (event.clientX - canvasBounds.left) - ((canvasBounds.width - treeBounds.width) * 0.5) + viewportOffset.x,
         y: (event.clientY - canvasBounds.top) - ((canvasBounds.height - treeBounds.height) * 0.5) + viewportOffset.y,
@@ -116,8 +118,8 @@ const handleMouseDrag = (event) => {
         }
     }
 
-    const canvasBounds = canvasContainer.getBoundingClientRect();
-    const talentBounds = talentContainer.getBoundingClientRect();
+    const canvasBounds = boundingRects.containers.canvas;
+    const talentBounds = boundingRects.containers.talent;
 
     controls.panning = true;
     controls.x = Math.min(Math.max(controls.x - event.movementX, 0), canvasBounds.width - talentBounds.width);
@@ -146,7 +148,7 @@ const handleSearch = (event) => {
         let isMatch = node.name.toLowerCase().includes(filter) || node.name.toLowerCase().includes(altFilter);
         isMatch = isMatch || node.identifier.talent.includes(filter) || node.identifier.talent.includes(altFilter);
         isMatch = isMatch || node.keywords.includes(filter) || node.keywords.includes(altFilter);
-        isMatch = isMatch || node.stats.some(item => item.stat.includes(filter) || item.description.toLowerCase().includes(filter) || item.stat.includes(altFilter));
+        isMatch = isMatch || node.stats.some(item => item.stat.includes(filter) || item.stat.includes(altFilter) || item.description.toLowerCase().includes(filter));
 
         if (isMatch) {
             node.visual.classList.remove("filtered");
@@ -163,8 +165,8 @@ const handleEvents = () => {
         const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
         controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), 3.0);
 
-        const canvasBounds = canvasContainer.getBoundingClientRect();
-        const talentBounds = talentContainer.getBoundingClientRect();
+        const canvasBounds = boundingRects.containers.canvas;
+        const talentBounds = boundingRects.containers.talent;
 
         const offset = {
             x: event.clientX - talentBounds.left,
@@ -181,6 +183,8 @@ const handleEvents = () => {
         if (controls.zoom !== oldZoom) {
             ascendancyMenu.classList.add("hidden");
             handleViewport();
+
+            refreshBoundingRects();
         }
     };
 
@@ -204,6 +208,10 @@ const handleEvents = () => {
             return;
         }
 
+        if (controls.panning) {
+            refreshBoundingRects();
+        }
+
         controls.panning = false;
         talentContainer.style.cursor = null;
         if (controls.hovering) {
@@ -214,7 +222,6 @@ const handleEvents = () => {
         talentContainer.removeEventListener("mousemove", handleMouseDrag);
     };
 
-    const viewportContainer = document.querySelector("#viewport-container");
     viewportContainer.oncontextmenu = () => {
         return false;
     };
@@ -241,7 +248,7 @@ const handleEvents = () => {
         }
 
         infoTooltip.main.style.width = "max-content";
-        const bounds = viewportContainer.getBoundingClientRect();
+        const bounds = boundingRects.containers.viewport;
         const contentBounds = infoTooltip.main.getBoundingClientRect();
         infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
         infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.bottom - contentBounds.height - tooltipOffsets.edge)}px`;
@@ -266,6 +273,7 @@ window.onresize = () => {
 
 window.onload = async () => {
     updateTalentTree(document.querySelector("#talent-tree"));
+    updateViewportContainer(document.querySelector("#viewport-container"));
     updateAscendancyContainer(document.querySelector("#ascendancy-container"));
     updateAscendancyTreeContainer(document.querySelector("#ascendancy-tree-container"));
     updateCanvasContainer(document.querySelector("#canvas-container"));
@@ -348,4 +356,6 @@ window.onload = async () => {
     handleEvents();
 
     await handleLoading();
+
+    updateFittedZoom();
 };

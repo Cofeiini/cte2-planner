@@ -1,5 +1,7 @@
+import { distanceMatrix } from "../core/algorithm.js";
 import {
     handleAscendancyOptions,
+    handleSidePanel,
     handleVersionOptions,
     presetInfo,
     releaseInfo,
@@ -28,7 +30,7 @@ import {
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
 import { generateAscendancyGrid, generateAscendancyMenu, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
-import { handleViewport } from "./spuddling.js";
+import { collectStatInformation, handleViewport } from "./spuddling.js";
 
 const updateProgress = async (text) => {
     document.querySelector("#progress").innerText = text;
@@ -425,10 +427,18 @@ export const handleLoading = async () => {
         }
     }
 
+    collectStatInformation();
+    handleSidePanel();
+
     await updateProgress("Drawing node trees...");
     drawLinesRegular();
     drawLinesAscendancy();
     handleViewport();
+
+    const trees = new Set(fullNodeList.map(node => node.parentTree));
+    for (const tree of trees) {
+        distanceMatrix.set(tree, new Map());
+    }
 
     title.classList.add("hidden");
     let index = 0;

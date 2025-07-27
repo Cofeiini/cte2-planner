@@ -11,6 +11,9 @@ import {
     talentSelections,
 } from "../type/talent-node.js";
 
+/** @type {Map<string, Map<number, Map<number, number>>>} */
+export const distanceMatrix = new Map();
+
 /**
  * @param {number} level
  * @param {number} value
@@ -81,42 +84,60 @@ export const findPaths = (start, end, currentPath, allPaths) => {
 /**
  * @param {TalentNode} start
  * @param {TalentNode} target
- * @returns {TalentNode[]}
+ * @returns {Set<TalentNode>}
  */
 export const findDeadBranch = (start, target) => {
-    if (!start) {
-        return [];
-    }
-
     const paths = [];
     findPaths(start, target, [start], paths);
 
     if (!paths.some(item => item.some(element => element.identifier.number === target.identifier.number))) {
-        return [];
+        return new Set();
     }
 
     const nodesToRemove = new Set();
     searchNodes(target, paths, nodesToRemove);
 
-    return Array.from(nodesToRemove);
+    return nodesToRemove;
 };
 
 /**
  * @param {TalentNode} start
  * @param {TalentNode} end
+ * @param {number} cutoff
  * @returns {number}
  */
-export const findDistance = (start, end) => {
+export const findDistance = (start, end, cutoff = Number.MAX_VALUE) => {
+    const matrix = distanceMatrix.get(start.parentTree);
+    if (!matrix.has(start.identifier.number)) {
+        matrix.set(start.identifier.number, new Map());
+    }
+
+    const startDistances = matrix.get(start.identifier.number);
+    const bypass = startDistances.get(end.identifier.number) ?? matrix.get(end.identifier.number)?.get(start.identifier.number);
+    if (bypass !== undefined) {
+        return bypass;
+    }
+
     const excluded = exclusiveNodeValues.nodes.get("start");
 
     const queue = [[start, 0]];
-    const visited = new Set([start.identifier.number]);
+    const visited = new Set();
 
     while (queue.length > 0) {
         const [node, distance] = queue.shift();
+        if (distance > cutoff) {
+            return Number.MAX_VALUE;
+        }
+
         if (node.identifier.number === end.identifier.number) {
+            startDistances.set(end.identifier.number, distance);
             return distance;
         }
+
+        if (visited.has(node.identifier.number)) {
+            continue;
+        }
+        visited.add(node.identifier.number);
 
         for (const neighbor of node.neighbors) {
             if (visited.has(neighbor.identifier.number)) {
@@ -127,7 +148,6 @@ export const findDistance = (start, end) => {
                 continue;
             }
 
-            visited.add(neighbor.identifier.number);
             queue.push([neighbor, distance + 1]);
         }
     }
@@ -237,30 +257,24 @@ export const findShortestRoute = (target) => {
         return [target];
     }
 
+    const nodePool = selections.filter(item => target.identifier.number !== item.identifier.number);
+
     let distant = Number.MAX_VALUE;
-    const routeList = [];
-    for (const start of selections) {
-        if (start.identifier.number === target.identifier.number) {
-            continue;
-        }
-
-        const current = findDistance(start, target);
-        if (current <= distant) {
+    for (const start of nodePool) {
+        const current = findDistance(start, target, distant);
+        if (current < distant) {
             distant = current;
-            routeList.push(algorithm(start, target));
         }
     }
 
-    let shortest = [];
-    let min = Number.MAX_VALUE;
-    for (const route of routeList) {
-        if (route.length < min) {
-            min = route.length;
-            shortest = route;
+    for (const start of nodePool) {
+        const current = findDistance(start, target, distant);
+        if (current <= distant) {
+            return algorithm(start, target);
         }
     }
 
-    return shortest;
+    return [];
 };
 
 /**
