@@ -230,6 +230,10 @@ const handleEvents = () => {
             return;
         }
 
+        if (controls.panning) {
+            refreshBoundingRects();
+        }
+
         controls.panning = false;
         talentContainer.style.cursor = null;
         talentContainer.removeEventListener("mousemove", handleMouseDrag);
