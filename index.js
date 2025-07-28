@@ -246,7 +246,7 @@ const handleEvents = () => {
 
         handleNodeFocus(event);
 
-        if (!previousFocus) {
+        if (!previousFocus && !ascendancyButton.classList.contains("focused")) {
             return;
         }
 
