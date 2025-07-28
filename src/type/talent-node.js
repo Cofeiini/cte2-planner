@@ -107,13 +107,7 @@ export class TalentNode {
     travel = {
         /** @type {TalentNode} */
         source: undefined,
-        closed: false,
         visited: false,
-        cost: {
-            total: 0,
-            accumulated: 0,
-            heuristic: 0,
-        },
     };
 
     constructor(input) {
@@ -138,11 +132,7 @@ export class TalentNode {
         this.neighbors = [];
         this.parentTree = input.parentTree;
         this.travel.source = undefined;
-        this.travel.closed = false;
         this.travel.visited = false;
-        this.travel.cost.total = 0;
-        this.travel.cost.accumulated = 0;
-        this.travel.cost.heuristic = 0;
     }
 }
 

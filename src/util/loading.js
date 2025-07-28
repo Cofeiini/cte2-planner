@@ -1,4 +1,3 @@
-import { distanceMatrix } from "../core/algorithm.js";
 import {
     handleAscendancyOptions,
     handleSidePanel,
@@ -434,11 +433,6 @@ export const handleLoading = async () => {
     drawLinesRegular();
     drawLinesAscendancy();
     handleViewport();
-
-    const trees = new Set(fullNodeList.map(node => node.parentTree));
-    for (const tree of trees) {
-        distanceMatrix.set(tree, new Map());
-    }
 
     title.classList.add("hidden");
     let index = 0;

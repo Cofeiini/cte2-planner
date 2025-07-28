@@ -48,6 +48,7 @@ export const calculateStatTotal = (stat) => {
  * @returns {HTMLDivElement}
  */
 export const setUpStatContainer = (stat) => {
+    /** @type {number} */
     let total = stat["total"];
     if (total === undefined) {
         total = calculateStatTotal(stat);

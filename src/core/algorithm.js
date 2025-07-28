@@ -1,4 +1,3 @@
-import { BinaryHeap } from "../type/binary-heap.js";
 import {
     ascendancyGrid,
     ascendancySelections,
@@ -6,13 +5,9 @@ import {
     exclusiveNodeValues,
     fullNodeList,
     startingNode,
-    talentExclusions,
     talentGrid,
     talentSelections,
 } from "../type/talent-node.js";
-
-/** @type {Map<string, Map<number, Map<number, number>>>} */
-export const distanceMatrix = new Map();
 
 /**
  * @param {number} level
@@ -28,7 +23,7 @@ export const scaleValueToLevel = (level, value) => {
  * @param {TalentNode[][]} paths
  * @param {Set<TalentNode>} collected
  */
-export const searchNodes = (node, paths, collected) => {
+const searchNodes = (node, paths, collected) => {
     const visited = new Set();
 
     const search = (current) => {
@@ -61,7 +56,7 @@ export const searchNodes = (node, paths, collected) => {
  * @param {TalentNode[]} currentPath
  * @param {TalentNode[][]} allPaths
  */
-export const findPaths = (start, end, currentPath, allPaths) => {
+const findPaths = (start, end, currentPath, allPaths) => {
     const node = currentPath.at(-1);
     if (node.identifier.number === end.identifier.number) {
         allPaths.push(currentPath);
@@ -101,138 +96,13 @@ export const findDeadBranch = (start, target) => {
 };
 
 /**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @param {number} cutoff
- * @returns {number}
- */
-export const findDistance = (start, end, cutoff = Number.MAX_VALUE) => {
-    const matrix = distanceMatrix.get(start.parentTree);
-    if (!matrix.has(start.identifier.number)) {
-        matrix.set(start.identifier.number, new Map());
-    }
-
-    const startDistances = matrix.get(start.identifier.number);
-    const bypass = startDistances.get(end.identifier.number) ?? matrix.get(end.identifier.number)?.get(start.identifier.number);
-    if (bypass !== undefined) {
-        return bypass;
-    }
-
-    const excluded = exclusiveNodeValues.nodes.get("start");
-
-    const queue = [[start, 0]];
-    const visited = new Set();
-
-    while (queue.length > 0) {
-        const [node, distance] = queue.shift();
-        if (distance > cutoff) {
-            return Number.MAX_VALUE;
-        }
-
-        if (node.identifier.number === end.identifier.number) {
-            startDistances.set(end.identifier.number, distance);
-            return distance;
-        }
-
-        if (visited.has(node.identifier.number)) {
-            continue;
-        }
-        visited.add(node.identifier.number);
-
-        for (const neighbor of node.neighbors) {
-            if (visited.has(neighbor.identifier.number)) {
-                continue;
-            }
-
-            if (neighbor.exclusive && excluded.includes(neighbor.identifier.talent)) {
-                continue;
-            }
-
-            queue.push([neighbor, distance + 1]);
-        }
-    }
-
-    return 0;
-};
-
-export const resetNodeHeuristics = () => {
-    for (const talent of fullNodeList) {
-        talent.travel.source = undefined;
-        talent.travel.closed = false;
-        talent.travel.cost.total = Number.MAX_VALUE;
-        talent.travel.cost.accumulated = 0;
-        talent.travel.cost.heuristic = 0;
-    }
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @returns {TalentNode[]}
- */
-export const algorithm = (start, end) => {
-    resetNodeHeuristics();
-
-    for (const node of talentExclusions.get("start")) {
-        node.travel.closed = true;
-    }
-
-    const openHeap = new BinaryHeap();
-    openHeap.push(start);
-    start.travel.cost.heuristic = findDistance(start, end);
-
-    while (openHeap.size() > 0) {
-        const currentNode = openHeap.pop();
-
-        if (currentNode.identifier.number === end.identifier.number) {
-            const path = [currentNode];
-
-            let temp = currentNode;
-            while (temp.travel.source) {
-                path.push(temp.travel.source);
-                temp = temp.travel.source;
-            }
-
-            return path;
-        }
-
-        currentNode.travel.closed = true;
-        for (const neighbor of currentNode.neighbors) {
-            if (neighbor.travel.closed) {
-                continue;
-            }
-
-            const accumulated = currentNode.travel.cost.accumulated + 1;
-            const visited = neighbor.travel.closed;
-            if (!visited || (accumulated < neighbor.travel.cost.accumulated)) {
-                neighbor.travel.closed = true;
-                neighbor.travel.source = currentNode;
-                neighbor.travel.cost.heuristic = neighbor.travel.cost.heuristic || findDistance(neighbor, end);
-                neighbor.travel.cost.accumulated = accumulated;
-                neighbor.travel.cost.total = neighbor.travel.cost.accumulated + neighbor.travel.cost.heuristic;
-
-                if (visited) {
-                    openHeap.rescore(neighbor);
-                } else {
-                    openHeap.push(neighbor);
-                }
-            }
-        }
-    }
-
-    return [];
-};
-
-/**
  * @param {TalentNode} target
- * @returns {TalentNode[]}
+ * @returns {string[]}
  */
-export const findShortestRoute = (target) => {
-    let origin = startingNode;
+const listExcluded = (target) => {
     let selections = talentSelections;
     let exclude = "start";
     if (target.parentTree !== "main") {
-        origin = ascendancyStartNodes.get(target.parentTree);
         selections = ascendancySelections;
         exclude = "ascendancy";
     }
@@ -249,32 +119,96 @@ export const findShortestRoute = (target) => {
         excluded.push(...exclusiveNodeValues.nodes.get(exclude));
     }
 
+    return excluded;
+};
+
+/**
+ * @param {TalentNode} target
+ * @param {string[]} excluded
+ * @returns {Set<TalentNode> | undefined}
+ */
+const checkOrigin = (target, excluded) => {
+    let origin = startingNode;
+    if (target.parentTree !== "main") {
+        origin = ascendancyStartNodes.get(target.parentTree);
+    }
+
     if (excluded.includes(target.identifier.talent)) {
         if (origin) {
-            return [];
+            return new Set();
         }
 
-        return [target];
+        return new Set([target]);
     }
 
-    const nodePool = selections.filter(item => target.identifier.number !== item.identifier.number);
+    return undefined;
+};
 
-    let distant = Number.MAX_VALUE;
-    for (const start of nodePool) {
-        const current = findDistance(start, target, distant);
-        if (current < distant) {
-            distant = current;
+/**
+ * @param {TalentNode} target
+ * @returns {Set<TalentNode>}
+ */
+export const findShortestRoute = (target) => {
+    const excluded = listExcluded(target);
+    const checkedPath = checkOrigin(target, excluded);
+    if (checkedPath) {
+        return checkedPath;
+    }
+
+    let selections = talentSelections;
+    if (target.parentTree !== "main") {
+        selections = ascendancySelections;
+    }
+
+    if (selections.some(item => item.identifier.number === target.identifier.number)) {
+        return new Set([target]);
+    }
+
+    for (const talent of fullNodeList) {
+        talent.travel.source = undefined;
+        talent.travel.visited = false;
+    }
+
+    /** @type {TalentNode[]} */
+    const queue = [];
+
+    for (const node of selections) {
+        queue.push(node);
+        node.travel.visited = true;
+    }
+
+    while (queue.length > 0) {
+        const current = queue.shift();
+
+        if (current.identifier.number === target.identifier.number) {
+            /** @type {TalentNode[]} */
+            const path = [];
+
+            let node = current;
+            while (node) {
+                path.push(node);
+                node = node.travel.source;
+            }
+
+            return new Set(path);
+        }
+
+        for (const neighbor of current.neighbors) {
+            if (neighbor.travel.visited) {
+                continue;
+            }
+
+            if (neighbor.exclusive && excluded.includes(neighbor.identifier.talent)) {
+                continue;
+            }
+
+            neighbor.travel.visited = true;
+            neighbor.travel.source = current;
+            queue.push(neighbor);
         }
     }
 
-    for (const start of nodePool) {
-        const current = findDistance(start, target, distant);
-        if (current <= distant) {
-            return algorithm(start, target);
-        }
-    }
-
-    return [];
+    return new Set();
 };
 
 /**
