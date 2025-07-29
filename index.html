@@ -34,15 +34,27 @@
                 <div class="talent-node" id="ascendancy-button"></div>
             </div>
         </div>
-        <div id="top-bar">
-            <div id="points-container">Points:
-                <div id="talent-points">0</div>
+        <div id="top-bar-container">
+            <div id="top-bar">
+                <div id="points-container">Points:
+                    <div id="talent-points">0</div>
+                </div>
+                <div id="talent-search-container">
+                    <!--suppress HtmlFormInputWithoutLabel-->
+                    <input id="talent-search" name="talent-search" placeholder="Search talents..." type="text" value="">
+                    <div id="talent-search-modifier">
+                        <button id="search-modifier-button">
+                            <span data-value="unselected" id="search-modifier-value">U</span>
+                        </button>
+                    </div>
+                    <div id="talent-search-info">?</div>
+                </div>
             </div>
-            <div id="talent-search-container">
-                <!--suppress HtmlFormInputWithoutLabel-->
-                <input id="talent-search" name="talent-search" placeholder="Search talents..." type="text" value="">
-                <div id="talent-search-info">?</div>
-            </div>
+            <ul id="search-modifier-list" class="hidden">
+                <li class="selected" data-value="unselected">Unselected</li>
+                <li data-value="selected">Selected</li>
+                <li data-value="all">All</li>
+            </ul>
         </div>
         <div class="hidden" id="ascendancy-menu"></div>
         <div id="tooltip-container">

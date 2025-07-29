@@ -2,7 +2,7 @@ import { handleAscendancyChange, handleDataExport, handleDataImport, handleSideP
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
 import { CELL_SIZE, controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { ascendancyGrid, fullNodeList, talentGrid } from "./src/type/talent-node.js";
+import { ascendancyGrid, ascendancySelections, fullNodeList, talentGrid, talentSelections } from "./src/type/talent-node.js";
 import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
 import {
     ascendancyButton,
@@ -25,6 +25,12 @@ import {
 } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
 import { handleViewport, setUpURL } from "./src/util/spuddling.js";
+
+/** @type {HTMLInputElement} */
+let searchInput = undefined;
+
+/** @type {HTMLSpanElement} */
+let searchModifierValue = undefined;
 
 /** @type {TalentNode} */
 let previousFocus = undefined;
@@ -128,11 +134,10 @@ const handleMouseDrag = (event) => {
     handleViewport();
 };
 
-/**
- * @param {InputEvent} event
- */
-const handleSearch = (event) => {
-    const filter = event.target.value.trim().toLowerCase();
+const handleSearch = () => {
+    const modifier = searchModifierValue.dataset.value;
+    const filter = searchInput.value.trim().toLowerCase();
+
     const altFilter = filter.replaceAll(" ", "_");
     if (filter.length === 0) {
         for (const node of fullNodeList) {
@@ -141,10 +146,19 @@ const handleSearch = (event) => {
         return;
     }
 
+    let nodeList = fullNodeList;
+    if (modifier === "unselected") {
+        nodeList = fullNodeList.filter(item => !item.selected);
+    } else if (modifier === "selected") {
+        nodeList = [...talentSelections, ...ascendancySelections];
+    }
+
     for (const node of fullNodeList) {
         node.visual.classList.add("filtered");
         node.visual.classList.remove("highlighted");
+    }
 
+    for (const node of nodeList) {
         let isMatch = node.name.toLowerCase().includes(filter) || node.name.toLowerCase().includes(altFilter);
         isMatch = isMatch || node.identifier.talent.includes(filter) || node.identifier.talent.includes(altFilter);
         isMatch = isMatch || node.keywords.includes(filter) || node.keywords.includes(altFilter);
@@ -325,9 +339,71 @@ window.onload = async () => {
 
     document.querySelector("#ascendancy-select").onchange = handleAscendancyChange;
 
-    const search = document.querySelector("#talent-search");
-    search.value = "";
-    search.oninput = handleSearch;
+    searchInput = document.querySelector("#talent-search");
+    searchInput.value = "";
+    searchInput.oninput = () => {
+        handleSearch();
+    };
+
+    const searchModifierButton = document.querySelector("#search-modifier-button");
+    const searchModifierList = document.querySelector("#search-modifier-list");
+    const searchModifierOptions = searchModifierList.querySelectorAll("li");
+    searchModifierValue = document.querySelector("#search-modifier-value");
+
+    const toggleModifierMenu = (override = undefined) => {
+        searchModifierList.classList.toggle("hidden");
+        if (override !== undefined) {
+            searchModifierList.classList.toggle("hidden", override);
+        }
+
+        infoTooltip.container.classList.remove("visible");
+        if (!override && searchModifierList.classList.contains("hidden")) {
+            infoTooltip.container.classList.add("visible");
+        }
+    };
+
+    searchModifierButton.onclick = () => {
+        toggleModifierMenu();
+    };
+
+    const searchModifier = document.querySelector("#talent-search-modifier");
+    searchModifier.onmouseenter = () => {
+        if (!searchModifierList.classList.contains("hidden")) {
+            return;
+        }
+
+        infoTooltip.name.innerText = "Search modifier";
+        infoTooltip.name.style.color = "white";
+        infoTooltip.node.count.classList.add("hidden");
+        infoTooltip.node.text.classList.add("hidden");
+
+        infoTooltip.stats.innerHTML = [
+            `<p style="margin: 0 0 0.5em 0;">You can apply modifiers to your search with this menu.</p>`,
+        ].join("");
+
+        infoTooltip.container.classList.add("visible");
+    };
+    searchModifier.onmouseleave = () => {
+        infoTooltip.container.classList.remove("visible");
+    };
+
+    const toggleModifierOptions = (selected) => {
+        for (const option of searchModifierOptions) {
+            option.classList.remove("selected");
+        }
+
+        selected.classList.add("selected");
+        const value = selected.dataset.value;
+        searchModifierValue.dataset.value = value;
+        searchModifierValue.innerText = value.at(0).toUpperCase();
+    };
+    for (const option of searchModifierOptions) {
+        option.onclick = () => {
+            toggleModifierOptions(option);
+            toggleModifierMenu(true);
+            handleSearch();
+        };
+    }
 
     const searchInfo = document.querySelector("#talent-search-info");
     searchInfo.onmouseenter = () => {
