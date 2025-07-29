@@ -108,6 +108,12 @@ export const refreshBoundingRects = () => {
     }
 };
 
+export const resetTooltipArrow = () => {
+    infoTooltip.arrow.style.left = `${tooltipOffsets.pointer + Math.floor(tooltipOffsets.arrow * 2.5)}px`;
+    infoTooltip.arrow.style.top = `${tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)}px`;
+    infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(225deg)`;
+};
+
 export let fittedZoom = 1.0;
 export const updateFittedZoom = () => {
     refreshBoundingRects();
@@ -526,9 +532,7 @@ export const handleTalentEvents = (talent, container) => {
         infoTooltip.node.text.classList.remove("hidden");
         handleTooltip(talent);
 
-        infoTooltip.arrow.style.left = `${tooltipOffsets.pointer + Math.floor(tooltipOffsets.arrow * 2.5)}px`;
-        infoTooltip.arrow.style.top = `${tooltipOffsets.pointer - Math.floor(tooltipOffsets.arrow * 0.5)}px`;
-        infoTooltip.arrow.style.transform = `translate(-50%, -50%) rotate(225deg)`;
+        resetTooltipArrow();
 
         draw();
     };

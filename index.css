@@ -369,10 +369,8 @@ html, body {
     border-left: 12px solid #101010;
     border-top: 12px solid transparent;
     height: 0;
-    left: 50%;
     pointer-events: none;
     position: absolute;
-    top: 50%;
     transform: translate(-50%, -50%);
     transform-origin: -100% 50%;
     width: 0;

@@ -10,6 +10,7 @@ import {
     boundingRects,
     fittedZoom,
     refreshBoundingRects,
+    resetTooltipArrow,
     talentContainer,
     updateAscendancyButton,
     updateAscendancyContainer,
@@ -435,4 +436,5 @@ window.onload = async () => {
     await handleLoading();
 
     updateFittedZoom();
+    resetTooltipArrow();
 };
