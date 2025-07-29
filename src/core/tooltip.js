@@ -15,7 +15,7 @@ import {
     TOTAL_POINTS,
 } from "../type/talent-node.js";
 import { generateDescriptionHTML } from "../util/generating.js";
-import { findDeadBranch, findShortestRoute, scaleValueToLevel } from "./algorithm.js";
+import { findRemovedBranch, findShortestRoute, scaleValueToLevel } from "./algorithm.js";
 import { sidePanel } from "./side-panel.js";
 
 export const infoTooltip = {
@@ -57,7 +57,7 @@ export const handleTooltip = (talent) => {
             preview = ascendancyRemovePreview;
         }
 
-        const droppedNodes = findDeadBranch(start, talent);
+        const droppedNodes = findRemovedBranch(start, talent);
         preview.clear();
         for (const node of droppedNodes) {
             preview.set(node, new Set(node.neighbors.filter(item => droppedNodes.has(item)).map(item => item.identifier.number)));

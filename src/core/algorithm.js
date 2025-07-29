@@ -19,19 +19,27 @@ export const scaleValueToLevel = (level, value) => {
 };
 
 /**
- * @param {TalentNode} node
- * @param {TalentNode[][]} paths
- * @param {Set<TalentNode>} collected
+ * @param {TalentNode} root
+ * @returns {Map<number, TalentNode[]>}
  */
-const searchNodes = (node, paths, collected) => {
-    const visited = new Set();
+const generateTree = (root) => {
+    for (const talent of fullNodeList) {
+        talent.travel.source = undefined;
+        talent.travel.visited = false;
+    }
+    root.travel.visited = true;
 
-    const search = (current) => {
-        visited.add(current.identifier.number);
-        collected.add(current);
+    /** @type {Map<number, TalentNode[]>} */
+    const tree = new Map();
 
+    const queue = [root];
+    while (queue.length > 0) {
+        const current = queue.shift();
+
+        /** @type {TalentNode[]} */
+        const branch = [];
         for (const neighbor of current.neighbors) {
-            if (visited.has(neighbor.identifier.number)) {
+            if (neighbor.travel.visited) {
                 continue;
             }
 
@@ -39,41 +47,16 @@ const searchNodes = (node, paths, collected) => {
                 continue;
             }
 
-            if (paths.some(item => item.some(element => element.identifier.number === neighbor.identifier.number))) {
-                continue;
-            }
-
-            search(neighbor);
+            neighbor.travel.visited = true;
+            neighbor.travel.source = current;
+            branch.push(neighbor);
+            queue.push(neighbor);
         }
-    };
 
-    search(node);
-};
-
-/**
- * @param {TalentNode} start
- * @param {TalentNode} end
- * @param {TalentNode[]} currentPath
- * @param {TalentNode[][]} allPaths
- */
-const findPaths = (start, end, currentPath, allPaths) => {
-    const node = currentPath.at(-1);
-    if (node.identifier.number === end.identifier.number) {
-        allPaths.push(currentPath);
-        return;
+        tree.set(current.identifier.number, branch);
     }
 
-    for (const neighbor of node.neighbors) {
-        if (currentPath.some(item => item.identifier.number === neighbor.identifier.number)) {
-            continue;
-        }
-
-        if (!neighbor.selected) {
-            continue;
-        }
-
-        findPaths(start, end, [...currentPath, neighbor], allPaths);
-    }
+    return tree;
 };
 
 /**
@@ -81,18 +64,26 @@ const findPaths = (start, end, currentPath, allPaths) => {
  * @param {TalentNode} target
  * @returns {Set<TalentNode>}
  */
-export const findDeadBranch = (start, target) => {
-    const paths = [];
-    findPaths(start, target, [start], paths);
+export const findRemovedBranch = (start, target) => {
+    const tree = generateTree(start);
 
-    if (!paths.some(item => item.some(element => element.identifier.number === target.identifier.number))) {
-        return new Set();
+    /** @type {Set<TalentNode>} */
+    const path = new Set();
+
+    const queue = [target];
+    while (queue.length > 0) {
+        const current = queue.shift();
+
+        if (current.selected) {
+            path.add(current);
+        }
+
+        for (const neighbor of tree.get(current.identifier.number)) {
+            queue.push(neighbor);
+        }
     }
 
-    const nodesToRemove = new Set();
-    searchNodes(target, paths, nodesToRemove);
-
-    return nodesToRemove;
+    return path;
 };
 
 /**
