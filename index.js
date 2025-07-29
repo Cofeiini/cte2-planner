@@ -46,7 +46,7 @@ const handleNodeFocus = (event) => {
         viewportOffset.x = 0;
         viewportOffset.y = 0;
 
-        currentTarget = event.target.closest(".ascendancy-tree");
+        currentTarget = event.target.closest("#ascendancy-tree-container");
         treeBounds = boundingRects.trees.ascendancy.get(controls.ascendancy);
         canvasBounds = boundingRects.containers.ascendancy;
         grid = ascendancyGrid.get(controls.ascendancy);

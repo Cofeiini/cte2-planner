@@ -24,7 +24,7 @@ import {
     TOTAL_POINTS,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
-import { handleViewport, setUpIcon } from "./spuddling.js";
+import { setUpIcon } from "./spuddling.js";
 
 export const viewport = {
     width: 0,
@@ -817,9 +817,14 @@ export const generateAscendancyMenu = () => {
         infoTooltip.name.style.color = colorMap.minecraft.get("5");
         infoTooltip.node.count.classList.add("hidden");
         infoTooltip.node.text.classList.add("hidden");
+
+        let text = "Choose an Ascendancy first";
+        if (controls.ascendancy !== "none") {
+            text = `${isHidden ? "Show" : "Hide"} the Ascendancy menu`;
+        }
         infoTooltip.stats.innerHTML = [
             `<p style="margin: 0;">Left click toggles the menu and right click lets you quickly change Ascendancy.</p>`,
-            `<p style="color: red; margin: 0;">${controls.ascendancy === "none" ? "Choose an Ascendancy first" : `${isHidden ? "Show" : "Hide"} the Ascendancy menu`}</p>`,
+            `<p style="color: red; margin: 0;">${text}</p>`,
         ].join("");
 
         infoTooltip.container.classList.add("visible");
@@ -888,13 +893,14 @@ export const generateAscendancyMenu = () => {
         if (controls.clickTarget === ascendancyButton) {
             controls.clickTarget = undefined;
 
-            if (controls.ascendancy !== "none") {
-                ascendancyContainer.classList.toggle("hidden");
+            if ((controls.ascendancy !== "none") && !ascendancyContainer.classList.toggle("hidden")) {
+                const tree = ascendancyTreeContainer.querySelector(`#${controls.ascendancy}_tree`);
+                boundingRects.trees.ascendancy.set(controls.ascendancy, tree.getBoundingClientRect());
+                boundingRects.containers.ascendancy = ascendancyTreeContainer.getBoundingClientRect();
             }
 
             handleSimpleTooltip();
             ascendancyButton.refresh();
-            handleViewport();
         }
     };
 };
