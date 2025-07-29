@@ -253,7 +253,6 @@ const handleEvents = () => {
         infoTooltip.main.style.width = "max-content";
         const bounds = boundingRects.containers.viewport;
         const contentBounds = infoTooltip.main.getBoundingClientRect();
-        boundingRects.tooltip.main = contentBounds;
         infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
         infoTooltip.container.style.top = `${Math.min(Math.floor(event.clientY) + tooltipOffsets.pointer, bounds.bottom - contentBounds.height - tooltipOffsets.edge)}px`;
 

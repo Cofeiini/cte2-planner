@@ -94,10 +94,6 @@ export const boundingRects = {
         /** @type {Map<string, DOMRect>}*/
         ascendancy: new Map(),
     },
-    tooltip: {
-        /** @type {DOMRect}*/
-        main: undefined,
-    },
 };
 export const refreshBoundingRects = () => {
     boundingRects.containers.canvas = canvasContainer.getBoundingClientRect();
@@ -564,7 +560,7 @@ export const handleTalentEvents = (talent, container) => {
         }
 
         const containerBounds = infoTooltip.container.getBoundingClientRect();
-        const contentBounds = boundingRects.tooltip.main;
+        const contentBounds = infoTooltip.main.getBoundingClientRect();
 
         const origin = {
             x: Math.floor(event.clientX - containerBounds.left),
