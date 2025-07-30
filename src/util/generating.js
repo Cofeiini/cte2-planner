@@ -626,6 +626,8 @@ export const handleTalentEvents = (talent, container) => {
         }
 
         if (controls.panning) {
+            infoTooltip.container.style.left = `${Math.floor(event.clientX) + tooltipOffsets.pointer}px`;
+            infoTooltip.container.style.top = `${Math.floor(event.clientY) + tooltipOffsets.pointer}px`;
             return;
         }
 
