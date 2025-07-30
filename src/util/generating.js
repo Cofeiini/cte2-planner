@@ -542,6 +542,10 @@ export const handleTalentEvents = (talent, container) => {
 
         infoTooltip.container.classList.remove("visible");
 
+        if (controls.panning) {
+            return;
+        }
+
         const previewNodes = [
             ...talentTree.querySelectorAll(".preview-add, .preview-remove"),
             ...ascendancyTreeContainer.querySelector(".ascendancy-tree:not(.hidden)")?.querySelectorAll(".preview-add, .preview-remove") ?? [],
