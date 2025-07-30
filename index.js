@@ -287,6 +287,11 @@ window.onresize = () => {
     updateFittedZoom();
     controls.zoom = Math.min(Math.max(controls.zoom, fittedZoom), 3.0);
     handleViewport();
+
+    const modifierBounds = document.querySelector("#search-modifier-button").getBoundingClientRect();
+    const searchModifierList = document.querySelector("#search-modifier-list");
+    searchModifierList.style.left = `${modifierBounds.left}px`;
+    searchModifierList.style.top = `${modifierBounds.height}px`;
 };
 
 window.onload = async () => {
@@ -378,8 +383,11 @@ window.onload = async () => {
         infoTooltip.node.count.classList.add("hidden");
         infoTooltip.node.text.classList.add("hidden");
 
+        const text = searchModifierValue.dataset.value;
         infoTooltip.stats.innerHTML = [
-            `<p style="margin: 0 0 0.5em 0;">You can apply modifiers to your search with this menu.</p>`,
+            `<p style="margin: 0 0 0.5em 0;">You can apply modifiers to your search.</p>`,
+            `<p style="margin: 0 0 0.5em 0;">Modifiers filter what nodes are highlighted.</p>`,
+            `<p style="color: red; margin: 0;">Current modifier is "${text.at(0).toUpperCase() + text.slice(1)}"</p>`,
         ].join("");
 
         infoTooltip.container.classList.add("visible");
@@ -405,6 +413,10 @@ window.onload = async () => {
             handleSearch();
         };
     }
+
+    const modifierBounds = searchModifierButton.getBoundingClientRect();
+    searchModifierList.style.left = `${modifierBounds.left}px`;
+    searchModifierList.style.top = `${modifierBounds.height}px`;
 
     const searchInfo = document.querySelector("#talent-search-info");
     searchInfo.onmouseenter = () => {
