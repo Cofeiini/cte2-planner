@@ -172,35 +172,47 @@ const handleSearch = () => {
     }
 };
 
+/** @param {WheelEvent} event */
+const handleZoom = (event) => {
+    event.preventDefault();
+
+    const oldZoom = controls.zoom;
+    const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
+    controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), 3.0);
+
+    const canvasBounds = boundingRects.containers.canvas;
+    const talentBounds = boundingRects.containers.talent;
+
+    const offset = {
+        x: event.clientX - talentBounds.left,
+        y: event.clientY - talentBounds.top,
+    };
+    const target = {
+        x: (controls.x + offset.x) / oldZoom,
+        y: (controls.y + offset.y) / oldZoom,
+    };
+
+    controls.x = Math.min(Math.max((target.x * controls.zoom) - offset.x, 0), canvasBounds.width - talentBounds.width);
+    controls.y = Math.min(Math.max((target.y * controls.zoom) - offset.y, 0), canvasBounds.height - talentBounds.height);
+
+    if (controls.zoom !== oldZoom) {
+        ascendancyMenu.classList.add("hidden");
+        handleViewport();
+
+        refreshBoundingRects();
+    }
+};
+
+/** @type {number} */
+let scrollFrameId = undefined;
 const handleEvents = () => {
     talentContainer.onwheel = (event) => {
         event.preventDefault();
 
-        const oldZoom = controls.zoom;
-        const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
-        controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), 3.0);
-
-        const canvasBounds = boundingRects.containers.canvas;
-        const talentBounds = boundingRects.containers.talent;
-
-        const offset = {
-            x: event.clientX - talentBounds.left,
-            y: event.clientY - talentBounds.top,
-        };
-        const target = {
-            x: (controls.x + offset.x) / oldZoom,
-            y: (controls.y + offset.y) / oldZoom,
-        };
-
-        controls.x = Math.min(Math.max((target.x * controls.zoom) - offset.x, 0), canvasBounds.width - talentBounds.width);
-        controls.y = Math.min(Math.max((target.y * controls.zoom) - offset.y, 0), canvasBounds.height - talentBounds.height);
-
-        if (controls.zoom !== oldZoom) {
-            ascendancyMenu.classList.add("hidden");
-            handleViewport();
-
-            refreshBoundingRects();
+        if (scrollFrameId === undefined) {
+            cancelAnimationFrame(scrollFrameId);
         }
+        scrollFrameId = requestAnimationFrame(handleZoom.bind(null, event));
     };
 
     talentContainer.onmousedown = (event) => {
@@ -256,6 +268,7 @@ const handleEvents = () => {
 
     viewportContainer.onmousemove = (event) => {
         if (controls.panning) {
+            previousFocus = undefined;
             return;
         }
 
@@ -449,4 +462,15 @@ window.onload = async () => {
 
     updateFittedZoom();
     resetTooltipArrow();
+
+    const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+            entry.target.style.visibility = entry.isIntersecting ? "visible" : "hidden";
+        }
+    }, {
+        root: talentContainer,
+    });
+    for (const node of fullNodeList) {
+        observer.observe(node.visual);
+    }
 };
