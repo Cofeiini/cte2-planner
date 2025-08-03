@@ -18,45 +18,51 @@ export const scaleValueToLevel = (level, value) => {
     return value * (1 + (0.2 * (level - 1)));
 };
 
-/**
- * @param {TalentNode} root
- * @returns {Map<number, TalentNode[]>}
- */
-const generateTree = (root) => {
+const resetHeuristics = () => {
     for (const talent of fullNodeList) {
         talent.travel.source = undefined;
         talent.travel.visited = false;
     }
-    root.travel.visited = true;
+};
 
-    /** @type {Map<number, TalentNode[]>} */
-    const tree = new Map();
+/**
+ * @param {TalentNode} start
+ * @param {TalentNode} skip
+ * @returns {Set<TalentNode>}
+ */
+const findReachable = (start, skip = undefined) => {
+    resetHeuristics();
 
-    const queue = [root];
-    while (queue.length > 0) {
-        const current = queue.shift();
+    const path = new Set();
+    const stack = [start];
 
-        /** @type {TalentNode[]} */
-        const branch = [];
-        for (const neighbor of current.neighbors) {
-            if (neighbor.travel.visited) {
-                continue;
-            }
-
-            if (!neighbor.selected) {
-                continue;
-            }
-
-            neighbor.travel.visited = true;
-            neighbor.travel.source = current;
-            branch.push(neighbor);
-            queue.push(neighbor);
+    while (stack.length > 0) {
+        const node = stack.pop();
+        if (!node.selected) {
+            continue;
         }
 
-        tree.set(current.identifier.number, branch);
+        if (node.travel.visited) {
+            continue;
+        }
+
+        if (node.identifier.number === skip?.identifier?.number) {
+            continue;
+        }
+
+        node.travel.visited = true;
+        path.add(node);
+
+        for (const neighbor of node.neighbors) {
+            if (neighbor.identifier.number === skip?.identifier?.number) {
+                continue;
+            }
+
+            stack.push(neighbor);
+        }
     }
 
-    return tree;
+    return path;
 };
 
 /**
@@ -65,25 +71,10 @@ const generateTree = (root) => {
  * @returns {Set<TalentNode>}
  */
 export const findRemovedBranch = (start, target) => {
-    const tree = generateTree(start);
+    const allSelected = findReachable(start);
+    const reachable = findReachable(start, target);
 
-    /** @type {Set<TalentNode>} */
-    const path = new Set();
-
-    const queue = [target];
-    while (queue.length > 0) {
-        const current = queue.shift();
-
-        if (current.selected) {
-            path.add(current);
-        }
-
-        for (const neighbor of tree.get(current.identifier.number)) {
-            queue.push(neighbor);
-        }
-    }
-
-    return path;
+    return allSelected.difference(reachable);
 };
 
 /**
