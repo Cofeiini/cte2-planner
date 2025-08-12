@@ -14,6 +14,7 @@ import { RELEASES } from "../releases.js";
 import {
     ascendancyNodes,
     ascendancySelections,
+    ascendancyStartNodes,
     excludedAscendancyNodes,
     excludedTalentNodes,
     exclusiveNodeValues,
@@ -26,6 +27,7 @@ import {
     TOTAL_POINTS,
     updateAscendancyPoints,
     updatePoints,
+    updateStartingNode,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
 import { generateAscendancyGrid, generateAscendancyMenu, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
@@ -390,13 +392,16 @@ export const handleLoading = async () => {
     document.querySelector("#ascendancy-select").value = controls.ascendancy;
     handleAscendancyOptions();
 
-    for (const talent of talentSelections) {
-        toggleNode(talent, true);
+    for (const talent of fullNodeList) {
+        talent.selected = false;
+        talent.update();
     }
-
-    for (const talent of ascendancySelections) {
-        toggleNode(talent, true);
+    updateStartingNode(undefined);
+    for (const key of ascendancyStartNodes.keys()) {
+        ascendancyStartNodes.set(key, undefined);
     }
+    talentSelections.length = 0;
+    ascendancySelections.length = 0;
 
     if (presetInfo.start) {
         toggleNode(talentExclusions.get("start").find(item => item.identifier.number === presetInfo.start), true);
