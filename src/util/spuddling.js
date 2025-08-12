@@ -1,5 +1,5 @@
 import { scaleValueToLevel } from "../core/algorithm.js";
-import { ascendancyInfo, presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
+import { presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
 import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentSelections } from "../type/talent-node.js";
@@ -153,7 +153,7 @@ export const setUpSeparator = () => {
  */
 export const setUpURL = (json = undefined) => {
     const talents = new Set(talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort());
-    const ascendancyStart = ascendancyStartNodes.get(ascendancyInfo);
+    const ascendancyStart = ascendancyStartNodes.get(controls.ascendancy);
     const ascendancy = new Set(ascendancySelections.filter(item => item.identifier.number !== ascendancyStart?.identifier.number).map(item => item.identifier.number).sort());
 
     updatePresetInfo(json || {
@@ -162,7 +162,7 @@ export const setUpURL = (json = undefined) => {
         start: startingNode?.identifier.number,
         talents: Array.from(talents),
         ascendancy: {
-            selection: ascendancyInfo,
+            selection: controls.ascendancy,
             talents: Array.from(ascendancy),
         },
     });

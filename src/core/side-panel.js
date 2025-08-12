@@ -40,12 +40,6 @@ export const updatePresetInfo = (json) => {
     presetInfo = json;
 };
 
-/** @type {string} */
-export let ascendancyInfo = "none";
-export const updateAscendancyInfo = (ascendancy) => {
-    ascendancyInfo = ascendancy;
-};
-
 /** @type {Map<string, HTMLDivElement>} */
 const ascendancyCache = new Map();
 
@@ -76,8 +70,6 @@ export const handleVersionOptions = (select) => {
 };
 
 export const handleAscendancyOptions = () => {
-    updateAscendancyInfo(controls.ascendancy);
-
     ascendancyContainer.classList.add("hidden");
     if (controls.ascendancy !== "none") {
         const canvas = document.querySelector("#ascendancy-canvas").offscreenCanvasMap.get(controls.ascendancy);
