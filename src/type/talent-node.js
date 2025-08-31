@@ -42,14 +42,14 @@ export const talentAddLeftovers = new Map();
 /** @type {Map<TalentNode, Set<number>>} */
 export const ascendancyAddLeftovers = new Map();
 
-/** @type {Map<TalentNode, Set<number>>} */
-export const talentRemovePreview = new Map();
+/** @type {TalentNode[]} */
+export const talentRemovePreview = [];
 
 /** @type {Map<TalentNode, Set<number>>} */
 export const ascendancyAddPreview = new Map();
 
-/** @type {Map<TalentNode, Set<number>>} */
-export const ascendancyRemovePreview = new Map();
+/** @type {TalentNode[]} */
+export const ascendancyRemovePreview = [];
 
 /** @type {Map<string, TalentNode[]>} */
 export const talentExclusions = new Map();
@@ -180,8 +180,8 @@ export const toggleNode = (node, isPreset = false) => {
 
     const selectedCount = selections.length;
     if (node.selected) {
-        let removed = Array.from(removePreview.keys());
-        if (removePreview.size === 0) {
+        let removed = removePreview;
+        if (removePreview.length === 0) {
             removed = findRemovedBranch(origin, node);
         }
 

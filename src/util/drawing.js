@@ -182,7 +182,7 @@ export const drawLinesAscendancy = () => {
     drawLinesComplex(ascendancyCanvasContext, ascendancySelections);
 
     ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplexOptional(ascendancyCanvasContext, ascendancyRemovePreview, new Set());
+    drawLinesComplex(ascendancyCanvasContext, ascendancyRemovePreview);
 
     ascendancyCanvasContext.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplexOptional(ascendancyCanvasContext, ascendancyAddPreview, new Set([...ascendancyAddLeftovers.keys().map(item => item.identifier.number)]));
@@ -205,7 +205,7 @@ export const drawLinesRegular = () => {
     drawLinesComplex(lineCanvasContext, talentSelections);
 
     lineCanvasContext.strokeStyle = colorMap.custom.get("line_remove");
-    drawLinesComplexOptional(lineCanvasContext, talentRemovePreview, new Set());
+    drawLinesComplex(lineCanvasContext, talentRemovePreview);
 
     lineCanvasContext.strokeStyle = colorMap.custom.get("line_add");
     drawLinesComplexOptional(lineCanvasContext, talentAddPreview, new Set([...talentAddLeftovers.keys().map(item => item.identifier.number)]));

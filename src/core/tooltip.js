@@ -59,17 +59,17 @@ export const handleTooltip = (talent) => {
             }
 
             const droppedNodes = findRemovedBranch(start, talent);
-            preview.clear();
+            preview.length = 0;
             for (const node of droppedNodes) {
-                preview.set(node, new Set(node.neighbors.filter(item => droppedNodes.has(item)).map(item => item.identifier.number)));
+                preview.push(node);
             }
-            nodeTotal = -preview.size;
+            nodeTotal = -preview.length;
 
-            for (const node of preview.keys()) {
+            for (const node of preview) {
                 node.visual.classList.add("preview-remove");
             }
 
-            preview.set(talent, new Set(talent.neighbors.filter(item => item.selected).map(item => item.identifier.number)));
+            preview.push(talent);
         } else {
             let selectionsLength = talentSelections.length;
             let preview = talentAddPreview;

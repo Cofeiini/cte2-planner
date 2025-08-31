@@ -583,7 +583,7 @@ export const handleTalentEvents = (talent, container) => {
         }
 
         addPreview.clear();
-        removePreview.clear();
+        removePreview.length = 0;
         leftovers.clear();
 
         draw();
@@ -672,7 +672,7 @@ export const handleTalentEvents = (talent, container) => {
 
             toggleNode(talent);
 
-            removePreview.clear();
+            removePreview.length = 0;
             addPreview.clear();
 
             handleTooltip(talent);
