@@ -2,7 +2,7 @@ import { scaleValueToLevel } from "../core/algorithm.js";
 import { presetInfo, releaseInfo, sidePanel, totalAscendancy, totalGameChangers, totalStats, updatePresetInfo } from "../core/side-panel.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { controls } from "../data/constants.js";
-import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentSelections } from "../type/talent-node.js";
+import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentNodes, talentSelections } from "../type/talent-node.js";
 import { canvasContainer, generateDescriptionHTML, talentContainer } from "./generating.js";
 
 export const handleViewport = () => {
@@ -10,11 +10,67 @@ export const handleViewport = () => {
     talentContainer.scroll(controls.x, controls.y);
 };
 
+/**
+ * @param {string[]} textList
+ * @returns {HTMLDivElement}
+ */
+export const setUpMessageBox = (textList) => {
+    const content = document.createElement("div");
+    content.style.display = "flex";
+    content.style.flexDirection = "column";
+    content.style.gap = "1.0em";
+    content.style.height = "100%";
+
+    const message = document.createElement("div");
+    message.style.display = "flex";
+    message.style.flexDirection = "column";
+    message.style.fontSize = "larger";
+    message.style.gap = "0.5em";
+    message.style.height = "100%";
+    message.style.width = "100%";
+    content.append(message);
+
+    message.replaceChildren(...textList.map(item => {
+        const element = document.createElement("div");
+        element.innerText = item;
+        return element;
+    }));
+
+    return content;
+};
+
 export const resetMessageBox = () => {
     document.querySelector("#message-box-title").innerText = "";
     document.querySelector("#message-box-content").replaceChildren();
     document.querySelector("#message-box-buttons").replaceChildren();
     document.querySelector("#message-overlay").classList.add("hidden");
+};
+
+/**
+ * @returns {HTMLButtonElement}
+ */
+export const setUpCancelButton = () => {
+    const button = document.createElement("button");
+    button.innerText = "Cancel";
+    button.classList.add("custom-button");
+    button.onclick = (mouse) => {
+        if (mouse.button !== 0) {
+            return;
+        }
+
+        resetMessageBox();
+    };
+
+    return button;
+};
+
+/**
+ * @param {TalentNode} first
+ * @param {TalentNode} second
+ * @returns {boolean}
+ */
+export const isSameTalent = (first, second) => {
+    return (first.parentTree === second.parentTree) && (first.identifier.number === second.identifier.number);
 };
 
 /**
@@ -152,6 +208,10 @@ export const setUpSeparator = () => {
  * @param {Object} json
  */
 export const setUpURL = (json = undefined) => {
+    if (controls.editor.active) {
+        return;
+    }
+
     const talents = new Set(talentSelections.filter(item => item.identifier.number !== startingNode?.identifier.number).map(item => item.identifier.number).sort());
     const ascendancyStart = ascendancyStartNodes.get(controls.ascendancy);
     const ascendancy = new Set(ascendancySelections.filter(item => item.identifier.number !== ascendancyStart?.identifier.number).map(item => item.identifier.number).sort());
@@ -207,7 +267,10 @@ export const collectStatInformation = () => {
     };
 
     const allStats = new Set(fullNodeList.filter(item => (item.type !== "major")).map(item => item.stats.map(stat => stat["stat"])).flat(Infinity));
-    const allNodes = [...talentSelections, ...ascendancySelections];
+    let allNodes = [...talentSelections, ...ascendancySelections];
+    if (controls.editor.active) {
+        allNodes = talentNodes;
+    }
 
     totalStats.clear();
     const regularSelections = allNodes.filter(item => (item.type !== "major"));

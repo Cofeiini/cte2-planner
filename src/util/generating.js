@@ -1,4 +1,5 @@
 import { generateAscendancyPath, generatePath } from "../core/algorithm.js";
+import { handleSidePanel } from "../core/side-panel.js";
 import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
 import { CELL_HALF, CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
@@ -15,6 +16,7 @@ import {
     talentAddPreview,
     talentExclusions,
     talentGrid,
+    talentIdentifiers,
     TalentNode,
     talentNodes,
     talentRemovePreview,
@@ -24,7 +26,7 @@ import {
     TOTAL_POINTS,
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
-import { setUpIcon } from "./spuddling.js";
+import { collectStatInformation, isSameTalent, setUpIcon } from "./spuddling.js";
 
 export const viewport = {
     width: 0,
@@ -136,6 +138,12 @@ export const updateAscendancyButton = (element) => {
 export let ascendancyMenu = undefined;
 export const updateAscendancyMenu = (element) => {
     ascendancyMenu = element;
+};
+
+/** @type {HTMLDivElement} */
+export let editorMenu = undefined;
+export const updateEditorMenu = (element) => {
+    editorMenu = element;
 };
 
 /**
@@ -311,6 +319,13 @@ export const generateTalentGrid = (data) => {
     viewport.offset.right = bounds.right + 2;
     viewport.offset.bottom = bounds.bottom + 2;
 
+    if (controls.editor.active) {
+        viewport.offset.top = 0;
+        viewport.offset.left = 0;
+        viewport.offset.right = talentGrid.at(0).length;
+        viewport.offset.bottom = talentGrid.length;
+    }
+
     talentNodes.length = 0;
     for (const branch of talentGrid) {
         for (const leaf of branch) {
@@ -338,7 +353,13 @@ export const generateTalentGrid = (data) => {
                         continue;
                     }
 
-                    generatePath(node, [leaf, node]).forEach(item => leaf.neighbors.push(item));
+                    generatePath(node, [leaf, node]).forEach(item => {
+                        if (leaf.neighbors.some(element => isSameTalent(item, element))) {
+                            return;
+                        }
+
+                        leaf.neighbors.push(item);
+                    });
                 }
             }
         }
@@ -521,6 +542,11 @@ export const handleTalentEvents = (talent, container) => {
         removePreview = ascendancyRemovePreview;
     }
 
+    if (controls.editor.active) {
+        draw = () => {
+        };
+    }
+
     container.onmouseenter = () => {
         controls.hovering = true;
 
@@ -528,8 +554,10 @@ export const handleTalentEvents = (talent, container) => {
             return;
         }
 
-        infoTooltip.node.count.classList.remove("hidden");
-        infoTooltip.node.text.classList.remove("hidden");
+        if (!controls.editor.active) {
+            infoTooltip.node.count.classList.remove("hidden");
+            infoTooltip.node.text.classList.remove("hidden");
+        }
         handleTooltip(talent);
 
         resetTooltipArrow();
@@ -613,7 +641,7 @@ export const handleTalentEvents = (talent, container) => {
             return;
         }
 
-        if (startingNode && (startingNode.identifier.number !== talent.identifier.number) && talentExclusions.get("start").some(item => item.identifier.number === talent.identifier.number)) {
+        if (startingNode && !isSameTalent(startingNode, talent) && talentExclusions.get("start").some(item => isSameTalent(item, talent))) {
             return;
         }
 
@@ -621,6 +649,10 @@ export const handleTalentEvents = (talent, container) => {
     };
 
     container.onmouseup = (event) => {
+        if (controls.editor.active) {
+            return;
+        }
+
         if (event.button !== 0) {
             return;
         }
@@ -658,7 +690,7 @@ const generateTalentNode = (talent) => {
 
     const indicator = document.createElement("img");
     indicator.loading = "lazy";
-    indicator.src = indicatorAssets.get("no");
+    indicator.src = indicatorAssets.get(controls.editor.active ? "yes" : "no");
     indicator.width = 40;
     indicator.height = 40;
     setUpIcon(indicator);
@@ -666,6 +698,7 @@ const generateTalentNode = (talent) => {
 
     const border = document.createElement("img");
     border.loading = "lazy";
+    border.classList.add("talent-node-border");
     border.src = borderAssets.get(`${talent.type}_off`);
     switch (talent.type) {
         case "stat": {
@@ -702,7 +735,7 @@ const generateTalentNode = (talent) => {
     const icon = document.createElement("img");
     icon.loading = "lazy";
     icon.classList.add("talent-node-icon");
-    icon.src = iconAssets.get(talent.identifier.talent);
+    icon.src = iconAssets.get(talent.identifier.talent) ?? iconAssets.get("missing");
     icon.width = 32;
     icon.height = 32;
     setUpIcon(icon);
@@ -711,6 +744,10 @@ const generateTalentNode = (talent) => {
     handleTalentEvents(talent, container);
 
     talent.update = () => {
+        if (controls.editor.active) {
+            return;
+        }
+
         let totalPoints = TOTAL_POINTS;
         let selections = talentSelections;
         if (talent.parentTree !== "main") {
@@ -821,8 +858,10 @@ export const generateAscendancyMenu = () => {
 
         infoTooltip.name.innerText = "Ascendancy";
         infoTooltip.name.style.color = colorMap.minecraft.get("5");
-        infoTooltip.node.count.classList.add("hidden");
-        infoTooltip.node.text.classList.add("hidden");
+        if (!controls.editor.active) {
+            infoTooltip.node.count.classList.add("hidden");
+            infoTooltip.node.text.classList.add("hidden");
+        }
 
         let text = "Choose an Ascendancy first";
         if (controls.ascendancy !== "none") {
@@ -927,5 +966,287 @@ export const generateAscendancyTree = () => {
         for (const talent of nodes) {
             tree.append(generateTalentNode(talent));
         }
+    }
+};
+
+export const generateEditorMenu = () => {
+    const generateItem = (text) => {
+        const item = document.createElement("div");
+        item.style.userSelect = "none";
+        item.innerText = text;
+
+        return item;
+    };
+
+    const generateSearch = () => {
+        const search = document.createElement("input");
+        search.value = "";
+        search.style.height = "1.0em";
+        search.style.position = "sticky";
+        search.style.top = "0";
+        search.oninput = () => {
+            const filter = search.value.toLowerCase();
+            for (const child of editorMenu.children) {
+                if (child.tagName.toLowerCase() === "input") {
+                    continue;
+                }
+                child.classList.add("hidden");
+                if ((filter.length === 0) || child.innerText.toLowerCase().includes(filter)) {
+                    child.classList.remove("hidden");
+                }
+            }
+        };
+
+        return search;
+    };
+
+    const add = generateItem("Add");
+    add.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        const search = generateSearch();
+        editorMenu.replaceChildren(search);
+
+        const entries = Array.from(talentIdentifiers.values()).sort((a, b) => a.identifier.talent.localeCompare(b.identifier.talent));
+        for (const entry of entries) {
+            const item = generateItem(entry.identifier.talent);
+            item.onmousedown = (mouse) => {
+                if (mouse.button !== 0) {
+                    return;
+                }
+
+                const focus = new TalentNode({
+                    x: controls.editor.focus.x,
+                    y: controls.editor.focus.y,
+                    length: controls.editor.focus.length,
+                    value: entry.identifier.talent,
+                    parentTree: controls.editor.focus.parentTree,
+                });
+                focus.identifier.data = entry.identifier.data;
+                focus.type = entry.type;
+                focus.name = entry.name;
+                focus.center.x = ((focus.x - viewport.offset.left) * CELL_SIZE) + CELL_HALF;
+                focus.center.y = ((focus.y - viewport.offset.top) * CELL_SIZE) + CELL_HALF;
+                focus.stats = structuredClone(entry.stats);
+
+                let generate = generateTree;
+                let nodeList = talentNodes;
+                let grid = talentGrid;
+                if (focus.parentTree !== "main") {
+                    generate = generateAscendancyTree;
+                    nodeList = ascendancyNodes.get(focus.parentTree);
+                    grid = ascendancyGrid.get(focus.parentTree);
+                    focus.center.x = (focus.x * CELL_SIZE) + CELL_HALF;
+                    focus.center.y = (focus.y * CELL_SIZE) + CELL_HALF;
+                }
+                grid[focus.y][focus.x] = focus;
+
+                nodeList.push(focus);
+                generate();
+
+                editorMenu.classList.add("hidden");
+
+                collectStatInformation();
+                handleSidePanel();
+            };
+            editorMenu.append(item);
+        }
+
+        const bounds = boundingRects.containers.talent;
+        const menuBounds = editorMenu.getBoundingClientRect();
+        editorMenu.style.top = `${Math.min(menuBounds.top, bounds.height - menuBounds.height - 3)}px`;
+
+        setTimeout(() => {
+            search.focus();
+        }, 1);
+    };
+
+    const remove = generateItem("Remove");
+    remove.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        const target = controls.editor.target;
+        const focus = new TalentNode({
+            x: target.x,
+            y: target.y,
+            length: target.length,
+            value: "",
+            parentTree: target.parentTree,
+        });
+        focus.center.x = ((focus.x - viewport.offset.left) * CELL_SIZE) + CELL_HALF;
+        focus.center.y = ((focus.y - viewport.offset.top) * CELL_SIZE) + CELL_HALF;
+
+        for (const neighbor of target.neighbors) {
+            neighbor.neighbors = neighbor.neighbors.filter(item => !isSameTalent(item, focus));
+        }
+
+        let generate = generateTree;
+        let draw = drawLinesInitial;
+        let nodeList = talentNodes;
+        let grid = talentGrid;
+        if (focus.parentTree !== "main") {
+            generate = generateAscendancyTree;
+            draw = drawLinesAscendancyInitial;
+            nodeList = ascendancyNodes.get(focus.parentTree);
+            grid = ascendancyGrid.get(controls.editor.target.parentTree);
+            focus.center.x = (focus.x * CELL_SIZE) + CELL_HALF;
+            focus.center.y = (focus.y * CELL_SIZE) + CELL_HALF;
+        }
+        grid[focus.y][focus.x] = focus;
+
+        const temp = nodeList.filter(item => !isSameTalent(item, focus));
+        nodeList.length = 0;
+        nodeList.push(...temp);
+        generate();
+        draw();
+        drawLinesRegular();
+        drawLinesAscendancy();
+
+        editorMenu.classList.add("hidden");
+
+        collectStatInformation();
+        handleSidePanel();
+    };
+
+    const move = generateItem("Move");
+    move.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        editorMenu.classList.add("hidden");
+
+        const target = controls.editor.target.visual.cloneNode(true);
+        target.style.left = "50%";
+        target.style.top = "50%";
+        target.style.transform = "translate(-50%, -50%)";
+        target.style.position = "absolute";
+        target.style.opacity = "0.5";
+        target.style.imageRendering = "pixelated";
+        target.style.pointerEvents = "none";
+        target.classList.remove("talent-node", "focused", "highlighted");
+        controls.editor.indicator.replaceChildren(target);
+
+        controls.editor.action = "move";
+        controls.editor.target.visual.classList.add("active", "highlighted");
+
+        document.body.style.cursor = "all-scroll";
+    };
+
+    const change = generateItem("Change");
+    change.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        const search = generateSearch();
+        editorMenu.replaceChildren(search);
+
+        const entries = Array.from(talentIdentifiers.values()).sort((a, b) => a.identifier.talent.localeCompare(b.identifier.talent));
+        for (const entry of entries) {
+            const item = generateItem(`${entry.name} (${entry.identifier.talent})`);
+            item.onmousedown = (mouse) => {
+                if (mouse.button !== 0) {
+                    return;
+                }
+
+                controls.editor.target.identifier.talent = entry.identifier.talent;
+                controls.editor.target.identifier.data = entry.identifier.data;
+                controls.editor.target.type = entry.type;
+                controls.editor.target.name = entry.name;
+                controls.editor.target.stats = structuredClone(entry.stats);
+
+                const icon = controls.editor.target.visual.querySelector(".talent-node-icon");
+                icon.src = iconAssets.get(entry.identifier.talent);
+
+                const border = controls.editor.target.visual.querySelector(".talent-node-border");
+                border.src = borderAssets.get(`${entry.type}_off`);
+                switch (entry.type) {
+                    case "stat": {
+                        border.width = 52;
+                        border.height = 52;
+                        break;
+                    }
+                    case "special": {
+                        border.width = 64;
+                        border.height = 64;
+                        break;
+                    }
+                    case "major": {
+                        border.width = 78;
+                        border.height = 78;
+                        break;
+                    }
+                    case "start": {
+                        border.width = 64;
+                        border.height = 64;
+                        break;
+                    }
+                    case "asc": {
+                        border.width = 64;
+                        border.height = 64;
+                        break;
+                    }
+                }
+                controls.editor.target.visual.style.width = `${border.width}px`;
+                controls.editor.target.visual.style.height = `${border.height}px`;
+
+                controls.editor.action = "none";
+
+                editorMenu.classList.add("hidden");
+
+                collectStatInformation();
+                handleSidePanel();
+            };
+            editorMenu.append(item);
+        }
+
+        const bounds = boundingRects.containers.talent;
+        const menuBounds = editorMenu.getBoundingClientRect();
+        editorMenu.style.top = `${Math.min(menuBounds.top, bounds.height - menuBounds.height - 3)}px`;
+
+        controls.editor.action = "change";
+
+        setTimeout(() => {
+            search.focus();
+        }, 1);
+    };
+
+    const connect = generateItem("Connect");
+    connect.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        if (controls.editor.target.visual) {
+            controls.editor.target.visual.classList.add("active", "highlighted");
+        }
+
+        editorMenu.classList.add("hidden");
+        controls.editor.action = "connect";
+    };
+
+    const disconnect = generateItem("Disconnect");
+    disconnect.onmousedown = (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        editorMenu.classList.add("hidden");
+        controls.editor.action = "disconnect";
+
+        const target = controls.editor.target;
+        for (const neighbor of target.neighbors) {
+            neighbor.visual.classList.add("active", "highlighted");
+        }
+    };
+
+    editorMenu.replaceChildren(add);
+    if (controls.editor.focus?.selectable) {
+        editorMenu.replaceChildren(move, change, remove, connect, disconnect);
     }
 };

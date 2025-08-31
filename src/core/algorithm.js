@@ -8,6 +8,7 @@ import {
     talentGrid,
     talentSelections,
 } from "../type/talent-node.js";
+import { isSameTalent } from "../util/spuddling.js";
 
 /**
  * @param {number} level
@@ -142,7 +143,7 @@ export const findShortestRoute = (target) => {
         selections = ascendancySelections;
     }
 
-    if (selections.some(item => item.identifier.number === target.identifier.number)) {
+    if (selections.some(item => isSameTalent(item, target))) {
         return new Set([target]);
     }
 
@@ -162,7 +163,7 @@ export const findShortestRoute = (target) => {
     while (queue.length > 0) {
         const current = queue.shift();
 
-        if (current.identifier.number === target.identifier.number) {
+        if (isSameTalent(current, target)) {
             /** @type {TalentNode[]} */
             const path = [];
 
@@ -211,7 +212,7 @@ export const generatePath = (current, route) => {
                 continue;
             }
 
-            if (route.some(item => item.identifier.number === node.identifier.number)) {
+            if (route.some(item => isSameTalent(item, node))) {
                 continue;
             }
 
@@ -267,7 +268,7 @@ export const generateAscendancyPath = (ascendancy, current, route) => {
                 continue;
             }
 
-            if (route.some(item => item.identifier.number === node.identifier.number)) {
+            if (route.some(item => isSameTalent(item, node))) {
                 continue;
             }
 

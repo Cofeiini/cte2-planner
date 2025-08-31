@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Craft to Exile 2 Planner">
-    <meta property="og:description" content="Plan and share your Craft to Exile 2 builds!">
+    <meta property="og:title" content="Craft to Exile 2 Talent Editor">
+    <meta property="og:description" content="Edit Craft to Exile 2 talent trees">
     <meta property="og:image" content="https://cofeiini.github.io/cte2-planner/assets/favicon.png">
     <meta property="og:url" content="https://cofeiini.github.io/cte2-planner">
 
-    <title>CtE2 Planner</title>
+    <title>CtE2 Talent Editor</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.png">
 
     <link href="index.css" rel="stylesheet">
 
-    <script src="index.js" type="module"></script>
+    <script src="editor.js" type="module"></script>
 </head>
 <body>
 <div id="content-container">
@@ -25,47 +25,27 @@
                 <div class="hidden" id="ascendancy-container">
                     <canvas id="ascendancy-canvas" style="position: absolute; transform-origin: top left; bottom: 0; left: 50%; transform: translateX(-50%)"></canvas>
                     <div id="ascendancy-tree-container"></div>
-                    <div id="ascendancy-bar">
-                        <div id="ascendancy-points-container">Points:
-                            <div id="ascendancy-points"></div>
-                        </div>
-                    </div>
                 </div>
                 <div class="talent-node" id="ascendancy-button"></div>
+                <div id="editor-indicator" style="outline: 1px solid white"></div>
             </div>
         </div>
         <div id="top-bar-container">
             <div id="top-bar">
-                <div id="points-container">Points:
-                    <div id="talent-points">0</div>
-                </div>
-                <div id="talent-search-container">
+                <div id="talent-search-container" style="left: calc(50% + 1.0em);">
                     <!--suppress HtmlFormInputWithoutLabel-->
                     <input id="talent-search" name="talent-search" placeholder="Search talents..." type="text" value="">
-                    <div id="talent-search-modifier">
-                        <button id="search-modifier-button">
-                            <span data-value="unselected" id="search-modifier-value">U</span>
-                        </button>
-                    </div>
                     <div id="talent-search-info">?</div>
                 </div>
             </div>
-            <ul id="search-modifier-list" class="hidden">
-                <li class="selected" data-value="unselected">Unselected</li>
-                <li data-value="selected">Selected</li>
-                <li data-value="all">All</li>
-            </ul>
         </div>
         <div class="hidden" id="ascendancy-menu"></div>
+        <div class="hidden" id="editor-menu"></div>
         <div id="tooltip-container">
             <div id="tooltip-arrow"></div>
             <div id="info-tooltip">
                 <div style="display: flex; padding: 0.5em; gap: 0.5em;">
                     <div id="info-name">Talent</div>
-                    <div id="info-node-container">
-                        <div id="info-node-count">0</div>
-                        <div id="info-node-text">Node</div>
-                    </div>
                 </div>
                 <div class="horizontal-line" style="background-color: white;"></div>
                 <div id="info-stats"></div>
@@ -86,43 +66,14 @@
                     <select id="ascendancy-select"></select>
                 </div>
             </div>
-            <div class="panel-group" style="gap: 0.5em;">
-                <div class="panel-group-title-big">
-                    <div id="allocated-points" style="font-size: x-large; color: white;">0</div>
-                    Allocated Points
-                </div>
-                <div class="panel-group-item" style="justify-content: space-between; padding: 0.25em;">
-                    <div class="panel-group-item-allocated">
-                        <div id="allocated-start" style="font-size: x-large; color: white;">0</div>
-                        Start
-                    </div>
-                    <div class="panel-group-item-allocated">
-                        <div id="allocated-major" style="font-size: x-large; color: white;">0</div>
-                        Game Changer
-                    </div>
-                    <div class="panel-group-item-allocated">
-                        <div id="allocated-special" style="font-size: x-large; color: white;">0</div>
-                        Special
-                    </div>
-                    <div class="panel-group-item-allocated">
-                        <div id="allocated-stat" style="font-size: x-large; color: white;">0</div>
-                        Attribute
-                    </div>
-                </div>
-            </div>
             <div class="panel-group" style="gap: 0.25em;">
                 <input id="player-level" type="range" min="1" max="100" step="1" value="100">
                 <div class="panel-group-item" style="justify-content: center;">Character Level:<label for="player-level" id="player-level-label" style="color: white;">100</label></div>
             </div>
             <div class="panel-group hidden" id="allocated-stat-list" style="gap: 0.5em; overflow-y: scroll; scrollbar-width: thin;"></div>
         </div>
-        <div style="display: flex;">
-            <div id="side-panel-footer">
-                <button class="custom-button" onclick="window.open('https://github.com/Cofeiini/cte2-planner/issues/new?template=bug_report.md', '_blank').focus()" style="font-size: x-small;">Report Bug</button>
-                <button class="custom-button" onclick="window.open('https://github.com/Cofeiini/cte2-planner/issues/new?template=feature_request.md', '_blank').focus()" style="font-size: x-small;">Give Feedback</button>
-                <button class="custom-button" onclick="window.open('https://github.com/Cofeiini/cte2-planner/commits/main', '_blank').focus()" style="font-size: x-small;">Changelog</button>
-            </div>
-            <button class="custom-button" id="editor-button" style="font-size: x-small;" title="Editor Mode">&#x1F527;️</button>
+        <div id="side-panel-footer">
+            <button class="custom-button" onclick="window.open('https://cofeiini.github.io/cte2-planner', '_blank').focus()" style="font-size: x-small;">Return to Planner</button>
         </div>
     </div>
 </div>

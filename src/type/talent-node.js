@@ -1,6 +1,7 @@
 import { findRemovedBranch } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
-import { collectStatInformation, setUpURL } from "../util/spuddling.js";
+import { controls } from "../data/constants.js";
+import { collectStatInformation, isSameTalent, setUpURL } from "../util/spuddling.js";
 
 /** @type {TalentNode[][]} */
 export const talentGrid = [];
@@ -22,6 +23,9 @@ export const excludedAscendancyNodes = [];
 
 /** @type {TalentNode[]} */
 export const fullNodeList = [];
+
+/** @type {Map<string, {identifier: {data: string, talent: string, number: number}, name: string, type: string, stats: Object[]}>} */
+export const talentIdentifiers = new Map();
 
 /** @type {TalentNode[]} */
 export const talentSelections = [];
@@ -78,6 +82,7 @@ export const updateAscendancyPoints = (value) => {
 export class TalentNode {
     x = 0;
     y = 0;
+    length = 0;
     center = {
         x: 0,
         y: 0,
@@ -113,6 +118,7 @@ export class TalentNode {
     constructor(input) {
         this.x = input.x;
         this.y = input.y;
+        this.length = input.length;
         this.center.x = input.x;
         this.center.y = input.y;
         this.identifier.number = input.x + (input.y * input.length);
@@ -126,9 +132,6 @@ export class TalentNode {
         this.selectable = (input.value.length > 1) && input.value !== "[CENTER]";
         this.exclusive = false;
         this.selected = false;
-        this.update = () => {
-            console.error("Default talent update was called!");
-        };
         this.neighbors = [];
         this.parentTree = input.parentTree;
         this.travel.source = undefined;
@@ -250,7 +253,7 @@ export const toggleNode = (node, isPreset = false) => {
 
             excluded.length = 0;
             for (const values of talentExclusions.values()) {
-                if (selections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
+                if (selections.some(item => item.exclusive && values.some(element => isSameTalent(item, element)))) {
                     excluded.push(...values);
                 }
             }
@@ -259,6 +262,8 @@ export const toggleNode = (node, isPreset = false) => {
         }
     }
 
-    document.querySelector("#talent-points").innerText = `${TOTAL_POINTS - talentSelections.length}`;
-    document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS - ascendancySelections.length}`;
+    if (!controls.editor.active) {
+        document.querySelector("#talent-points").innerText = `${TOTAL_POINTS - talentSelections.length}`;
+        document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS - ascendancySelections.length}`;
+    }
 };

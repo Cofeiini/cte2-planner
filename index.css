@@ -283,24 +283,26 @@ html, body {
     width: 100%;
 }
 
-#ascendancy-menu {
+#ascendancy-menu, #editor-menu {
     background-color: #191821;
     box-shadow: black 0 0 1.0em 0.5em;
     color: white;
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+    max-height: 35em;
+    overflow-y: scroll;
     padding: 0.5em;
     position: absolute;
     z-index: 1;
 }
 
-#ascendancy-menu div {
+#ascendancy-menu div, #editor-menu div {
     display: flex;
     padding: 0.25em;
 }
 
-#ascendancy-menu div:hover {
+#ascendancy-menu div:hover, #editor-menu div:hover {
     background-color: #182828;
     cursor: pointer;
 }
@@ -374,6 +376,14 @@ html, body {
     transform: translate(-50%, -50%);
     transform-origin: -100% 50%;
     width: 0;
+}
+
+#editor-indicator {
+    aspect-ratio: 1;
+    display: flex;
+    height: 50px;
+    pointer-events: none;
+    position: absolute;
 }
 
 #top-bar-container {

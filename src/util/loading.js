@@ -20,6 +20,7 @@ import {
     exclusiveNodeValues,
     fullNodeList,
     talentExclusions,
+    talentIdentifiers,
     talentNodes,
     talentSelections,
     toggleNode,
@@ -31,7 +32,12 @@ import {
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
 import { generateAscendancyGrid, generateAscendancyMenu, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
-import { collectStatInformation, handleViewport } from "./spuddling.js";
+import { collectStatInformation, handleViewport, isSameTalent } from "./spuddling.js";
+
+export const editorDataOverride = {
+    type: "main",
+    data: "",
+};
 
 const updateProgress = async (text) => {
     document.querySelector("#progress").innerText = text;
@@ -75,6 +81,29 @@ export const handleLoadingImageAssets = async () => {
     });
 
     await fetch(`data/${releaseInfo.version}/perks.json`).then(response => response.json()).then(data => {
+        if (controls.editor.active) {
+            for (const json of data) {
+                const node = {
+                    identifier: {
+                        talent: json["id"],
+                        number: 0,
+                        data: json["id"],
+                    },
+                    name: "",
+                    type: json["type"].toLowerCase(),
+                    stats: structuredClone(json["stats"]),
+                };
+
+                if ((node.type === "stat") || (node.type === "special")) {
+                    if (node.stats.length === 1) {
+                        node.identifier.data = node.stats.at(0)["stat"];
+                    }
+                }
+
+                talentIdentifiers.set(json["id"], node);
+            }
+        }
+
         const requested = new Set();
 
         for (const node of fullNodeList) {
@@ -88,7 +117,7 @@ export const handleLoadingImageAssets = async () => {
             node.type = json.type.toLowerCase(); // This should be one of these: asc, start, major, special, stat
             node.stats = json.stats;
             node.identifier.data = json.id;
-            if (node.type === "stat" || node.type === "special") {
+            if ((node.type === "stat") || (node.type === "special")) {
                 if (node.stats.length === 1) {
                     node.identifier.data = node.stats.at(0)["stat"];
                 }
@@ -145,15 +174,27 @@ export const handleLoadingAssets = async () => {
         });
     }
 
-    await updateProgress("Processing the talent tree...");
-    await fetch(`data/${releaseInfo.version}/talents_new.csv`).then(response => response.text()).then(data => {
-        generateTalentGrid(data);
-    });
+    if (editorDataOverride.data.length > 0) {
+        if (editorDataOverride.type === "main") {
+            await updateProgress("Processing the talent tree...");
+            generateTalentGrid(editorDataOverride.data);
+        } else {
+            await updateProgress("Processing the ascendancy tree...");
+            generateAscendancyGrid(editorDataOverride.data);
+        }
 
-    await updateProgress("Processing the ascendancy tree...");
-    await fetch(`data/${releaseInfo.version}/ascendancy.csv`).then(response => response.text()).then(data => {
-        generateAscendancyGrid(data);
-    });
+        editorDataOverride.data = "";
+    } else {
+        await updateProgress("Processing the talent tree...");
+        await fetch(`data/${releaseInfo.version}/talents_new.csv`).then(response => response.text()).then(data => {
+            generateTalentGrid(data);
+        });
+
+        await updateProgress("Processing the ascendancy tree...");
+        await fetch(`data/${releaseInfo.version}/ascendancy.csv`).then(response => response.text()).then(data => {
+            generateAscendancyGrid(data);
+        });
+    }
 
     fullNodeList.length = 0;
     fullNodeList.push(...talentNodes);
@@ -206,40 +247,122 @@ export const handleLoadingAssets = async () => {
         }
     }
 
-    const statData = new Map();
-    await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
-        for (const node of fullNodeList) {
-            for (const stat of node.stats) {
-                const identifier = stat["stat"];
-                const type = stat["type"].toLowerCase();
-
-                stat["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
-                const hasPercent = stat["description"].match(/\[VAL1].*?%/) !== null;
-
-                let json = structuredClone(data.find(item => (item.id === identifier) || (item.data?.id === identifier)));
-                if (!json) {
-                    json = {
-                        is_perc: (type === "percent") || (type === "more"),
-                        format: ((Math.abs(parseFloat(stat["v1"])) > 0.0) && (type !== "flat")) || undefined,
-                    };
+    if (controls.editor.active) {
+        const statIdentifierList = Array.from(talentIdentifiers.values()).filter(item => item.type === "stat" || item.type === "special");
+        for (const node of statIdentifierList) {
+            node.name = descriptionData[`mmorpg.stat.${node.identifier.data}`];
+            if (!node.name) {
+                node.name = descriptionData[`mmorpg.stat.${node.stats.at(0)["stat"]}`];
+                if (!node.name) {
+                    node.name = "Missing Data";
+                    console.error(node.identifier.talent, node.identifier.data, node.type, "not found!");
                 }
-                json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more") || hasPercent;
-                json["description"] = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/§\w/g, "");
-
-                if (overrideData[identifier]) {
-                    Object.assign(json, overrideData[identifier]);
-                }
-
-                let newData = new Map([[identifier, json]]);
-                if (statData.has(node.identifier.talent)) {
-                    newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
-                }
-                statData.set(node.identifier.talent, newData);
             }
+        }
+
+        const talentIdentifierList = Array.from(talentIdentifiers.values()).filter(item => item.type === "start" || item.type === "major" || item.type === "asc");
+        for (const node of talentIdentifierList) {
+            node.name = descriptionData[`mmorpg.talent.${node.identifier.data}`];
+            if (!node.name) {
+                node.name = "Missing Data";
+                console.error(node.identifier.talent, node.identifier.data, node.type, "not found!");
+            }
+        }
+    }
+
+    /** @type {Map<string, Object>} */
+    const statData = new Map();
+
+    const parseStatData = (node, data) => {
+        for (const stat of node.stats) {
+            const identifier = stat["stat"];
+            const type = stat["type"].toLowerCase();
+
+            let description = "Missing data";
+            if (descriptionData[`mmorpg.stat.${identifier}`]) {
+                description = descriptionData[`mmorpg.stat.${identifier}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
+            }
+            stat["description"] = description;
+            const hasPercent = stat["description"].match(/\[VAL1].*?%/) !== null;
+
+            let json = structuredClone(data.find(item => (item.id === identifier) || (item.data?.id === identifier)));
+            if (!json) {
+                json = {
+                    is_perc: (type === "percent") || (type === "more"),
+                    format: ((Math.abs(parseFloat(stat["v1"])) > 0.0) && (type !== "flat")) || undefined,
+                };
+            }
+            json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more") || hasPercent;
+            json["description"] = description.replaceAll(/§\w/g, "");
+
+            if (overrideData[identifier]) {
+                Object.assign(json, overrideData[identifier]);
+            }
+
+            /** @type {Map<string, Object>} */
+            let newData = new Map([[identifier, json]]);
+            if (statData.has(node.identifier.talent)) {
+                newData = new Map([...newData, ...statData.get(node.identifier.talent)]);
+            }
+            statData.set(node.identifier.talent, newData);
+        }
+    };
+
+    await fetch(`data/${releaseInfo.version}/stats.json`).then(response => response.json().then(data => {
+        if (controls.editor.active) {
+            for (const node of talentIdentifiers.values()) {
+                parseStatData(node, data);
+            }
+        }
+
+        for (const node of fullNodeList) {
+            parseStatData(node, data);
         }
     }));
 
     await updateProgress("Processing talent information...");
+    if (controls.editor.active) {
+        for (const [key, node] of talentIdentifiers) {
+            const nodeData = statData.get(key);
+            if (!nodeData) {
+                continue;
+            }
+
+            for (const stat of node.stats) {
+                const type = stat["type"].toLowerCase();
+
+                let info = {
+                    is_perc: false,
+                };
+                if (nodeData.has(stat["stat"])) {
+                    info = nodeData.get(stat["stat"]);
+                }
+                const isPercent = info["is_perc"];
+
+                stat["is_long"] = info["is_long"] ?? false;
+                stat["scale_to_lvl"] = ((stat["scale_to_lvl"] ?? false) && ((info["scaling"] ?? "normal").toLowerCase() !== "none"));
+
+                let isFormat = info["format"] ?? ((type === "flat") || isPercent);
+                if (stat["is_long"]) {
+                    isFormat = false;
+                }
+
+                let description = "Missing data";
+                if (descriptionData[`mmorpg.stat.${stat["stat"]}`]) {
+                    description = descriptionData[`mmorpg.stat.${stat["stat"]}`].replaceAll(/\\u(\w{4})/gi, (match, p1) => String.fromCharCode(parseInt(p1, 16)));
+                }
+                if (isFormat && !description.includes("[VAL1]")) {
+                    description = `[VAL1]§7 ${description}`;
+                }
+
+                stat["type"] = type;
+                stat["is_percent"] = isPercent;
+                stat["description"] = description;
+                stat["minus_is_good"] = info["minus_is_good"] ?? false;
+            }
+        }
+    }
+
     for (const node of fullNodeList) {
         const nodeData = statData.get(node.identifier.talent);
 
@@ -257,7 +380,10 @@ export const handleLoadingAssets = async () => {
                 isFormat = false;
             }
 
-            let description = stat["description"];
+            let description = "Missing data";
+            if (stat["description"]) {
+                description = stat["description"];
+            }
             if (isFormat && !description.includes("[VAL1]")) {
                 description = `[VAL1]§7 ${description}`;
             }
@@ -288,6 +414,24 @@ export const handleLoadingAssets = async () => {
         }
     }
 
+    if (controls.editor.active) {
+        for (const node of fullNodeList) {
+            if (talentIdentifiers.has(node.identifier.talent)) {
+                const talent = talentIdentifiers.get(node.identifier.talent);
+                talent.identifier.talent = node.identifier.talent;
+                talent.identifier.number = node.identifier.number;
+                talent.name = node.name;
+            }
+
+            talentIdentifiers.set(node.identifier.talent, {
+                identifier: structuredClone(node.identifier),
+                name: node.name,
+                type: node.type,
+                stats: structuredClone(node.stats),
+            });
+        }
+    }
+
     const ascendancySelect = document.querySelector("#ascendancy-select");
     for (const option of ascendancySelect.options) {
         option.innerText = descriptionData[`mmorpg.talent.${option.value}`];
@@ -313,7 +457,9 @@ export const handleLoading = async () => {
     await updateProgress("Preparing...");
 
     try {
-        updatePresetInfo(JSON.parse(atob(new URLSearchParams(location.search).get("preset"))));
+        if (!controls.editor.active) {
+            updatePresetInfo(JSON.parse(atob(new URLSearchParams(location.search).get("preset"))));
+        }
 
         if (!releaseInfo) {
             const overrideInfo = RELEASES.find(item => item.version === presetInfo.version);
@@ -375,8 +521,11 @@ export const handleLoading = async () => {
     const points = releaseInfo.points;
     updatePoints(points.starting + points.leveling + points.questing);
     updateAscendancyPoints(points.ascendancy.starting + points.ascendancy.questing);
-    document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
-    document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS}`;
+
+    if (!controls.editor.active) {
+        document.querySelector("#talent-points").innerText = `${TOTAL_POINTS}`;
+        document.querySelector("#ascendancy-points").innerText = `${TOTAL_ASCENDANCY_POINTS}`;
+    }
 
     controls.ascendancy = presetInfo.ascendancy.selection;
 
@@ -411,7 +560,7 @@ export const handleLoading = async () => {
 
         excludedTalentNodes.length = 0;
         for (const values of talentExclusions.values()) {
-            if (talentSelections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
+            if (talentSelections.some(item => item.exclusive && values.some(element => isSameTalent(item, element)))) {
                 excludedTalentNodes.push(...values);
             }
         }
@@ -425,7 +574,7 @@ export const handleLoading = async () => {
 
         excludedAscendancyNodes.length = 0;
         for (const values of talentExclusions.values()) {
-            if (ascendancySelections.some(item => item.exclusive && values.some(element => item.identifier.number === element.identifier.number))) {
+            if (ascendancySelections.some(item => item.exclusive && values.some(element => isSameTalent(item, element)))) {
                 excludedAscendancyNodes.push(...values);
             }
         }

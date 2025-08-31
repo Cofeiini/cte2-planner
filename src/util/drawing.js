@@ -1,4 +1,4 @@
-import { colorMap, controls, LINE_WIDTH } from "../data/constants.js";
+import { CELL_SIZE, colorMap, controls, LINE_WIDTH } from "../data/constants.js";
 import {
     ascendancyAddLeftovers,
     ascendancyAddPreview,
@@ -15,6 +15,7 @@ import {
     TOTAL_ASCENDANCY_POINTS,
     TOTAL_POINTS,
 } from "../type/talent-node.js";
+import { isSameTalent } from "./spuddling.js";
 
 /**
  * @typedef {HTMLCanvasElement} CustomLineCanvas
@@ -53,7 +54,7 @@ export const drawLinesSimple = (context, collection, excluded = []) => {
     context.beginPath();
     for (const leaf of collection) {
         for (const neighbor of leaf.neighbors) {
-            if (excluded.some(item => item.identifier.number === neighbor.identifier.number)) {
+            if (excluded.some(item => isSameTalent(item, neighbor))) {
                 continue;
             }
 
@@ -107,6 +108,28 @@ const drawLinesComplexOptional = (context, collection, optional) => {
     context.stroke();
 };
 
+/**
+ * @param {CanvasRenderingContext2D} context
+ * @param {{width: number, height: number}} workspace
+ */
+const drawGridLines = (context, workspace) => {
+    context.strokeStyle = colorMap.custom.get("grid");
+    context.lineWidth = 1;
+    context.beginPath();
+    const height = Math.ceil(workspace.height / CELL_SIZE) - 1;
+    const width = Math.ceil(workspace.width / CELL_SIZE) - 1;
+    for (let y = 1; y < (height + 1); ++y) {
+        context.moveTo(CELL_SIZE, y * CELL_SIZE);
+        context.lineTo(width * CELL_SIZE, y * CELL_SIZE);
+    }
+    for (let x = 1; x < (width + 1); ++x) {
+        context.moveTo(x * CELL_SIZE, CELL_SIZE);
+        context.lineTo(x * CELL_SIZE, height * CELL_SIZE);
+    }
+    context.closePath();
+    context.stroke();
+};
+
 export const drawLinesInitial = () => {
     const context = lineCanvas.offscreenCanvas.getContext("2d", { alpha: false });
     context.imageSmoothingEnabled = false;
@@ -114,10 +137,13 @@ export const drawLinesInitial = () => {
     context.fillStyle = colorMap.custom.get("background");
     context.fillRect(0, 0, lineCanvas.offscreenCanvas.width, lineCanvas.offscreenCanvas.height);
 
+    if (controls.editor.active) {
+        drawGridLines(context, { width: lineCanvas.offscreenCanvas.width, height: lineCanvas.offscreenCanvas.height });
+    }
+
     context.strokeStyle = colorMap.custom.get("line");
     context.lineWidth = LINE_WIDTH;
     drawLinesSimple(context, talentNodes);
-    context.stroke();
 };
 
 export const drawLinesAscendancyInitial = () => {
@@ -128,10 +154,13 @@ export const drawLinesAscendancyInitial = () => {
         context.fillStyle = colorMap.custom.get("background");
         context.fillRect(0, 0, subCanvas.width, subCanvas.height);
 
+        if (controls.editor.active) {
+            drawGridLines(context, { width: subCanvas.width, height: subCanvas.height });
+        }
+
         context.strokeStyle = colorMap.custom.get("line");
         context.lineWidth = LINE_WIDTH;
         drawLinesSimple(context, ascendancyNodes.get(ascendancy));
-        context.stroke();
     }
 };
 

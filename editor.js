@@ -1,14 +1,25 @@
-import { handleAscendancyChange, handleDataExport, handleDataImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
+import { handleAscendancyChange, handleEditorExport, handleEditorImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
-import { CELL_SIZE, controls } from "./src/data/constants.js";
+import { CELL_HALF, CELL_SIZE, controls } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
-import { ascendancyGrid, ascendancySelections, fullNodeList, talentGrid, talentSelections } from "./src/type/talent-node.js";
-import { updateAscendancyCanvas, updateLineCanvas } from "./src/util/drawing.js";
+import { ascendancyGrid, fullNodeList, talentGrid } from "./src/type/talent-node.js";
+import {
+    drawLinesAscendancy,
+    drawLinesAscendancyInitial,
+    drawLinesInitial,
+    drawLinesRegular,
+    updateAscendancyCanvas,
+    updateLineCanvas,
+} from "./src/util/drawing.js";
 import {
     ascendancyButton,
     ascendancyMenu,
     boundingRects,
+    editorMenu,
     fittedZoom,
+    generateAscendancyTree,
+    generateEditorMenu,
+    generateTree,
     refreshBoundingRects,
     resetTooltipArrow,
     talentContainer,
@@ -17,6 +28,7 @@ import {
     updateAscendancyMenu,
     updateAscendancyTreeContainer,
     updateCanvasContainer,
+    updateEditorMenu,
     updateFittedZoom,
     updateTalentContainer,
     updateTalentTree,
@@ -25,19 +37,21 @@ import {
     viewportContainer,
 } from "./src/util/generating.js";
 import { handleLoading } from "./src/util/loading.js";
-import { handleViewport, resetMessageBox, setUpCancelButton, setUpMessageBox, setUpURL } from "./src/util/spuddling.js";
+import { handleViewport, isSameTalent, setUpURL } from "./src/util/spuddling.js";
 
 /** @type {HTMLInputElement} */
 let searchInput = undefined;
-
-/** @type {HTMLSpanElement} */
-let searchModifierValue = undefined;
 
 /** @type {TalentNode} */
 let previousFocus = undefined;
 
 /** @param {MouseEvent} event */
 const handleNodeFocus = (event) => {
+    if (!editorMenu.classList.contains("hidden")) {
+        previousFocus?.visual.classList.remove("focused");
+        return;
+    }
+
     const zoomedCell = CELL_SIZE * controls.zoom;
 
     const viewportOffset = {
@@ -61,6 +75,7 @@ const handleNodeFocus = (event) => {
 
     ascendancyButton.classList.remove("focused");
     if (!currentTarget) {
+        controls.editor.target = undefined;
         ascendancyButton.classList.add("focused");
         return;
     }
@@ -110,6 +125,12 @@ const handleNodeFocus = (event) => {
         }
         previousFocus = focus;
     }
+
+    if (previousFocus && (controls.editor.action === "none")) {
+        controls.editor.target = previousFocus;
+    }
+
+    controls.editor.focus = grid.at(cell.y)?.at(cell.x);
 };
 
 /**
@@ -136,7 +157,6 @@ const handleMouseDrag = (event) => {
 };
 
 const handleSearch = () => {
-    const modifier = searchModifierValue.dataset.value;
     const filter = searchInput.value.trim().toLowerCase();
 
     const altFilter = filter.replaceAll(" ", "_");
@@ -147,19 +167,10 @@ const handleSearch = () => {
         return;
     }
 
-    let nodeList = fullNodeList;
-    if (modifier === "unselected") {
-        nodeList = fullNodeList.filter(item => !item.selected);
-    } else if (modifier === "selected") {
-        nodeList = [...talentSelections, ...ascendancySelections];
-    }
-
     for (const node of fullNodeList) {
         node.visual.classList.add("filtered");
         node.visual.classList.remove("highlighted");
-    }
 
-    for (const node of nodeList) {
         let isMatch = node.name.toLowerCase().includes(filter) || node.name.toLowerCase().includes(altFilter);
         isMatch = isMatch || node.identifier.talent.includes(filter) || node.identifier.talent.includes(altFilter);
         isMatch = isMatch || node.keywords.includes(filter) || node.keywords.includes(altFilter);
@@ -197,10 +208,42 @@ const handleZoom = (event) => {
 
     if (controls.zoom !== oldZoom) {
         ascendancyMenu.classList.add("hidden");
+        editorMenu.classList.add("hidden");
         handleViewport();
 
         refreshBoundingRects();
     }
+};
+
+/**
+ * @param {MouseEvent} event
+ */
+const handleEditorIndicator = (event) => {
+    const canvasBounds = boundingRects.containers.canvas;
+    const offset = {
+        x: 0,
+        y: 0,
+        cell: {
+            x: 0,
+            y: 0,
+        },
+    };
+    if (controls.editor.focus?.parentTree === "main") {
+        offset.y = CELL_HALF;
+        offset.cell.y = CELL_HALF;
+    }
+
+    const layer = {
+        x: event.clientX - canvasBounds.left,
+        y: event.clientY - canvasBounds.top,
+    };
+    const cell = {
+        x: (Math.floor(((layer.x / controls.zoom) - (CELL_HALF - offset.x)) / CELL_SIZE) * CELL_SIZE) + CELL_HALF,
+        y: (Math.floor(((layer.y / controls.zoom) - (CELL_HALF - offset.y)) / CELL_SIZE) * CELL_SIZE) + CELL_HALF,
+    };
+
+    controls.editor.indicator.style.left = `${cell.x - offset.cell.x}px`;
+    controls.editor.indicator.style.top = `${cell.y - offset.cell.y}px`;
 };
 
 /** @type {number} */
@@ -219,6 +262,99 @@ const handleEvents = () => {
         event.preventDefault();
 
         if (event.button !== 0) {
+            if (event.button === 2) {
+                const isAction = controls.editor.action !== "none";
+                if (isAction) {
+                    controls.editor.action = "none";
+                    controls.editor.indicator.replaceChildren();
+
+                    const highlighted = document.querySelectorAll(".highlighted");
+                    for (const node of highlighted) {
+                        node.classList.remove("active", "highlighted");
+                    }
+                    document.body.style.cursor = null;
+                }
+
+                if (!ascendancyMenu.classList.contains("hidden")) {
+                    editorMenu.classList.add("hidden");
+                    return;
+                }
+
+                if (isAction) {
+                    editorMenu.classList.add("hidden");
+                    return;
+                }
+
+                if (controls.editor.focus) {
+                    editorMenu.classList.remove("hidden");
+
+                    generateEditorMenu();
+
+                    const bounds = boundingRects.containers.talent;
+                    const menuBounds = editorMenu.getBoundingClientRect();
+
+                    editorMenu.style.left = `${event.clientX}px`;
+                    editorMenu.style.top = `${Math.min(event.clientY, bounds.height - menuBounds.height - 3)}px`;
+
+                    handleEditorIndicator(event);
+                }
+            }
+            return;
+        }
+
+        editorMenu.classList.add("hidden");
+
+        if (controls.editor.action !== "none") {
+            switch (controls.editor.action) {
+                case "move": {
+                    const focus = controls.editor.focus;
+                    if (!focus.selectable) {
+                        const target = controls.editor.target;
+                        if (target) {
+                            focus.x = [target.x, target.x = focus.x][0];
+                            focus.y = [target.y, target.y = focus.y][0];
+                            focus.center = [structuredClone(target.center), target.center = structuredClone(focus.center)][0];
+                            focus.identifier.number = [target.identifier.number, target.identifier.number = focus.identifier.number][0];
+
+                            let grid = talentGrid;
+                            if (target.parentTree !== "main") {
+                                grid = ascendancyGrid.get(controls.ascendancy);
+                            }
+                            grid[focus.y][focus.x] = [grid[target.y][target.x], grid[target.y][target.x] = grid[focus.y][focus.x]][0];
+                        }
+                    }
+                    break;
+                }
+                case "connect": {
+                    const focus = controls.editor.focus;
+                    if (focus.selectable) {
+                        const target = controls.editor.target;
+                        target.neighbors.push(focus);
+                        focus.neighbors.push(target);
+                    }
+                    break;
+                }
+                case "disconnect": {
+                    const focus = controls.editor.focus;
+                    if (focus.selectable) {
+                        const target = controls.editor.target;
+                        target.neighbors = target.neighbors.filter(item => !isSameTalent(item, focus));
+                        focus.neighbors = focus.neighbors.filter(item => !isSameTalent(item, target));
+                    }
+                    break;
+                }
+            }
+
+            generateTree();
+            generateAscendancyTree();
+            drawLinesInitial();
+            drawLinesAscendancyInitial();
+            drawLinesRegular();
+            drawLinesAscendancy();
+            controls.editor.action = "none";
+            controls.editor.indicator.replaceChildren();
+
+            document.body.style.cursor = null;
             return;
         }
 
@@ -241,9 +377,7 @@ const handleEvents = () => {
 
         controls.panning = false;
         talentContainer.style.cursor = null;
-        if (controls.hovering) {
-            infoTooltip.container.classList.add("visible");
-        }
+        infoTooltip.container.classList.remove("visible");
 
         talentContainer.removeEventListener("mousemove", handleMouseDrag);
     };
@@ -274,6 +408,10 @@ const handleEvents = () => {
 
         handleNodeFocus(event);
 
+        if (editorMenu.classList.contains("hidden")) {
+            handleEditorIndicator(event);
+        }
+
         if (!previousFocus && !ascendancyButton.classList.contains("focused")) {
             return;
         }
@@ -300,14 +438,11 @@ window.onresize = () => {
     updateFittedZoom();
     controls.zoom = Math.min(Math.max(controls.zoom, fittedZoom), 3.0);
     handleViewport();
-
-    const modifierBounds = document.querySelector("#search-modifier-button").getBoundingClientRect();
-    const searchModifierList = document.querySelector("#search-modifier-list");
-    searchModifierList.style.left = `${modifierBounds.left}px`;
-    searchModifierList.style.top = `${modifierBounds.height}px`;
 };
 
 window.onload = async () => {
+    controls.editor.active = true;
+
     updateTalentTree(document.querySelector("#talent-tree"));
     updateViewportContainer(document.querySelector("#viewport-container"));
     updateAscendancyContainer(document.querySelector("#ascendancy-container"));
@@ -321,19 +456,15 @@ window.onload = async () => {
     updateAscendancyButton(document.querySelector("#ascendancy-button"));
     updateAscendancyMenu(document.querySelector("#ascendancy-menu"));
 
+    updateEditorMenu(document.querySelector("#editor-menu"));
+    controls.editor.indicator = document.querySelector("#editor-indicator");
+
     infoTooltip.container = document.querySelector("#tooltip-container");
     infoTooltip.main = document.querySelector("#info-tooltip");
     infoTooltip.arrow = document.querySelector("#tooltip-arrow");
     infoTooltip.name = document.querySelector("#info-name");
-    infoTooltip.node.count = document.querySelector("#info-node-count");
-    infoTooltip.node.text = document.querySelector("#info-node-text");
     infoTooltip.stats = document.querySelector("#info-stats");
 
-    sidePanel.allocated.points = document.querySelector("#allocated-points");
-    sidePanel.allocated.start = document.querySelector("#allocated-start");
-    sidePanel.allocated.major = document.querySelector("#allocated-major");
-    sidePanel.allocated.special = document.querySelector("#allocated-special");
-    sidePanel.allocated.stat = document.querySelector("#allocated-stat");
     sidePanel.allocated.statList = document.querySelector("#allocated-stat-list");
 
     sidePanel.character.levelLabel = document.querySelector("#player-level-label");
@@ -344,8 +475,8 @@ window.onload = async () => {
         handleSidePanel();
     };
 
-    document.querySelector("#import-button").onclick = handleDataImport;
-    document.querySelector("#export-button").onclick = handleDataExport;
+    document.querySelector("#import-button").onclick = handleEditorImport;
+    document.querySelector("#export-button").onclick = handleEditorExport;
 
     const versionSelect = document.querySelector("#version-select");
     for (const release of RELEASES) {
@@ -364,79 +495,10 @@ window.onload = async () => {
         handleSearch();
     };
 
-    const searchModifierButton = document.querySelector("#search-modifier-button");
-    const searchModifierList = document.querySelector("#search-modifier-list");
-    const searchModifierOptions = searchModifierList.querySelectorAll("li");
-    searchModifierValue = document.querySelector("#search-modifier-value");
-
-    const toggleModifierMenu = (override = undefined) => {
-        searchModifierList.classList.toggle("hidden");
-        if (override !== undefined) {
-            searchModifierList.classList.toggle("hidden", override);
-        }
-
-        infoTooltip.container.classList.remove("visible");
-        if (!override && searchModifierList.classList.contains("hidden")) {
-            infoTooltip.container.classList.add("visible");
-        }
-    };
-
-    searchModifierButton.onclick = () => {
-        toggleModifierMenu();
-    };
-
-    const searchModifier = document.querySelector("#talent-search-modifier");
-    searchModifier.onmouseenter = () => {
-        if (!searchModifierList.classList.contains("hidden")) {
-            return;
-        }
-
-        infoTooltip.name.innerText = "Search modifier";
-        infoTooltip.name.style.color = "white";
-        infoTooltip.node.count.classList.add("hidden");
-        infoTooltip.node.text.classList.add("hidden");
-
-        const text = searchModifierValue.dataset.value;
-        infoTooltip.stats.innerHTML = [
-            `<p style="margin: 0 0 0.5em 0;">You can apply modifiers to your search.</p>`,
-            `<p style="margin: 0 0 0.5em 0;">Modifiers filter what nodes are highlighted.</p>`,
-            `<p style="color: red; margin: 0;">Current modifier is "${text.at(0).toUpperCase() + text.slice(1)}"</p>`,
-        ].join("");
-
-        infoTooltip.container.classList.add("visible");
-    };
-    searchModifier.onmouseleave = () => {
-        infoTooltip.container.classList.remove("visible");
-    };
-
-    const toggleModifierOptions = (selected) => {
-        for (const option of searchModifierOptions) {
-            option.classList.remove("selected");
-        }
-
-        selected.classList.add("selected");
-        const value = selected.dataset.value;
-        searchModifierValue.dataset.value = value;
-        searchModifierValue.innerText = value.at(0).toUpperCase();
-    };
-    for (const option of searchModifierOptions) {
-        option.onclick = () => {
-            toggleModifierOptions(option);
-            toggleModifierMenu(true);
-            handleSearch();
-        };
-    }
-
-    const modifierBounds = searchModifierButton.getBoundingClientRect();
-    searchModifierList.style.left = `${modifierBounds.left}px`;
-    searchModifierList.style.top = `${modifierBounds.height}px`;
-
     const searchInfo = document.querySelector("#talent-search-info");
     searchInfo.onmouseenter = () => {
         infoTooltip.name.innerText = "Search options";
         infoTooltip.name.style.color = "white";
-        infoTooltip.node.count.classList.add("hidden");
-        infoTooltip.node.text.classList.add("hidden");
 
         const keywords = new Set();
         for (const talent of fullNodeList) {
@@ -454,37 +516,6 @@ window.onload = async () => {
     };
     searchInfo.onmouseleave = () => {
         infoTooltip.container.classList.remove("visible");
-    };
-
-    document.querySelector("#editor-button").onclick = () => {
-        const content = setUpMessageBox([
-            "The Editor Mode is meant for development and debugging.",
-            "For a regular user there won't be anything useful here.",
-        ]);
-
-        /** @type {HTMLElement[]} */
-        const buttons = [];
-
-        const ok = document.createElement("button");
-        ok.innerText = "OK";
-        ok.classList.add("custom-button");
-        ok.onclick = (mouse) => {
-            if (mouse.button !== 0) {
-                return;
-            }
-
-            window.open("./editor.html", "_blank").focus();
-            resetMessageBox();
-        };
-
-        buttons.push(ok);
-        buttons.push(setUpCancelButton());
-
-        document.querySelector("#message-box-title").innerText = "Editor Mode";
-        document.querySelector("#message-box-content").replaceChildren(content);
-        document.querySelector("#message-box-buttons").replaceChildren(...buttons);
-
-        document.querySelector("#message-overlay").classList.remove("hidden");
     };
 
     handleEvents();

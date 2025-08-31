@@ -31,6 +31,7 @@ export const colorMap = {
         ["line_remove", "#9F1F1F"],
         ["line_add", "#1F1F9F"],
         ["line_overflow", "#9F1F9F"],
+        ["grid", "#1F1E27"],
     ]),
 };
 
@@ -43,6 +44,16 @@ export const controls = {
     shouldRedraw: false,
     clickTarget: undefined,
     ascendancy: "none",
+    editor: {
+        active: false,
+        action: "none",
+        /** @type {TalentNode} */
+        target: undefined,
+        /** @type {TalentNode} */
+        focus: undefined,
+        /** @type {HTMLDivElement} */
+        indicator: undefined,
+    },
 };
 
 export const welcomeMessages = [
