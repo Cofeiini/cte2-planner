@@ -11266,21 +11266,6 @@
     ]
   },
   {
-    "type": "SPECIAL",
-    "icon": "mmorpg:textures/gui/stat_icons/elemental/physical_resist.png",
-    "id": "physical_resist_big",
-    "is_entry": false,
-    "max_lvls": 1,
-    "stats": [
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "physical_resist",
-        "v1": 10.0
-      }
-    ]
-  },
-  {
     "type": "STAT",
     "icon": "mmorpg:textures/gui/stat_icons/elemental/physical_resist.png",
     "id": "physical_resist",
@@ -11322,21 +11307,6 @@
         "scale_to_lvl": false,
         "stat": "physical_resist",
         "v1": 5.0
-      }
-    ]
-  },
-  {
-    "type": "STAT",
-    "icon": "mmorpg:textures/gui/stat_icons/elemental/physical_resist.png",
-    "id": "physical_resist",
-    "is_entry": false,
-    "max_lvls": 1,
-    "stats": [
-      {
-        "type": "FLAT",
-        "scale_to_lvl": false,
-        "stat": "physical_resist",
-        "v1": 2.0
       }
     ]
   },
