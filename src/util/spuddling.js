@@ -5,6 +5,41 @@ import { controls } from "../data/constants.js";
 import { ascendancySelections, ascendancyStartNodes, fullNodeList, startingNode, talentNodes, talentSelections } from "../type/talent-node.js";
 import { canvasContainer, generateDescriptionHTML, talentContainer } from "./generating.js";
 
+/**
+ * @param {Object} target
+ * @param {Object} sources
+ * @returns {Object}
+ */
+export const deepAssign = (target, ...sources) => {
+    for (const source of sources) {
+        for (const key of Object.keys(source)) {
+            const sourceValue = source[key];
+            const targetValue = target[key];
+
+            if ((targetValue === undefined) || (targetValue === null)) {
+                target[key] = sourceValue;
+                continue;
+            }
+            if ((sourceValue === undefined) || (sourceValue === null)) {
+                target[key] = sourceValue;
+                continue;
+            }
+            if (typeof targetValue !== "object") {
+                target[key] = sourceValue;
+                continue;
+            }
+            if (typeof sourceValue !== "object") {
+                target[key] = sourceValue;
+                continue;
+            }
+
+            target[key] = deepAssign(targetValue, sourceValue);
+        }
+    }
+
+    return target;
+};
+
 export const handleViewport = () => {
     canvasContainer.style.transform = `scale(${controls.zoom})`;
     talentContainer.scroll(controls.x, controls.y);

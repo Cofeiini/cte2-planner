@@ -32,7 +32,7 @@ import {
 } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesRegular } from "./drawing.js";
 import { generateAscendancyGrid, generateAscendancyMenu, generateAscendancyTree, generateTalentGrid, generateTree } from "./generating.js";
-import { collectStatInformation, handleViewport, isSameTalent } from "./spuddling.js";
+import { collectStatInformation, deepAssign, handleViewport, isSameTalent } from "./spuddling.js";
 
 export const editorDataOverride = {
     type: "main",
@@ -295,8 +295,8 @@ export const handleLoadingAssets = async () => {
             json["is_perc"] = (json["data"]?.["perc"] ?? json["is_perc"]) || (type === "percent") || (type === "more") || hasPercent;
             json["description"] = description.replaceAll(/§\w/g, "");
 
-            if (overrideData[identifier]) {
-                Object.assign(json, overrideData[identifier]);
+            if (overrideData["stat"][identifier]) {
+                Object.assign(json, overrideData["stat"][identifier]);
             }
 
             /** @type {Map<string, Object>} */
@@ -365,6 +365,11 @@ export const handleLoadingAssets = async () => {
 
     for (const node of fullNodeList) {
         const nodeData = statData.get(node.identifier.talent);
+
+        const override = overrideData["talent"][node.identifier.talent];
+        if (override) {
+            deepAssign(node, override);
+        }
 
         for (const stat of node.stats) {
             const type = stat["type"].toLowerCase();
