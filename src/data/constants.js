@@ -2,6 +2,7 @@ export const CELL_SIZE = 50.0;
 export const CELL_HALF = CELL_SIZE * 0.5;
 export const LINE_WIDTH = 10;
 export const RAD_TO_DEG = 180 / Math.PI;
+export const MAX_ZOOM_SCALE = 3.0;
 
 /** @type {{minecraft: Map<string, string>, custom: Map<string, string>}} */
 export const colorMap = {

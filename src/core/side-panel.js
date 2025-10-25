@@ -12,7 +12,7 @@ import {
 } from "../type/talent-node.js";
 import { drawLinesAscendancy } from "../util/drawing.js";
 import { checkConflictingPlan, drawPlan, planAllRoutes, setUpBorder, setUpCenter, setUpLiteralCenter, updateEditorGrid } from "../util/editing.js";
-import { ascendancyContainer, ascendancyTreeContainer, boundingRects } from "../util/generating.js";
+import { ascendancyContainer, ascendancyTreeContainer, boundingRects, updateFittedZoom } from "../util/generating.js";
 import { editorDataOverride, handleLoading } from "../util/loading.js";
 import {
     handleViewport,
@@ -313,6 +313,16 @@ const setUpDownload = (grid, name) => {
  * @param {InputEvent} event
  */
 export const handleVersionChange = async (event) => {
+    const loadOtherVersion = async () => {
+        presetInfo.version = releaseInfo.version;
+        setUpURL();
+        handleVersionOptions(event.target);
+
+        controls.zoom = 1.0;
+        await handleLoading();
+        updateFittedZoom();
+    };
+
     const shouldConfirm = (releaseInfo.version !== event.target.value);
     updateReleaseInfo(RELEASES.find(item => item.version === event.target.value));
 
@@ -335,11 +345,7 @@ export const handleVersionChange = async (event) => {
 
             resetMessageBox();
 
-            presetInfo.version = releaseInfo.version;
-            setUpURL();
-            handleVersionOptions(event.target);
-
-            await handleLoading();
+            await loadOtherVersion();
         };
         buttons.append(proceedButton);
 
@@ -366,11 +372,7 @@ export const handleVersionChange = async (event) => {
         return;
     }
 
-    presetInfo.version = releaseInfo.version;
-    setUpURL();
-    handleVersionOptions(event.target);
-
-    await handleLoading();
+    await loadOtherVersion();
 };
 
 /**

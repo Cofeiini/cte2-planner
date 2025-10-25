@@ -1,6 +1,6 @@
 import { handleAscendancyChange, handleEditorExport, handleEditorImport, handleSidePanel, handleVersionChange, sidePanel } from "./src/core/side-panel.js";
 import { infoTooltip, tooltipOffsets } from "./src/core/tooltip.js";
-import { CELL_HALF, CELL_SIZE, controls } from "./src/data/constants.js";
+import { CELL_HALF, CELL_SIZE, controls, MAX_ZOOM_SCALE } from "./src/data/constants.js";
 import { RELEASES } from "./src/releases.js";
 import { ascendancyGrid, fullNodeList, talentGrid } from "./src/type/talent-node.js";
 import {
@@ -189,7 +189,7 @@ const handleZoom = (event) => {
 
     const oldZoom = controls.zoom;
     const change = Math.pow(1 + controls.zoom, Math.sign(event.deltaY) * -0.25);
-    controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), 3.0);
+    controls.zoom = Math.min(Math.max(controls.zoom * change, fittedZoom), MAX_ZOOM_SCALE);
 
     const canvasBounds = boundingRects.containers.canvas;
     const talentBounds = boundingRects.containers.talent;
@@ -436,7 +436,7 @@ const handleEvents = () => {
 
 window.onresize = () => {
     updateFittedZoom();
-    controls.zoom = Math.min(Math.max(controls.zoom, fittedZoom), 3.0);
+    controls.zoom = Math.min(Math.max(controls.zoom, fittedZoom), MAX_ZOOM_SCALE);
     handleViewport();
 };
 
