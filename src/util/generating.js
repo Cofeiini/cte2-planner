@@ -133,18 +133,19 @@ export const generateDescriptionHTML = (description) => {
     const results = [];
     const parts = description.split(/(§\w)/).filter(element => element);
     let color = colorMap.minecraft.get("7");
-    for (const part of parts) {
+    for (let part of parts) {
         if (part.startsWith("§")) {
             color = colorMap.minecraft.get(part.at(1));
             continue;
         }
 
+        if (markdownRegex.test(part)) {
+            part = part.replace(markdownRegex, (match, p1) => p1);
+        }
+
         const elements = [];
         const words = part.split(/\s/).filter(element => element);
-        for (let word of words) {
-            if (markdownRegex.test(word)) {
-                word = word.match(markdownRegex).at(1);
-            }
+        for (const word of words) {
             elements.push(`<span class="word" style="color: ${color};">${word}</span>`);
         }
         results.push(elements.join(""));
