@@ -140,7 +140,7 @@ export const generateDescriptionHTML = (description) => {
         }
 
         if (markdownRegex.test(part)) {
-            part = part.replace(markdownRegex, (match, p1) => p1);
+            part = part.replaceAll(markdownRegex, (match, p1) => p1);
         }
 
         const elements = [];

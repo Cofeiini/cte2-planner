@@ -4,7 +4,7 @@ export const LINE_WIDTH = 10;
 export const RAD_TO_DEG = 180 / Math.PI;
 export const MAX_ZOOM_SCALE = 3.0;
 
-export const markdownRegex = /\[([\w\s]+)]\(\w+\)/i;
+export const markdownRegex = /\[([\w\s]+)]\(\w+\)/gi;
 
 /** @type {{minecraft: Map<string, string>, custom: Map<string, string>}} */
 export const colorMap = {
