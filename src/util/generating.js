@@ -2,29 +2,8 @@ import { generateAscendancyPath, generatePath } from "../core/algorithm.js";
 import { handleSidePanel } from "../core/side-panel.js";
 import { handleTooltip, infoTooltip, tooltipOffsets } from "../core/tooltip.js";
 import { borderAssets, iconAssets, indicatorAssets } from "../data/assets.js";
-import { CELL_HALF, CELL_SIZE, colorMap, controls, RAD_TO_DEG } from "../data/constants.js";
-import {
-    ascendancyAddLeftovers,
-    ascendancyAddPreview,
-    ascendancyGrid,
-    ascendancyNodes,
-    ascendancyRemovePreview,
-    ascendancySelections,
-    exclusiveNodeValues,
-    startingNode,
-    talentAddLeftovers,
-    talentAddPreview,
-    talentExclusions,
-    talentGrid,
-    talentIdentifiers,
-    TalentNode,
-    talentNodes,
-    talentRemovePreview,
-    talentSelections,
-    toggleNode,
-    TOTAL_ASCENDANCY_POINTS,
-    TOTAL_POINTS,
-} from "../type/talent-node.js";
+import { CELL_HALF, CELL_SIZE, colorMap, controls, markdownRegex, RAD_TO_DEG } from "../data/constants.js";
+import { ascendancyAddLeftovers, ascendancyAddPreview, ascendancyGrid, ascendancyNodes, ascendancyRemovePreview, ascendancySelections, exclusiveNodeValues, startingNode, talentAddLeftovers, talentAddPreview, talentExclusions, talentGrid, talentIdentifiers, TalentNode, talentNodes, talentRemovePreview, talentSelections, toggleNode, TOTAL_ASCENDANCY_POINTS, TOTAL_POINTS, } from "../type/talent-node.js";
 import { drawLinesAscendancy, drawLinesAscendancyInitial, drawLinesInitial, drawLinesRegular } from "./drawing.js";
 import { collectStatInformation, isSameTalent, setUpIcon } from "./spuddling.js";
 
@@ -162,7 +141,10 @@ export const generateDescriptionHTML = (description) => {
 
         const elements = [];
         const words = part.split(/\s/).filter(element => element);
-        for (const word of words) {
+        for (let word of words) {
+            if (markdownRegex.test(word)) {
+                word = word.match(markdownRegex).at(1);
+            }
             elements.push(`<span class="word" style="color: ${color};">${word}</span>`);
         }
         results.push(elements.join(""));
