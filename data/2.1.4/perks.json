@@ -1,6 +1,21 @@
 [
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/abyssal_aura.png",
+    "id": "abyssal_aura",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_abyssal_aura",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/stat_icons/main/accuracy.png",
     "id": "accuracy_percent",
     "is_entry": false,
@@ -1540,6 +1555,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/banishing_blade.png",
+    "id": "banishing_blade",
+    "is_entry": false,
+    "max_lvls": 20,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_banishing_blade",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/stat_icons/misc/banner_cdr.png",
     "id": "banner_cdr",
     "is_entry": false,
@@ -2012,6 +2042,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/blasphemous_ritual.png",
+    "id": "blasphemous_ritual",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_blasphemous_ritual",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/stat_icons/misc/bleed_chance.png",
     "id": "bleed_chance",
     "is_entry": false,
@@ -2237,6 +2282,21 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "learn_blood_explosion",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/blood_harvest.png",
+    "id": "blood_harvest",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_blood_harvest",
         "v1": 1.0
       }
     ]
@@ -4024,6 +4084,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/curse_of_damnation.png",
+    "id": "curse_of_damnation",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_curse_of_damnation",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/spells/icons/curse_of_despair.png",
     "id": "curse_of_despair",
     "is_entry": false,
@@ -4109,6 +4184,21 @@
         "scale_to_lvl": false,
         "stat": "damage_shield",
         "v1": 3.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/dark_pact.png",
+    "id": "dark_pact",
+    "is_entry": false,
+    "max_lvls": 20,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_dark_pact",
+        "v1": 1.0
       }
     ]
   },
@@ -12233,6 +12323,36 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_chaos_pen_sang.png",
+    "id": "p_chaos_pen_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "chaos_penetration",
+        "v1": 2.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_chaos_res_sang.png",
+    "id": "p_chaos_res_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "chaos_resist",
+        "v1": 2.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/spells/passives/p_cold_lightning_resist_chr.png",
     "id": "p_cold_lightning_resist_chr",
     "is_entry": false,
@@ -12474,6 +12594,21 @@
         "scale_to_lvl": false,
         "stat": "dot_magicshield_steal",
         "v1": 2.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_double_attack_chance_when_low_sang.png",
+    "id": "p_double_attack_chance_when_low_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "double_attack_chance_when_low",
+        "v1": 3.0
       }
     ]
   },
@@ -12755,6 +12890,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_health_per_sec_sang.png",
+    "id": "p_health_per_sec_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "inc_leech",
+        "v1": 6.25
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/spells/passives/p_health_regen.png",
     "id": "p_health_regen",
     "is_entry": false,
@@ -12780,6 +12930,21 @@
         "scale_to_lvl": false,
         "stat": "health_regen",
         "v1": 6.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_health_sang.png",
+    "id": "p_health_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "PERCENT",
+        "scale_to_lvl": false,
+        "stat": "health",
+        "v1": 4.0
       }
     ]
   },
@@ -13055,6 +13220,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_negative_effect_sang.png",
+    "id": "p_negative_effect_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "inc_effect_of_negative_buff_given",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/spells/passives/p_phys_to_chaos_rog.png",
     "id": "p_phys_to_chaos_rog",
     "is_entry": false,
@@ -13071,6 +13251,27 @@
         "scale_to_lvl": false,
         "stat": "all_chaos_damage",
         "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_poison_bleed_chance_sang.png",
+    "id": "p_poison_bleed_chance_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "poison_chance",
+        "v1": 2.0
+      },
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "bleed_chance",
+        "v1": 2.0
       }
     ]
   },
@@ -13206,6 +13407,21 @@
         "scale_to_lvl": false,
         "stat": "roll_cooldown",
         "v1": 3.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/passives/p_sacrifice_when_hit_sang.png",
+    "id": "p_sacrifice_when_hit_sang",
+    "is_entry": false,
+    "max_lvls": 8,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "sacrifice_when_hit",
+        "v1": 6.25
       }
     ]
   },
@@ -13958,6 +14174,21 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "learn_piercing_strike",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/plague_aura.png",
+    "id": "plague_aura",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_plague_aura",
         "v1": 1.0
       }
     ]
@@ -14811,6 +15042,21 @@
     ]
   },
   {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/reaper_form.png",
+    "id": "reaper_form",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_reaper_form",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
     "type": "MAJOR",
     "icon": "mmorpg:textures/gui/stat_icons/game_changers/reckless_defender.png",
     "id": "reckless_defender",
@@ -15152,6 +15398,21 @@
   },
   {
     "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/sanguine_aura.png",
+    "id": "sanguine_aura",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_sanguine_aura",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
     "icon": "mmorpg:textures/gui/stat_icons/weapon/scythe_damage.png",
     "id": "scythe_damage",
     "is_entry": false,
@@ -15198,6 +15459,21 @@
         "scale_to_lvl": false,
         "stat": "dot_dmg",
         "v1": -10.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/shadow_step.png",
+    "id": "shadow_step",
+    "is_entry": false,
+    "max_lvls": 12,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_shadow_step",
+        "v1": 1.0
       }
     ]
   },
@@ -15843,6 +16119,21 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "learn_song_of_vigor",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/soul_siphon.png",
+    "id": "soul_siphon",
+    "is_entry": false,
+    "max_lvls": 20,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_soul_siphon",
         "v1": 1.0
       }
     ]
@@ -16857,6 +17148,21 @@
         "type": "FLAT",
         "scale_to_lvl": false,
         "stat": "learn_summon_wisp",
+        "v1": 1.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/summon_wraith.png",
+    "id": "summon_wraith",
+    "is_entry": false,
+    "max_lvls": 20,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_summon_wraith",
         "v1": 1.0
       }
     ]
@@ -17948,6 +18254,21 @@
         "scale_to_lvl": false,
         "stat": "max_elemental_resist",
         "v1": -3.0
+      }
+    ]
+  },
+  {
+    "type": "STAT",
+    "icon": "mmorpg:textures/gui/spells/icons/vile_splash_potion.png",
+    "id": "vile_splash_potion",
+    "is_entry": false,
+    "max_lvls": 20,
+    "stats": [
+      {
+        "type": "FLAT",
+        "scale_to_lvl": false,
+        "stat": "learn_vile_splash_potion",
+        "v1": 1.0
       }
     ]
   },
