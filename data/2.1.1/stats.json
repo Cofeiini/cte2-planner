@@ -9650,7 +9650,7 @@
   },
   {
     "data": {
-      "attribute_id": "stardew_fishing:treasure_chance_bonus",
+      "attribute_id": "stardew_fishing:bar_size",
       "base": 0.0,
       "cut_by_hundred": true,
       "ele": "Physical",
@@ -9660,7 +9660,7 @@
       "operation": "MULTIPLY_BASE",
       "perc": true,
       "scale": "NONE",
-      "uuid": "e50dbabd-6a90-40ed-a3e4-278eebb9a4fa"
+      "uuid": "5c76746d-b255-4ad1-8e21-d407270ab868"
     },
     "ser": "vanilla_attribute_stat_ser"
   },
@@ -17202,15 +17202,15 @@
   },
   {
     "data": {
-      "add_to": "physical_weapon_damage",
+      "add_to": "flat_physical_added_damage",
       "adder_stat": "mana",
       "base": 0.0,
       "ele": "Physical",
+      "priority": 75,
       "id": "physical_weapon_damage_per_perc_of_mana",
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
-      "priority": 50,
       "scale": "NONE"
     },
     "ser": "one_to_other"
@@ -17638,7 +17638,7 @@
         "side": "Source"
       }
     ],
-    "ele": "Cold",
+    "ele": "Physical",
     "format": "aqua",
     "group": "Misc",
     "gui_group": "NONE",
@@ -19525,13 +19525,14 @@
         ],
         "ifs": [
           "random_roll",
-          "is_ignite_explosion_not_on_cd"
+          "is_ignite_explosion_not_on_cd",
+          "spell_has_tag_totem"
         ],
         "order": "data_modification",
         "side": "Source"
       }
     ],
-    "ele": "Cold",
+    "ele": "Fire",
     "format": "aqua",
     "group": "Misc",
     "gui_group": "NONE",
@@ -20363,23 +20364,21 @@
     "effect": [
       {
         "effects": [
-          "proc_spell_bone_shatter",
-          "give_essence_of_frost_to_source",
-          "remove_bone_chill_from_target"
+          "proc_spell_bone_shatter"
         ],
         "events": [
           "on_damage"
         ],
         "ifs": [
           "random_roll",
-          "is_ailment_freeze",
-          "is_target_under_bone_chill"
+          "is_bone_shatter_not_on_cd",
+          "spell_has_tag_burst"
         ],
         "order": "data_modification",
         "side": "Source"
       }
     ],
-    "ele": "Physical",
+    "ele": "Cold",
     "format": "aqua",
     "group": "Misc",
     "gui_group": "NONE",
@@ -23843,11 +23842,11 @@
       "adder_stat": "increase_healing",
       "base": 0.0,
       "ele": "Physical",
+      "priority": 75,
       "id": "spell_damage_per_perc_of_increase_healing",
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
-      "priority": 50,
       "scale": "NONE"
     },
     "ser": "one_to_other"

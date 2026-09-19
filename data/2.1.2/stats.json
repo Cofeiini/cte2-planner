@@ -9647,7 +9647,7 @@
   },
   {
     "data": {
-      "attribute_id": "stardew_fishing:treasure_chance_bonus",
+      "attribute_id": "stardew_fishing:bar_size",
       "base": 0.0,
       "cut_by_hundred": true,
       "ele": "Physical",
@@ -9657,7 +9657,7 @@
       "operation": "MULTIPLY_BASE",
       "perc": true,
       "scale": "NONE",
-      "uuid": "e50dbabd-6a90-40ed-a3e4-278eebb9a4fa"
+      "uuid": "5c76746d-b255-4ad1-8e21-d407270ab868"
     },
     "ser": "vanilla_attribute_stat_ser"
   },
@@ -17213,6 +17213,21 @@
     "ser": "one_to_other"
   },
   {
+    "data": {
+      "add_to": "physical_weapon_damage",
+      "adder_stat": "mana",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "physical_weapon_damage_per_perc_of_mana_deprecated",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "priority": 50,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
     "base": 0.0,
     "effect": [
       {
@@ -17665,6 +17680,43 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_blood_explosion_bleed",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_blood_explosion"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_blood_explosion_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_blood_explosion_deprecated",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -19501,6 +19553,43 @@
     "effect": [
       {
         "effects": [
+          "proc_spell_ignite_explosion"
+        ],
+        "events": [
+          "on_mob_kill"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_ignite_explosion_not_on_cd"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Cold",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_ignite_explosion_deprecated",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
           "proc_spell_immolate_target"
         ],
         "events": [
@@ -20333,6 +20422,46 @@
     "has_softcap": false,
     "icon": "★",
     "id": "proc_shatter_2",
+    "is_long": true,
+    "is_perc": true,
+    "max": 100.0,
+    "min": -1000.0,
+    "minus_is_good": false,
+    "multiUseType": "MULTIPLY_STAT",
+    "order": 100,
+    "scaling": "NONE",
+    "ser": "data",
+    "show_in_gui": true,
+    "softcap": 0.0
+  },
+  {
+    "base": 0.0,
+    "effect": [
+      {
+        "effects": [
+          "proc_spell_bone_shatter",
+          "give_essence_of_frost_to_source",
+          "remove_bone_chill_from_target"
+        ],
+        "events": [
+          "on_damage"
+        ],
+        "ifs": [
+          "random_roll",
+          "is_ailment_freeze",
+          "is_target_under_bone_chill"
+        ],
+        "order": "data_modification",
+        "side": "Source"
+      }
+    ],
+    "ele": "Physical",
+    "format": "aqua",
+    "group": "Misc",
+    "gui_group": "NONE",
+    "has_softcap": false,
+    "icon": "★",
+    "id": "proc_shatter_deprecated",
     "is_long": true,
     "is_perc": true,
     "max": 100.0,
@@ -23730,6 +23859,21 @@
       "max": 1.0E+8,
       "min": 0.0,
       "perc": true,
+      "scale": "NONE"
+    },
+    "ser": "one_to_other"
+  },
+  {
+    "data": {
+      "add_to": "spell_damage",
+      "adder_stat": "increase_healing",
+      "base": 0.0,
+      "ele": "Physical",
+      "id": "spell_damage_per_perc_of_increase_healing_deprecated",
+      "max": 1.0E+8,
+      "min": 0.0,
+      "perc": true,
+      "priority": 50,
       "scale": "NONE"
     },
     "ser": "one_to_other"
